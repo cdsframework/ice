@@ -1,12 +1,7 @@
 # Runtime Configuration
 
 This page describes service-wide configuration for ICE. Runtime
-configuration applies to every forecast handled by the service instance. In
-contrast, request-level options, such as schedule flags supplied by a client,
-apply only to one forecast.
-
-The behavior described here includes schedule flags introduced in commit
-`0cba4d0cdd0732fd17bffeeb4dad1f99e91a05a1`.
+configuration applies to every forecast handled by the service instance.
 
 ## Configuration mechanisms
 
@@ -70,14 +65,15 @@ cds-engine:
     enable-fhir-r6: false
 ```
 
-| Setting | Default | Effect |
-|---|---:|---|
-| `enable-dose-override-feature` | `false` | Permit request-supplied administered-dose validity overrides. |
-| `enable-unsupported-vaccines-group` | `false` | Enable the unsupported-vaccines group. |
-| `vaccine-group-exclusions` | Listed above | Do not forecast the listed vaccine groups. |
-| `vaccine-group-inclusions` | Empty | When provided, restrict forecasting to these vaccine groups. |
-| `disable-covid19-sep2023-dose-number-reset` | `false` | Disable the September 2023 COVID-19 dose-number reset behavior. |
-| `enable-fhir-r6` | `false` | Enable the experimental FHIR R6 endpoint. This is a startup-only service setting under `cds-engine.experimental-features`, not a forecast request option or an `ice.*` property. |
+| Setting                                     |      Default | Effect                                                                                                                                                                                                                                                 |
+|---------------------------------------------|-------------:|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `enable-dose-override-feature`              |      `false` | Permit request-supplied administered-dose validity overrides.                                                                                                                                                                                          |
+| `enable-unsupported-vaccines-group`         |      `false` | Enable the unsupported-vaccines group.                                                                                                                                                                                                                 |
+| `output-vaccine-group-rules-artifact`       |      `false` | Include a vaccine-group Wiki URL in ICE SOAP/vMR API or ICE FHIR API (FHIR R6) output when configured. See [Output Configuration](output-configuration.md#vaccine-group-rules-artifact-and-schedule-authorities) to enable it and configure its scope. |
+| `vaccine-group-exclusions`                  | Listed above | Do not forecast the listed vaccine groups.                                                                                                                                                                                                             |
+| `vaccine-group-inclusions`                  |        Empty | When provided, restrict forecasting to these vaccine groups.                                                                                                                                                                                           |
+| `disable-covid19-sep2023-dose-number-reset` |      `false` | Disable the September 2023 COVID-19 dose-number reset behavior.                                                                                                                                                                                        |
+| `enable-fhir-r6`                            |      `false` | Enable the experimental FHIR R6 endpoint. This is a startup-only service setting under `cds-engine.experimental-features`, not a forecast request option or an `ice.*` property.                                                                       |
 
 Do not set both `vaccine-group-exclusions` and
 `vaccine-group-inclusions` unless the resulting restriction is intentional.

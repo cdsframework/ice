@@ -2,6 +2,9 @@
 
 ICE provides service-wide controls for optional forecast and evaluation output.
 These settings apply to every forecast handled by the service instance.
+The related ICE SOAP/vMR API values are listed in [Evaluation and Recommendation
+Reason Codes](../reference/evaluation-and-recommendation-reasons.md); ICE FHIR API (FHIR R6) CodeSystem values are
+maintained in the repository's [`fhir/ice`](../../fhir/ice) artifacts.
 
 ```yaml
 ice:
@@ -14,15 +17,15 @@ ice:
   output-schedule-authorities: false
 ```
 
-| Setting | Default | Effect |
-|---|---:|---|
-| `output-earliest-and-overdue-dates` | `true` | Include earliest and overdue forecast dates. |
-| `output-supplemental-text` | `true` | Include supplemental recommendation and evaluation text. |
-| `supplemental-text-mode` | `LEGACY` | Choose supplemental-text representation: `LEGACY`, `CODED`, or `BOTH`. |
-| `output-series-information` | `false` | Include series-selection and series-dose information in output. |
-| `output-number-of-doses-remaining` | `false` | Include the number of doses remaining in the series. |
-| `output-vaccine-group-rules-artifact` | `false` | Include a link to the vaccine-group rules artifact when available. |
-| `output-schedule-authorities` | `false` | Include schedule authorities associated with a recommendation. In FHIR, this is the ICE schedule-authority extension on each recommendation entry. |
+| Setting                               |  Default | Effect                                                                                                                                             |
+|---------------------------------------|---------:|----------------------------------------------------------------------------------------------------------------------------------------------------|
+| `output-earliest-and-overdue-dates`   |   `true` | Include earliest and overdue forecast dates.                                                                                                       |
+| `output-supplemental-text`            |   `true` | Include supplemental recommendation and evaluation text.                                                                                           |
+| `supplemental-text-mode`              | `LEGACY` | Choose supplemental-text representation: `LEGACY`, `CODED`, or `BOTH`.                                                                             |
+| `output-series-information`           |  `false` | Include series-selection and series-dose information in output.                                                                                    |
+| `output-number-of-doses-remaining`    |  `false` | Include the number of doses remaining in the series.                                                                                               |
+| `output-vaccine-group-rules-artifact` |  `false` | Include a link to the vaccine-group rules artifact when available.                                                                                 |
+| `output-schedule-authorities`         |  `false` | Include schedule authorities associated with a recommendation. In FHIR, this is the ICE schedule-authority extension on each recommendation entry. |
 
 Spring Boot environment-variable equivalents are:
 
@@ -44,11 +47,11 @@ configuration mechanisms and environment-variable mapping.
 When `output-earliest-and-overdue-dates` is enabled, ICE returns three
 clinically distinct forecast dates:
 
-| Date | Meaning |
-|---|---|
+| Date     | Meaning                                                                                                        |
+|----------|----------------------------------------------------------------------------------------------------------------|
 | Earliest | The first date the vaccine can be administered and be valid, without applying the usual four-day grace period. |
-| Due | The recommended administration date. |
-| Overdue | The date after which a recommended immunization is late. |
+| Due      | The recommended administration date.                                                                           |
+| Overdue  | The date after which a recommended immunization is late.                                                       |
 
 For example, a routine fifth DTaP dose may be due on the patient's fourth
 birthday and overdue on the seventh birthday. Earliest dates support clinical
@@ -59,11 +62,11 @@ FHIR R6 responses carry these values in
 `ImmunizationRecommendation.recommendation[].dateCriterion` with these LOINC
 codings:
 
-| Date | LOINC code |
-|---|---|
-| Earliest | `30981-5` — Earliest date to give |
-| Due | `30980-7` — Date vaccine due |
-| Overdue | `59778-1` — Date when overdue for immunization |
+| Date     | LOINC code                                     |
+|----------|------------------------------------------------|
+| Earliest | `30981-5` — Earliest date to give              |
+| Due      | `30980-7` — Date vaccine due                   |
+| Overdue  | `59778-1` — Date when overdue for immunization |
 
 ```json
 {
@@ -163,7 +166,7 @@ FHIR R6 output:
 ### `CODED`
 
 `CODED` returns the specific supplemental-reason code. It does not return the
-legacy `SUPPLEMENTAL_TEXT` code or message.
+generic `SUPPLEMENTAL_TEXT` code or message.
 
 ```yaml
 ice:
@@ -201,8 +204,8 @@ FHIR R6 output:
 
 ### `BOTH`
 
-`BOTH` returns the legacy reason followed by the specific coded reason. Use it
-when clients need the legacy representation while they migrate to the
+`BOTH` returns the generic reason followed by the specific coded reason. Use it
+when clients need the `SUPPLEMENTAL_TEXT` representation alongside the
 supplemental-reason code systems.
 
 ```bash
@@ -257,24 +260,25 @@ FHIR R6 output:
 
 `output-series-information` and `output-number-of-doses-remaining` are
 independent global output controls. Both default to `false`.
+For the related vMR and FHIR code systems, see [Series and Display Codes](../reference/series.md)
+and [Season Codes](../reference/season.md).
 
-| Setting | Output |
-|---|---|
-| `output-series-information=true` | Selected series, selection type, and season when applicable, for evaluations and recommendations. |
-| `output-number-of-doses-remaining=true` | Selected series context, plus the number of doses remaining for recommendations. |
-| Both enabled | Series context for evaluations and recommendations, and doses remaining for recommendations. |
+| Setting                                 | Output                                                                                            |
+|-----------------------------------------|---------------------------------------------------------------------------------------------------|
+| `output-series-information=true`        | Selected series, selection type, and season when applicable, for evaluations and recommendations. |
+| `output-number-of-doses-remaining=true` | Selected series context, plus the number of doses remaining for recommendations.                  |
+| Both enabled                            | Series context for evaluations and recommendations, and doses remaining for recommendations.      |
+
+The output setting is `output-number-of-doses-remaining`. In SOAP/vMR, the
+resulting nested observation uses the focus code `NUMBER_OF_DOSES_REMAINING`
+from code system `2.16.840.1.113883.3.795.12.100.10`.
 
 This feature adds nested output elements. SOAP/vMR consumers that parse related
 clinical statements must tolerate these elements when either setting is
 enabled.
 
-ICE provides the selected series and one selection type:
-
-| Selection type | Meaning |
-|---|---|
-| `SERIES_DISPLAY_UNAMBIGUOUS` | Only one series can be selected. ICE forecasts from that series. |
-| `SERIES_DISPLAY_BEST_GUESS` | More than one series could apply; ICE forecasts from the selected best-guess series. The selection can change as additional immunizations are recorded. |
-| `SERIES_DISPLAY_ALTERNATIVE` | Reserved for future use; ICE does not currently return it. It would describe an alternative series that ICE is not using for the forecast. |
+ICE provides the selected series and one selection type. See [Series and Display Codes](../reference/series.md) for the
+selection-type values and meanings.
 
 For seasonal vaccine groups—COVID-19, influenza, infant RSV, and H1N1—ICE
 also returns the season selected with the series, including its effective
@@ -284,12 +288,12 @@ but displays the actual selected season dates.
 
 The number of doses remaining is returned only with forecasts:
 
-| Condition | Value returned |
-|---|---|
-| Series incomplete and a dose is due now or due in the future | Doses administered subtracted from the doses needed for the selected series. |
-| Complete, non-recurring series with no dose recommended | `0` |
+| Condition                                                      | Value returned                                                                       |
+|----------------------------------------------------------------|--------------------------------------------------------------------------------------|
+| Series incomplete and a dose is due now or due in the future   | Doses administered subtracted from the doses needed for the selected series.         |
+| Complete, non-recurring series with no dose recommended        | `0`                                                                                  |
 | Complete, non-recurring series but another dose is recommended | `0 doses remaining in series; one or more additional doses may still be recommended` |
-| Complete recurring series with a dose recommended | `Recurring` |
+| Complete recurring series with a dose recommended              | `Recurring`                                                                          |
 
 ### SOAP/vMR series output
 
@@ -438,8 +442,47 @@ produced by ICE.
 ## Vaccine-group rules artifact and schedule authorities
 
 `output-vaccine-group-rules-artifact` returns the published rules URL when one
-is available for the vaccine group. `output-schedule-authorities` returns the
-configured schedule authority or authorities for a recommendation.
+is available for the vaccine group. It defaults to `false`. To enable the Wiki
+URL output for all knowledge bases, set the service-wide property:
+
+```yaml
+ice:
+  output-vaccine-group-rules-artifact: true
+```
+
+To enable it for one knowledge base only, set the property under that
+knowledge base instead:
+
+```yaml
+ice:
+  knowledge-bases:
+    '[https://terminology.cdsframework.org/PlanDefinition/ice-forecast|1.0.0]':
+      output-vaccine-group-rules-artifact: true
+```
+
+An explicit service-wide value takes precedence over the knowledge-base
+setting. Leave the service-wide property unset when you need different values
+for different knowledge bases.
+
+The service-wide setting can also be provided as
+`ICE_OUTPUTVACCINEGROUPRULESARTIFACT=true`. Restart ICE after changing the
+configuration; see [Runtime Configuration](runtime-configuration.md) for
+configuration precedence and mechanisms.
+
+ICE reads the URL from the `vaccineGroupRulesUrl` property on the selected
+vaccine group's supporting-data entry. If the setting is enabled but the selected group has no URL in
+supporting data, ICE omits this output for that group. This URL is distinct
+from the output code: SOAP/vMR returns it with the
+`VACCINE_GROUP_RULES_URL` observation focus, while FHIR R6 represents it with
+the `vaccine-group-rules-artifact` extension and a `RelatedArtifact` value.
+
+For vaccine group schedule authorities,`output-schedule-authorities` returns the configured schedule authority or
+authorities for a recommendation.
+
+Supported schedule-authority codes are:
+
+See [Schedule Authority Codes](../reference/schedule-authority.md) for the code values and FHIR extension definition. The
+optional-output focus codes are listed in [Optional Output Codes](../reference/optional-output.md).
 
 SOAP/vMR returns each as a pertinent `observationResult` under the forecast
 proposal:

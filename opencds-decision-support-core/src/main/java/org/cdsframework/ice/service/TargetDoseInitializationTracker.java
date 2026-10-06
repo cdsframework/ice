@@ -34,6 +34,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -49,8 +50,15 @@ import lombok.extern.slf4j.Slf4j;
 @ClassReactive
 public class TargetDoseInitializationTracker
 {
-    private final Set<String> initializedTargetDoseList = new HashSet<>();
+    private final Map<String, Map<String, Set<String>>> initializedComponentsByShotAndSeries = new HashMap<>();
     private final Map<String, String> initializedTargetDoseByVgMap = new HashMap<>();
+
+    private Set<String> initializedComponentsForShotAndSeries(final String shotId, final String seriesId)
+    {
+        return Optional.ofNullable(initializedComponentsByShotAndSeries.get(shotId))
+                .map(componentsBySeries -> componentsBySeries.getOrDefault(seriesId, Set.of()))
+                .orElseGet(Set::of);
+    }
 
     public List<TargetDose> addTargetDoseInitialization(final Vaccine vaccineAdministered, final SubstanceAdministrationEvent sae,
             final TargetSeries ts, final Schedule scheduleBackingSeries)
@@ -202,10 +210,9 @@ public class TargetDoseInitializationTracker
                 if (!lTargetDoseAdded)
                     continue;
 
-                final String setAddition = ctidvcc
-                        + ts.getTargetSeriesIdentifier();    // Set tracker - SE+vaccinecomponent+targetSeriesIdentifier must be unique
-                initializedTargetDoseList.add(setAddition);
-                // ICELogicHelper.logDRLDebugMessage(_METHODNAME, "Set key: " + setAddition);
+                initializedComponentsByShotAndSeries.computeIfAbsent(ctid, _ -> new HashMap<>())
+                        .computeIfAbsent(ts.getTargetSeriesIdentifier(), _ -> new HashSet<>())
+                        .add(vc.getCdsConceptName());
                 initializedTargetDoseByVgMap.put(ctidvcc,
                         vaccineGroupStr);    // Map tracker - SE+vaccineComponentCC must be in the same vaccine group
                 // ICELogicHelper.logDRLDebugMessage(_METHODNAME, "Map key: " + ctidvcc + "; value " + vaccineGroupStr);
@@ -230,7 +237,7 @@ public class TargetDoseInitializationTracker
         if (conceptTargetId == null || targetSeriesIdentifier == null || vcConceptCode == null)
             return false;
 
-        return initializedTargetDoseList.contains(conceptTargetId + vcConceptCode + targetSeriesIdentifier);
+        return initializedComponentsForShotAndSeries(conceptTargetId, targetSeriesIdentifier).contains(vcConceptCode);
     }
 
     public boolean allTargetDosesHaveBeenInitializedInSeries(final SubstanceAdministrationEvent sae, final Vaccine vaccine,
@@ -278,15 +285,14 @@ public class TargetDoseInitializationTracker
             final SubstanceAdministrationEvent sae, final TargetSeries targetSeries, final Vaccine vaccineAdministered,
             final String mappedVaccineConceptCode)
     {
-        final boolean mappedTargetDoseInitialized =
-                mappedVaccineConceptCode == null
-                ? containsMappedTargetDoseForSameShotAndSeries(sae, targetSeries, vaccineAdministered)
-                : isMappedVaccineAlreadyInitializedForSameShotAndSeries(sae, targetSeries, mappedVaccineConceptCode);
+        if (!specifiedSubstanceAdministrationEventAndAssociatedConceptHasNotPreviouslyBeenInitializedForAnotherVaccineGroup(ic,
+                svgc) || !atLeastOneVaccineComponentHasNotBeenNotInitializedForSpecifiedSubstanceAdministrationEventAndSeries(sae,
+                targetSeries, vaccineAdministered))
+            return false;
 
-        return specifiedSubstanceAdministrationEventAndAssociatedConceptHasNotPreviouslyBeenInitializedForAnotherVaccineGroup(ic,
-                svgc) && !mappedTargetDoseInitialized
-                && atLeastOneVaccineComponentHasNotBeenNotInitializedForSpecifiedSubstanceAdministrationEventAndSeries(sae,
-                targetSeries, vaccineAdministered);
+        return mappedVaccineConceptCode == null
+               ? !containsMappedTargetDoseForSameShotAndSeries(sae, targetSeries, vaccineAdministered)
+               : !isMappedVaccineAlreadyInitializedForSameShotAndSeries(sae, targetSeries, mappedVaccineConceptCode);
 
         // If there is a season associated with the SeriesRules, ensure that the shot administration date falls within the set of dates
         /*
@@ -329,18 +335,15 @@ public class TargetDoseInitializationTracker
         if (conceptTargetId == null || targetSeriesIdentifier == null)
             return false;
 
-        final Set<String> expectedTargetDoseKeys = vaccineAdministered.getVaccineComponents()
+        final Set<String> expectedComponentCodes = vaccineAdministered.getVaccineComponents()
                 .stream()
                 .map(VaccineComponent::getCdsConceptName)
                 .filter(Objects::nonNull)
-                .map(componentConceptCode -> conceptTargetId + componentConceptCode + targetSeriesIdentifier)
                 .collect(Collectors.toSet());
-        if (expectedTargetDoseKeys.isEmpty())
+        if (expectedComponentCodes.isEmpty())
             return false;
 
-        return initializedTargetDoseList.stream()
-                .filter(key -> key.startsWith(conceptTargetId) && key.endsWith(targetSeriesIdentifier))
-                .anyMatch(Predicate.not(expectedTargetDoseKeys::contains));
+        return !expectedComponentCodes.containsAll(initializedComponentsForShotAndSeries(conceptTargetId, targetSeriesIdentifier));
     }
 
     /**
@@ -357,7 +360,7 @@ public class TargetDoseInitializationTracker
         if (conceptTargetId == null || targetSeriesIdentifier == null)
             return false;
 
-        return initializedTargetDoseList.contains(conceptTargetId + mappedVaccineConceptCode + targetSeriesIdentifier);
+        return initializedComponentsForShotAndSeries(conceptTargetId, targetSeriesIdentifier).contains(mappedVaccineConceptCode);
     }
 
     private boolean atLeastOneVaccineComponentHasNotBeenNotInitializedForSpecifiedSubstanceAdministrationEventAndSeries(
@@ -371,10 +374,10 @@ public class TargetDoseInitializationTracker
         if (conceptTargetId == null || targetSeriesIdentifier == null)
             return false;
 
+        final Set<String> initializedComponentCodes =
+                initializedComponentsForShotAndSeries(conceptTargetId, targetSeriesIdentifier);
         return vaccine.getVaccineComponents()
-                .stream()
-                .map(vc -> conceptTargetId + vc.getCdsConceptName() + targetSeriesIdentifier)
-                .anyMatch(Predicate.not(initializedTargetDoseList::contains));
+                .stream().map(VaccineComponent::getCdsConceptName).anyMatch(Predicate.not(initializedComponentCodes::contains));
     }
 
     private boolean specifiedSubstanceAdministrationEventAndAssociatedConceptHasNotPreviouslyBeenInitializedForAnotherVaccineGroup(

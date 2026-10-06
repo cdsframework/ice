@@ -9,15 +9,14 @@ service-wide and request-level behavior.
 
 ## Currently defined flags
 
-| Flag | Effect |
-|---|---|
-| `HEP_B_EXTRA_DOSE_ACCEPTED_INSTEAD_OF_VALID` | Evaluate an invalid third Hepatitis B dose as an accepted extra dose. |
+| Flag                                         | Effect                                                                                 |
+|----------------------------------------------|----------------------------------------------------------------------------------------|
+| `HEP_B_EXTRA_DOSE_ACCEPTED_INSTEAD_OF_VALID` | Evaluate an invalid third Hepatitis B dose as an accepted extra dose.                  |
 | `POLIO_EXTRA_DOSE_ACCEPTED_INSTEAD_OF_VALID` | Evaluate a fourth or fifth polio dose below the minimum age as an accepted extra dose. |
 
 ## Service-wide configuration
 
-Set flags for every SOAP and FHIR forecast handled by the service instance
-with an environment variable:
+Set flags for every forecast handled through the ICE SOAP/vMR API and ICE FHIR API (FHIR R6) with an environment variable:
 
 ```bash
 ICE_SCHEDULEFLAGS=HEP_B_EXTRA_DOSE_ACCEPTED_INSTEAD_OF_VALID,POLIO_EXTRA_DOSE_ACCEPTED_INSTEAD_OF_VALID

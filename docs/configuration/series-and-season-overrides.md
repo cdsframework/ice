@@ -76,11 +76,11 @@ Configure series-wide properties under
 Source files:
 `opencds-decision-support-service/src/main/resources/data/seriesPlanDefinitions/*.yml`
 
-| Property | Type | Description |
-|---|---|---|
-| `number-of-doses-in-series` | Integer | The total number of doses required to complete the primary series. |
-| `recurring-doses-after-series-complete` | Boolean | If `true`, the series continues to recommend additional doses, such as boosters or annual doses, after the primary series is complete. |
-| `seasons` | List of String | Replaces the list of season identifiers associated with the series. Each value must match a season known to ICE. |
+| Property                                | Type           | Description                                                                                                                            |
+|-----------------------------------------|----------------|----------------------------------------------------------------------------------------------------------------------------------------|
+| `number-of-doses-in-series`             | Integer        | The total number of doses required to complete the primary series.                                                                     |
+| `recurring-doses-after-series-complete` | Boolean        | If `true`, the series continues to recommend additional doses, such as boosters or annual doses, after the primary series is complete. |
+| `seasons`                               | List of String | Replaces the list of season identifiers associated with the series. Each value must match a season known to ICE.                       |
 
 Command-line examples:
 
@@ -100,13 +100,13 @@ specific dose within a series. Configure them under
 Source files:
 `opencds-decision-support-service/src/main/resources/data/seriesPlanDefinitions/*.yml`
 
-| Property | Type | Description |
-|---|---|---|
-| `absolute-minimum-age` | Duration | The lowest age at which this dose is considered valid. Administrations before this age result in an `invalid` evaluation. |
-| `minimum-age` | Duration | The earliest age at which the dose can be recommended for administration, used for `Earliest Date`. |
-| `earliest-recommended-age` | Duration | The age at which the dose is routinely recommended, used for `Earliest Recommended Date`. |
+| Property                    | Type                | Description                                                                                                                  |
+|-----------------------------|---------------------|------------------------------------------------------------------------------------------------------------------------------|
+| `absolute-minimum-age`      | Duration            | The lowest age at which this dose is considered valid. Administrations before this age result in an `invalid` evaluation.    |
+| `minimum-age`               | Duration            | The earliest age at which the dose can be recommended for administration, used for `Earliest Date`.                          |
+| `earliest-recommended-age`  | Duration            | The age at which the dose is routinely recommended, used for `Earliest Recommended Date`.                                    |
 | `earliest-recommended-date` | Date (`YYYY-MM-DD`) | A fixed date for the earliest recommendation, used for `Earliest Recommended Date` if `earliest-recommended-age` is not set. |
-| `absolute-maximum-age` | Duration | The maximum age at which this dose is considered valid. Administrations after this age result in an `invalid` evaluation. |
+| `absolute-maximum-age`      | Duration            | The maximum age at which this dose is considered valid. Administrations after this age result in an `invalid` evaluation.    |
 
 Command-line examples:
 
@@ -131,9 +131,9 @@ when used to satisfy a specific dose in a series. Configure them under
 Source files:
 `opencds-decision-support-service/src/main/resources/data/seriesPlanDefinitions/*.yml`
 
-| Property | Type | Description |
-|---|---|---|
-| `preferred` | Boolean | If `true`, this vaccine is prioritized when recommending which product to use for this dose. |
+| Property                       | Type     | Description                                                                                                        |
+|--------------------------------|----------|--------------------------------------------------------------------------------------------------------------------|
+| `preferred`                    | Boolean  | If `true`, this vaccine is prioritized when recommending which product to use for this dose.                       |
 | `allowable-minimum-age-of-use` | Duration | The vaccine-specific minimum age; if this vaccine is administered before this age, the dose is considered invalid. |
 
 Command-line examples:
@@ -153,12 +153,12 @@ where both dose numbers are 1-based.
 Source files:
 `opencds-decision-support-service/src/main/resources/data/seriesPlanDefinitions/*.yml`
 
-| Property | Type | Description |
-|---|---|---|
-| `absolute-minimum-interval` | Duration | The minimum required time between this dose and the previous one for the current dose to be valid. |
-| `minimum-interval` | Duration | The minimum interval used to recommend the next dose as early as possible, used for `Earliest Date`. |
-| `earliest-recommended-interval` | Duration | The routine interval between doses, used for `Earliest Recommended Date`. |
-| `latest-recommended-interval` | Duration | The interval after which the next dose is considered overdue, used for `Latest Recommended Date`. |
+| Property                        | Type     | Description                                                                                          |
+|---------------------------------|----------|------------------------------------------------------------------------------------------------------|
+| `absolute-minimum-interval`     | Duration | The minimum required time between this dose and the previous one for the current dose to be valid.   |
+| `minimum-interval`              | Duration | The minimum interval used to recommend the next dose as early as possible, used for `Earliest Date`. |
+| `earliest-recommended-interval` | Duration | The routine interval between doses, used for `Earliest Recommended Date`.                            |
+| `latest-recommended-interval`   | Duration | The interval after which the next dose is considered overdue, used for `Latest Recommended Date`.    |
 
 Command-line examples:
 
@@ -180,12 +180,12 @@ start and stop month-and-day properties apply to default seasons.
 Source file:
 `opencds-decision-support-service/src/main/resources/data/knowledgeModule/org.nyc.cir.ice/ice-supporting-data/supportedSeasons.yml`
 
-| Property | Type | Description |
-|---|---|---|
-| `start-date` | Date (`YYYY-MM-DD`) | The start date of the season. Doses administered before this date in a seasonal series are invalid. |
-| `end-date` | Date (`YYYY-MM-DD`) | The end date of the season. Doses administered after this date in a seasonal series are invalid. |
-| `default-start-month-and-day` | `MM-DD` | The recurring start month and day for the default season. |
-| `default-stop-month-and-day` | `MM-DD` | The recurring stop month and day for the default season. |
+| Property                      | Type                | Description                                                                                         |
+|-------------------------------|---------------------|-----------------------------------------------------------------------------------------------------|
+| `start-date`                  | Date (`YYYY-MM-DD`) | The start date of the season. Doses administered before this date in a seasonal series are invalid. |
+| `end-date`                    | Date (`YYYY-MM-DD`) | The end date of the season. Doses administered after this date in a seasonal series are invalid.    |
+| `default-start-month-and-day` | `MM-DD`             | The recurring start month and day for the default season.                                           |
+| `default-stop-month-and-day`  | `MM-DD`             | The recurring stop month and day for the default season.                                            |
 
 Command-line examples:
 

@@ -33,10 +33,9 @@ global org.cdsframework.ice.service.Schedule schedule;
  * Yellow Fever Recommendation Rule
  * When recommending in the yellow fever vaccine group, always return reason code SUPPLEMENTAL_TEXT with descriptive text, "Yellow
  * fever vaccination is not routinely recommended in the U.S. and is only indicated for select patients at increased risk. Yellow
- * fever is a live vaccine. An absolute minimum interval of 24 days is required between yellow fever vaccines. An absolute minimum
- * interval of 28 days is required between a yellow fever vaccine and a live vaccine from another vaccine group. The minimum and
- * recommended interval between yellow fever and another live vaccine is 30 days. Refer to ACIP and the CDC Yellow Book: Health
- * Information for International Travel for additional information."
+ * fever is a live vaccine; a 28-day interval is needed between a yellow fever vaccine and a live vaccine from another vaccine group
+ * (30 days is needed for BCG). Refer to ACIP and the CDC Yellow Book: Health Information for International Travel for additional
+ * information."
  */
 rule "Yellow Fever: Always include supplemental text with the recommendation indicating Yellow Fever is not routinely recommended in the U.S."
 	dialect "mvel"
@@ -147,28 +146,4 @@ rule "Yellow Fever: Patient is complete for yellow fever, Conditional/Complete_H
 		Mark Forecasting of the Series $targetSeries Complete
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
 		Log that this Series Rule fired for the Series $targetSeries
-end
-
-/**
- * Yellow Fever vaccine is a live virus vaccine, and there needs to be a 30-day interval between yellow fever and other live virus
- * vaccines. This rule adjusts the earliest forecast date for a live virus vaccine when a yellow fever vaccine was administered less
- * than 30 days before the earliest date.
- */
-rule "YellowFever.adjustEarliestDateDueToYellowFeverVaccine"
-	dialect "mvel"
-	ruleflow-group "RecommendationForecast^supplementalSeriesRule"
-	when
-	 	There is a Series $yellowFeverVaccineSeries
-			- The Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.YELLOW_FEVER"
-			- The Series is complete
-			- Make note of the date that the most recent shot was administered as $yellowFeverDate
-		There is a Series $targetSeries distinct from $yellowFeverVaccineSeries
-    	    - a Forecast for the Series has been made and a Recommendation Date has been determined
-    	    - The recommendation is for a live vaccine
-            - Make note of the earliest date as $earliestDate
-        Confirm (!(the date $yellowFeverDate is on the same day as evalTime) && elapsed time between $yellowFeverDate and $earliestDate < "30d") || (the date $yellowFeverDate is on the same day as evalTime && the date $earliestDate is after $yellowFeverDate && elapsed time between $yellowFeverDate and $earliestDate < "30d")
-	then
-	    Adjust earliest date to 30 days after live virus date $yellowFeverDate for Series $targetSeries
-		Record that this Series Rule was Processed for the TargetSeries $targetSeries
-        Log that this Series Rule fired for the Series $targetSeries
 end

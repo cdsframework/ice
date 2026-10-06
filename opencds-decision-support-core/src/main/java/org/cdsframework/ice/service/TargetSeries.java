@@ -356,14 +356,16 @@ public class TargetSeries
             throw new InconsistentConfigurationException(str);
         }
 
-        // SeriesRules srOfThisSeries = this.seriesRules;
-        final List<DoseRule> thisSeriesDoseRules = this.seriesRules.getSeriesDoseRules();
-        if (thisSeriesDoseRules == null)
+        if (seriesRules.getSeriesDoseRules() == null)
         {
             final String str = _METHODNAME + "specified series does not have any dose rules; cannot continue.";
             log.error(str);
             throw new InconsistentConfigurationException(str);
         }
+
+        // Seasonal candidates share SeriesRules until a conversion needs its own ages, intervals and series name.
+        seriesRules = SeriesRules.constructDeepCopyOfSeriesRulesObject(seriesRules);
+        final List<DoseRule> thisSeriesDoseRules = seriesRules.getSeriesDoseRules();
 
         // Remove existing DoseRules starting with the existing dose number.
         final int numberOfDosesDefinedInThisSeriesRules = thisSeriesDoseRules.size();
@@ -405,17 +407,25 @@ public class TargetSeries
             final DoseRule newSeriesPriorDoseRuleForIntervalOnly =
                     srOfSeriesToSwitchTo.getSeriesDoseRuleByDoseNumber(doseNumberToSwitchTo - 1);
             thisSeriesLastDoseRuleFromPriorSeries.setAbsoluteMinimumInterval(
-                    newSeriesPriorDoseRuleForIntervalOnly.getAbsoluteMinimumInterval());
-            thisSeriesLastDoseRuleFromPriorSeries.setMinimumInterval(newSeriesPriorDoseRuleForIntervalOnly.getMinimumInterval());
+                    TimePeriod.constructDeepCopyOfTimePeriodObject(
+                            newSeriesPriorDoseRuleForIntervalOnly.getAbsoluteMinimumInterval()));
+            thisSeriesLastDoseRuleFromPriorSeries.setMinimumInterval(
+                    TimePeriod.constructDeepCopyOfTimePeriodObject(newSeriesPriorDoseRuleForIntervalOnly.getMinimumInterval()));
             thisSeriesLastDoseRuleFromPriorSeries.setEarliestRecommendedInterval(
-                    newSeriesPriorDoseRuleForIntervalOnly.getEarliestRecommendedInterval());
+                    TimePeriod.constructDeepCopyOfTimePeriodObject(
+                            newSeriesPriorDoseRuleForIntervalOnly.getEarliestRecommendedInterval()));
             thisSeriesLastDoseRuleFromPriorSeries.setLatestRecommendedInterval(
-                    newSeriesPriorDoseRuleForIntervalOnly.getLatestRecommendedInterval());
+                    TimePeriod.constructDeepCopyOfTimePeriodObject(
+                            newSeriesPriorDoseRuleForIntervalOnly.getLatestRecommendedInterval()));
         }
 
         // Add new DoseRules starting with the existing dose number - properly set the dose number to ensure they are sequential
         final List<DoseRule> ssDoseRulesToAdd =
-                srOfSeriesToSwitchTo.getSeriesDoseRules().subList(doseNumberToSwitchTo - 1, sizeOfSeriesToSwitchTo);
+                srOfSeriesToSwitchTo.getSeriesDoseRules()
+                        .subList(doseNumberToSwitchTo - 1, sizeOfSeriesToSwitchTo)
+                        .stream()
+                        .map(DoseRule::constructDeepCopyOfDoseRuleObject)
+                        .toList();
         if (log.isDebugEnabled())
         {
             final StringBuilder debugStr = new StringBuilder(_METHODNAME + "Switch series doses to add: ");

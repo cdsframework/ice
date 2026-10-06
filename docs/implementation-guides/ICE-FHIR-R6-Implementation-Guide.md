@@ -2,7 +2,8 @@
 
 ## Release 2.58.1 — FHIR Partner Update
 
-ICE 2.58.1 introduces a proposed FHIR R6 ImmDS forecast operation. The operation is experimental and is available only when
+ICE 2.58.1 introduced the proposed ImmDS forecast operation for the ICE FHIR
+API (FHIR R6). The operation is experimental and is available only when
 `cds-engine.experimental-features.enable-fhir-r6=true` is enabled.
 
 ### Migration required for existing FHIR forecast clients
@@ -37,8 +38,8 @@ schedule-authority behavior. Forecast results may therefore change independently
 
 ## Contextual Conditions
 
-The `$immds-forecast` operation accepts a contextual condition as a repeating `observation` input parameter. A contextual condition
-conveys disease history or evidence of immunity that affects forecasting; it is not sent as a legacy direct vMR observation.
+For supported codes, ICE mappings, the Observation requirements, and request behavior, see
+[Contextual Conditions](../reference/contextual-conditions.md).
 
 Each contextual-condition `Observation` SHALL include:
 
@@ -67,7 +68,7 @@ The disease codes use `http://snomed.info/sct`. The source codes use
 ### Request example
 
 The following `observation` parameter records provider-verified varicella history. ICE translates contextual-condition code
-`024` to Varicella with the `PROOF_OF_IMMUNITY` source before evaluating the forecast.
+`024` to Varicella with the `DISEASE_DOCUMENTED` source before evaluating the forecast.
 
 ```json
 {
@@ -105,20 +106,20 @@ This guide reflects the current implementation and JSON artifacts in the `../../
 
 ## Canonical Artifacts (`/fhir`)
 
-| File                                                          | Resource Type       | Canonical URL                                                                                 | Purpose                                                |
-|---------------------------------------------------------------|---------------------|-----------------------------------------------------------------------------------------------|--------------------------------------------------------|
-| `ice/OperationDefinition/immds-forecast.json`                 | OperationDefinition | `https://terminology.cdsframework.org/ice/OperationDefinition/immds-forecast`                 | Request/response contract for `$immds-forecast`        |
-| `ice/StructureDefinition/immunization-selection-context.json` | StructureDefinition | `https://terminology.cdsframework.org/ice/StructureDefinition/immunization-selection-context` | Selection context extension                            |
-| `ice/StructureDefinition/vaccine-group-rules-artifact.json`   | StructureDefinition | `https://terminology.cdsframework.org/ice/StructureDefinition/vaccine-group-rules-artifact`   | Vaccine group rules artifact extension                 |
-| `PlanDefinition/ice-forecast.json`                            | PlanDefinition      | `https://terminology.cdsframework.org/PlanDefinition/ice-forecast`                            | ICE forecast knowledge-base definition                 |
-| `ice/PlanDefinition/common-ice-forecast.json`                 | PlanDefinition      | `https://terminology.cdsframework.org/ice/PlanDefinition/common-ice-forecast`                 | Common forecast knowledge-base definition              |
-| `ice/StructureDefinition/ice-series-plan-definition.json`     | StructureDefinition | `https://terminology.cdsframework.org/ice/StructureDefinition/ice-series-plan-definition`     | PlanDefinition profile for series content              |
-| `ice/StructureDefinition/ice-series-metadata.json`            | StructureDefinition | `https://terminology.cdsframework.org/ice/StructureDefinition/ice-series-metadata`            | Series metadata extension                              |
-| `ice/StructureDefinition/ice-dose-number.json`                | StructureDefinition | `https://terminology.cdsframework.org/ice/StructureDefinition/ice-dose-number`                | Dose number extension                                  |
-| `ice/StructureDefinition/ice-dose-age-constraint.json`        | StructureDefinition | `https://terminology.cdsframework.org/ice/StructureDefinition/ice-dose-age-constraint`        | Dose age constraint extension                          |
-| `ice/StructureDefinition/ice-dose-interval-constraint.json`   | StructureDefinition | `https://terminology.cdsframework.org/ice/StructureDefinition/ice-dose-interval-constraint`   | Dose interval constraint extension                     |
-| `ice/StructureDefinition/ice-dose-vaccine.json`               | StructureDefinition | `https://terminology.cdsframework.org/ice/StructureDefinition/ice-dose-vaccine`               | Dose vaccine extension                                 |
-| `Bundle/ice-custom-code-systems.json`                         | Bundle              | n/a                                                                                           | Custom code systems/value sets used by ICE             |
+| File                                                          | Resource Type       | Canonical URL                                                                                 | Purpose                                         |
+|---------------------------------------------------------------|---------------------|-----------------------------------------------------------------------------------------------|-------------------------------------------------|
+| `ice/OperationDefinition/immds-forecast.json`                 | OperationDefinition | `https://terminology.cdsframework.org/ice/OperationDefinition/immds-forecast`                 | Request/response contract for `$immds-forecast` |
+| `ice/StructureDefinition/immunization-selection-context.json` | StructureDefinition | `https://terminology.cdsframework.org/ice/StructureDefinition/immunization-selection-context` | Selection context extension                     |
+| `ice/StructureDefinition/vaccine-group-rules-artifact.json`   | StructureDefinition | `https://terminology.cdsframework.org/ice/StructureDefinition/vaccine-group-rules-artifact`   | Vaccine group rules artifact extension          |
+| `PlanDefinition/ice-forecast.json`                            | PlanDefinition      | `https://terminology.cdsframework.org/PlanDefinition/ice-forecast`                            | ICE forecast knowledge-base definition          |
+| `ice/PlanDefinition/common-ice-forecast.json`                 | PlanDefinition      | `https://terminology.cdsframework.org/ice/PlanDefinition/common-ice-forecast`                 | Common forecast knowledge-base definition       |
+| `ice/StructureDefinition/ice-series-plan-definition.json`     | StructureDefinition | `https://terminology.cdsframework.org/ice/StructureDefinition/ice-series-plan-definition`     | PlanDefinition profile for series content       |
+| `ice/StructureDefinition/ice-series-metadata.json`            | StructureDefinition | `https://terminology.cdsframework.org/ice/StructureDefinition/ice-series-metadata`            | Series metadata extension                       |
+| `ice/StructureDefinition/ice-dose-number.json`                | StructureDefinition | `https://terminology.cdsframework.org/ice/StructureDefinition/ice-dose-number`                | Dose number extension                           |
+| `ice/StructureDefinition/ice-dose-age-constraint.json`        | StructureDefinition | `https://terminology.cdsframework.org/ice/StructureDefinition/ice-dose-age-constraint`        | Dose age constraint extension                   |
+| `ice/StructureDefinition/ice-dose-interval-constraint.json`   | StructureDefinition | `https://terminology.cdsframework.org/ice/StructureDefinition/ice-dose-interval-constraint`   | Dose interval constraint extension              |
+| `ice/StructureDefinition/ice-dose-vaccine.json`               | StructureDefinition | `https://terminology.cdsframework.org/ice/StructureDefinition/ice-dose-vaccine`               | Dose vaccine extension                          |
+| `Bundle/ice-custom-code-systems.json`                         | Bundle              | n/a                                                                                           | Custom code systems/value sets used by ICE      |
 
 ## Operation Contract
 
@@ -141,8 +142,7 @@ This guide reflects the current implementation and JSON artifacts in the `../../
 
 ### Response Parameters (out)
 
-Response is a `Parameters` resource whose forecast results are returned as
-top-level `parameter` entries:
+Response is a `Parameters` resource whose forecast results are returned as top-level `parameter` entries:
 
 - `durationMs` (`integer`, 0..1)
 - `engineVersion` (`string`, 1..1)
@@ -153,16 +153,17 @@ top-level `parameter` entries:
 
 Notes:
 
-- Handled forecast errors return `operationOutcome` and may also include `durationMs` and `engineVersion`; forecast result resources may be omitted.
+- Handled forecast errors return `operationOutcome` and may also include `durationMs` and `engineVersion`; forecast result resources
+  may be omitted.
 - `assessmentDate` is not emitted as an output parameter.
 
 ## Timing Semantics
 
-| Field                                           | Meaning                                                   | Source                 | Notes                                                   |
-|-------------------------------------------------|-----------------------------------------------------------|------------------------|---------------------------------------------------------|
-| `Parameters.parameter[durationMs]`              | Total processing time for the ICE request in milliseconds | Service runtime        | Technical metric; not clinically relevant               |
-| `GuidanceResponse.occurrenceDateTime`           | Timestamp when the forecast/guidance was generated        | ICE engine             | Represents when decision support logic executed         |
-| `ImmunizationRecommendation.date`               | Clinical evaluation date used for recommendations         | Input (assessmentDate) | Drives due/overdue calculations; independent of runtime |
+| Field                                 | Meaning                                                   | Source                 | Notes                                                   |
+|---------------------------------------|-----------------------------------------------------------|------------------------|---------------------------------------------------------|
+| `Parameters.parameter[durationMs]`    | Total processing time for the ICE request in milliseconds | Service runtime        | Technical metric; not clinically relevant               |
+| `GuidanceResponse.occurrenceDateTime` | Timestamp when the forecast/guidance was generated        | ICE engine             | Represents when decision support logic executed         |
+| `ImmunizationRecommendation.date`     | Clinical evaluation date used for recommendations         | Input (assessmentDate) | Drives due/overdue calculations; independent of runtime |
 
 Additional clarifications:
 
@@ -215,6 +216,7 @@ Implementation Implications:
 ## Runtime Mapping Rules
 
 - `targetDisease` can include multiple codings (for component/multi-disease contexts) under a single `CodeableConcept`.
+  See [Target Diseases](../reference/target-diseases.md) for the supported ICE disease keys and SNOMED CT codings.
 - `seriesDoses.text = "0"` is suppressed and not emitted in FHIR output.
 - Narrative and description fields are human-readable convenience text only.
     - Consumers should rely on structured fields and extensions, not text parsing.

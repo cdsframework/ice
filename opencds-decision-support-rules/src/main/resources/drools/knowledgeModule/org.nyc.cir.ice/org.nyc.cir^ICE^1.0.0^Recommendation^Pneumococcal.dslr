@@ -554,7 +554,7 @@ rule "Pneumococcal Adult: if patient *is* >= 5yrs and < 19yrs of age, the childh
 		Log that this Series Rule fired for the Series $targetSeries
 end
 
-rule "Pneumococcal Adult: if patient *is* >= 5yrs and < 19yrs of age, the childhood series *is* complete, _not_ including the PCV13/PCV15/PCV20/PCV21 rule, and an adult dose *has not* been administered, then recommend Conditional/COMPLETE_HIGH_RISK"
+rule "Pneumococcal Adult: if patient *is* >= 5yrs and < 19yrs of age, the childhood series *is* complete, _not_ including the PCV13/PCV15/PCV20 rule, and an adult dose *has not* been administered, then recommend Conditional/COMPLETE_HIGH_RISK"
 	dialect "mvel"
 	ruleflow-group "RecommendationForecast^customRecommendationRule"
 	salience 200
@@ -569,7 +569,7 @@ rule "Pneumococcal Adult: if patient *is* >= 5yrs and < 19yrs of age, the childh
 		There exists an IceFact
 			- that has finding SupportedFactConcept._PNEUMOCOCCAL_CHILD_SERIES_COMPLETE.conceptCodeValue
 			- that has associated series $targetSeries
-		Verify that the Count of Doses Administered in Series $targetSeries with Vaccine a member of ("VACCINE_CVX_133", "VACCINE_CVX_215", "VACCINE_CVX_216", "VACCINE_CVX_327") is == 0
+		Verify that the Count of Doses Administered in Series $targetSeries with Vaccine a member of ("VACCINE_CVX_133", "VACCINE_CVX_215", "VACCINE_CVX_216") is == 0
 		The patient information $assign_oEvaluatedPerson must be known to complete writing this rule
 			- make note of the patient's birthdate as $dtBirthDate
 		Confirm elapsed time between $dtBirthDate and evalTime >= "5y" && elapsed time between $dtBirthDate and evalTime < "19y"
@@ -581,7 +581,7 @@ rule "Pneumococcal Adult: if patient *is* >= 5yrs and < 19yrs of age, the childh
 		Log that this Series Rule fired for the Series $targetSeries
 end
 
-rule "Pneumococcal Adult: if patient *is* >= 5yrs and < 19yrs of age, the childhood series *is* complete, including the PCV13/PCV15/PCV20/PCV21 rule, and an adult dose *has not* been administered, then recommend Conditional/COMPLETE_HIGH_RISK"
+rule "Pneumococcal Adult: if patient *is* >= 5yrs and < 19yrs of age, the childhood series *is* complete, including the PCV13/PCV15/PCV20 rule, and an adult dose *has not* been administered, then recommend Conditional/COMPLETE_HIGH_RISK"
 	dialect "mvel"
 	ruleflow-group "RecommendationForecast^customRecommendationRule"
 	salience 200
@@ -596,7 +596,7 @@ rule "Pneumococcal Adult: if patient *is* >= 5yrs and < 19yrs of age, the childh
 		There exists an IceFact
 			- that has finding SupportedFactConcept._PNEUMOCOCCAL_CHILD_SERIES_COMPLETE.conceptCodeValue
 			- that has associated series $targetSeries
-		Verify that the Count of Doses Administered in Series $targetSeries with Vaccine a member of ("VACCINE_CVX_133", "VACCINE_CVX_215", "VACCINE_CVX_216", "VACCINE_CVX_327") is > 0
+		Verify that the Count of Doses Administered in Series $targetSeries with Vaccine a member of ("VACCINE_CVX_133", "VACCINE_CVX_215", "VACCINE_CVX_216") is > 0
 		The patient information $assign_oEvaluatedPerson must be known to complete writing this rule
 			- make note of the patient's birthdate as $dtBirthDate
 		Confirm elapsed time between $dtBirthDate and evalTime >= "5y" && elapsed time between $dtBirthDate and evalTime < "19y"
@@ -691,11 +691,11 @@ rule "Pneumococcal Child: if the patient >= 2yrs and < 5 years, if a PPSV23 (CVX
 end
 
 /**
- * PCV13 / PCV15 / PCV20 / PCV21 Rule: If a child is complete for the series, has not had a dose of PCV13/PCV15/PCV20/PCV21, is currently < 5
+ * PCV13 / PCV15 / PCV20 Rule: If a child is complete for the series, has not had a dose of PCV13/PCV15/PCV20, is currently < 5
  * years old, and will be < 5 years old at the recommended due date, then a dose of PCV 13 / PCV15 /PCV 20 is recommended.
  * Recommended interval is 8 weeks from previous shot. Include supplemental text:
  */
-rule "Pneumococcal Child Series: Recommend PCV13/PCV15/PCV20/PCV21 dose if series complete if no prior VALID PCV13, PCV15, PCV20 or PCV21 doses, is < 5 yrs of age and will be less than 5 yrs of age upon recommendation date"
+rule "Pneumococcal Child Series: Recommend PCV13/PCV15/PCV20 dose if series complete if no prior VALID PCV13, PCV15, or PCV20 doses, is < 5 yrs of age and will be less than 5 yrs of age upon recommendation date"
 	dialect "mvel"
 	ruleflow-group "RecommendationForecast^customRecommendationRule"
 	salience 450
@@ -706,13 +706,14 @@ rule "Pneumococcal Child Series: Recommend PCV13/PCV15/PCV20/PCV21 dose if serie
 			- the effective dose number in the Series is == 5
 			- the Number of Administered Shots is > 0
 			- make note of the date that the most recent shot was administered as $shotDate
-		Verify that the Count of Doses Administered in Series $targetSeries with Vaccine a member of ("VACCINE_CVX_133", "VACCINE_CVX_215", "VACCINE_CVX_216", "VACCINE_CVX_327") is == 0
+		Verify that the Count of Doses Administered in Series $targetSeries with Vaccine a member of ("VACCINE_CVX_133", "VACCINE_CVX_215", "VACCINE_CVX_216") is == 0
 		The patient information $assign_oEvaluatedPerson must be known to complete writing this rule
 			- make note of the patient's birthdate as $dtBirthDate
 		Confirm elapsed time between $dtBirthDate and evalTime < "5y"
 		Confirm elapsed time between $dtBirthDate and (calculate date from addition of $shotDate with TimePeriod "8w") < "5y"
 	then
 		Add "8w" to $shotDate and make note of the newly calculated date as $dtCalculated
+		Include a recommendation as $earliestRecommendation with earliest forecast date $dtCalculated for consideration in the final forecast of the series $targetSeries
 		Include a recommendation as $recommendation with recommended forecast date $dtCalculated for consideration in the final forecast of the series $targetSeries
 		Create a recommendation as $supplementalText for the Series $targetSeries
 		Set the recommendation supplemental text for $supplementalText to "SUPPLEMENTAL_RECOMMENDATION_REASON_CONCEPT.PCV15_OR_PCV20"
@@ -727,7 +728,7 @@ end
  * If patient is < 5 years and has completed the Child series (including meeting the PCV 13 Rule), then the Recommendation is Not Recommended and the reason code is COMPLETE_HIGH_RISK.
  * Has a lower salience then the PCV13 rule.
  */
-rule "Pneumococcal Child Series: if patient is < 5yrs completed the Child series (including a PCV13/PCV15/PCV20/PCV21), recommend Not Recommended with reason COMPLETE_HIGH_RISK"
+rule "Pneumococcal Child Series: if patient is < 5yrs completed the Child series (including a PCV13/PCV15/PCV20), recommend Not Recommended with reason COMPLETE_HIGH_RISK"
 	dialect "mvel"
 	ruleflow-group "RecommendationForecast^customRecommendationRule"
 	salience 425
@@ -739,7 +740,7 @@ rule "Pneumococcal Child Series: if patient is < 5yrs completed the Child series
 			- the effective dose number in the Series is > 4
 		There is an administered shot $shot
 			- the shot belongs to the Series $targetSeries
-			- the vaccine administered a member of ("VACCINE_CVX_133", "VACCINE_CVX_215", "VACCINE_CVX_216", "VACCINE_CVX_327")
+			- the vaccine administered a member of ("VACCINE_CVX_133", "VACCINE_CVX_215", "VACCINE_CVX_216")
 			- that has already been evaluated and whose Shot Validity is VALID
 		The patient information $assign_oEvaluatedPerson must be known to complete writing this rule
 			- make note of the patient's birthdate as $dtBirthDate
@@ -760,7 +761,7 @@ end
  * or RECOMMENDED_IN_FUTURE) and with the added conditional recommendation, ICE will override that recommendation with the
  * conditionally recommended (as per general ICE rules)
  */
-rule "Pneumococcal Child Series: if patient *will be* >= 5 years at the recommended due date and < 19 years and the series *is* complete but has not received a childhood PCV13/PCV15/PCV20/PCV21 dose, then recommend Conditional/HIGH_RISK"
+rule "Pneumococcal Child Series: if patient *will be* >= 5 years at the recommended due date and < 19 years and the series *is* complete but has not received a childhood PCV13/PCV15/PCV20 dose, then recommend Conditional/HIGH_RISK"
 	dialect "mvel"
 	ruleflow-group "RecommendationForecast^postCustomRecommendationCheck"
 	when

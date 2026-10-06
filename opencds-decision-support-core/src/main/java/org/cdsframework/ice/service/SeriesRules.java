@@ -62,6 +62,7 @@ public class SeriesRules
         lSR.seriesId = ICELogicHelper.generateUniqueString();
         lSR.seriesName = pSR.seriesName;
         lSR.seriesGroup = pSR.seriesGroup;
+        lSR.seriesGroupToTransitionTo = pSR.seriesGroupToTransitionTo;
         lSR.vaccineGroupConcept = CdsConcept.constructDeepCopyOfCdsConceptObject(pSR.getVaccineGroupConcept());
         lSR.numberOfDosesInSeries = pSR.numberOfDosesInSeries;
         lSR.seriesStartAge = TimePeriod.constructDeepCopyOfTimePeriodObject(pSR.seriesStartAge);

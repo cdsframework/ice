@@ -1,15 +1,21 @@
 # ICE API Client Integration Guide
 
-This guide describes how to consume the ICE Forecast API published at
-`https://ice-service-development.cdsframework.org/cds/ice-forecast/api-docs` and build a usable client plus associated data objects
-in:
+This guide describes how to consume the ICE FHIR API (FHIR R6) and build a
+usable client plus associated data objects in:
 
 - Java
 - Spring Boot
 - Python
 - C#.NET
 
-It is based on the live OpenAPI document and sampled live responses on May 11, 2026.
+The FHIR R6 forecast contract is defined in the [FHIR R6 Implementation
+Guide](ICE-FHIR-R6-Implementation-Guide.md). For the focused crosswalk from
+the ICE SOAP/vMR API, see [Migrating from vMR to FHIR](migrating-from-vmr-to-fhir.md).
+
+The examples below use the ICE development service URL that was available when
+this guide was written. The confirmed public Swagger UI is the [ICE API /
+Swagger Documentation](https://ice-service.cdsframework.org/opencds-decision-support-service/cds/ice-forecast/swagger-ui/index.html#/).
+That UI destination is distinct from the underlying OpenAPI JSON document.
 
 ## 1. What the API Actually Exposes
 
@@ -19,7 +25,7 @@ Base server:
 
 Primary forecast operation:
 
-- `POST /cds/$immunization-forecast`
+- `POST /cds/$immds-forecast`
 
 Supporting-data operations:
 
@@ -35,6 +41,13 @@ Supporting-data operations:
 Observed contract characteristics:
 
 - The forecast endpoint accepts and returns FHIR `Parameters`.
+- The request requires top-level `Parameters.parameter` entries named
+  `patient`, `assessmentDate`, and `knowledgeBase`; `immunization`,
+  `observation`, and `scheduleFlag` may repeat.
+- The response uses top-level `Parameters.parameter` entries such as
+  `durationMs`, `engineVersion`, `guidanceResponse`, `evaluation`,
+  `recommendation`, and `operationOutcome`; it does not use a nested output
+  wrapper.
 - Forecast content types are `application/json` and `application/fhir+json`.
 - Supporting-data endpoints return normal JSON and are good candidates for OpenAPI-based DTO generation.
 - The OpenAPI document does not define a security scheme.
@@ -45,7 +58,7 @@ Observed contract characteristics:
 
 Use two different modeling strategies:
 
-1. For `POST /cds/$immunization-forecast`
+1. For `POST /cds/$immds-forecast`
     - Do **not** rely on generated classes alone.
     - The OpenAPI schema for `Parameters.parameter[]` is effectively untyped.
     - Use either:
@@ -69,12 +82,12 @@ Regardless of language, the clean object split is:
     - contains:
         - `patient`
         - `assessmentDate`
-        - `module`
+        - `knowledgeBase` (required)
         - repeated `immunization`
         - repeated `observation`
 - `ForecastResponse`
     - wraps the returned FHIR `Parameters`
-    - extracts `output.part[]` into:
+    - extracts top-level `parameter[]` entries into:
         - `durationMs`
         - `engineVersion`
         - `guidanceResponse`
@@ -115,7 +128,19 @@ curl -sSLo ice-forecast-api.json \
   https://ice-service-development.cdsframework.org/cds/ice-forecast/api-docs
 ```
 
-Use that file for DTO generation and for contract tests.
+The repository configures the OpenAPI path as
+`/cds/ice-forecast/api-docs` and the Swagger UI path as
+`/cds/ice-forecast/swagger-ui.html`. Both are disabled by default in the
+repository configuration, and the application context path is
+`/opencds-decision-support-service`. The confirmed public Swagger UI is
+`https://ice-service.cdsframework.org/opencds-decision-support-service/cds/ice-forecast/swagger-ui/index.html#/`.
+
+The public Swagger UI URL does not, by itself, establish the public URL of the
+underlying OpenAPI JSON document. Use the deployment's served Swagger
+configuration or other deployment documentation to determine that URL; this
+guide does not assume one.
+
+When the document is available, use it for DTO generation and contract tests.
 
 ## 5. Java
 
@@ -175,7 +200,7 @@ public final class IceApiClient
     public ForecastResponse forecast(final Parameters request) throws IOException, InterruptedException
     {
         final var json = objectMapper.writeValueAsString(request);
-        final var httpRequest = HttpRequest.newBuilder(baseUri.resolve("/cds/$immunization-forecast"))
+        final var httpRequest = HttpRequest.newBuilder(baseUri.resolve("/cds/$immds-forecast"))
                 .header("Content-Type", "application/fhir+json")
                 .header("Accept", "application/fhir+json")
                 .POST(HttpRequest.BodyPublishers.ofString(json))
@@ -192,9 +217,8 @@ public final class IceApiClient
 
 Your parser should:
 
-- find top-level `parameter` where `name == "output"`
-- iterate `part[]`
-- dispatch by `part.name`
+- iterate the top-level `parameter[]` entries
+- dispatch by `parameter.name`
 - treat `operationOutcome` as an application-level failure even when HTTP status is `200`
 
 ## 6. Spring Boot
@@ -204,7 +228,7 @@ Your parser should:
 For Spring Boot, I would use:
 
 - `WebClient`
-- `@ConfigurationProperties` for host/module defaults
+- `@ConfigurationProperties` for host and knowledge-base defaults
 - generated DTOs for supporting-data
 - a dedicated forecast adapter that posts FHIR JSON and maps the response
 
@@ -221,14 +245,12 @@ For Spring Boot, I would use:
 ```yaml
 ice:
   base-url: https://ice-service-development.cdsframework.org
-  module-canonical: https://terminology.cdsframework.org/PlanDefinition/ice-forecast
-  module-version: 1.0.0
+  knowledge-base: https://terminology.cdsframework.org/PlanDefinition/ice-forecast|1.0.0
 ```
 
 ### Client bean
 
 ```java
-
 @Configuration
 public class IceClientConfiguration
 {
@@ -247,7 +269,6 @@ public class IceClientConfiguration
 ### Forecast client
 
 ```java
-
 @Service
 public class IceForecastClient
 {
@@ -261,7 +282,7 @@ public class IceForecastClient
     public Mono<ForecastResponse> forecast(final Parameters request)
     {
         return webClient.post()
-                .uri("/cds/$immunization-forecast")
+                .uri("/cds/$immds-forecast")
                 .contentType(MediaType.parseMediaType("application/fhir+json"))
                 .bodyValue(request)
                 .retrieve()
@@ -291,7 +312,8 @@ Expose a business-facing interface like:
 ```java
 public interface ImmunizationForecastGateway
 {
-    ForecastResult getForecast(Patient patient, LocalDate assessmentDate, List<Immunization> immunizations,
+    ForecastResult getForecast(Patient patient, LocalDate assessmentDate, String knowledgeBase,
+            List<Immunization> immunizations,
             List<Observation> observations);
 }
 ```
@@ -338,7 +360,7 @@ class IceClient:
 
     def forecast(self, parameters: dict) -> dict:
         response = self._client.post(
-            "/cds/$immunization-forecast",
+            "/cds/$immds-forecast",
             json=parameters,
             headers={
                 "Content-Type": "application/fhir+json",
@@ -440,7 +462,7 @@ public sealed class IceClient
     public async Task<ForecastResponse> ForecastAsync(Parameters request, CancellationToken cancellationToken = default)
     {
         using var response = await _httpClient.PostAsJsonAsync(
-            "/cds/$immunization-forecast",
+            "/cds/$immds-forecast",
             request,
             cancellationToken);
 
@@ -466,9 +488,8 @@ services.AddHttpClient<IceClient>(client =>
 
 Exactly like Java and Python:
 
-- locate `output`
-- read `part[]`
-- branch by `name`
+- iterate the top-level `parameter[]` entries
+- branch by each parameter's `name`
 - surface `operationOutcome` as a typed error/result object
 
 ## 9. Practical Data-Object Decisions
@@ -498,7 +519,7 @@ This split maps cleanly to the actual API shape.
 In all four stacks, keep the public client API small:
 
 ```text
-forecast(patient, assessmentDate, immunizations, observations, moduleCanonical, moduleVersion)
+forecast(patient, assessmentDate, knowledgeBase, immunizations, observations)
 getVaccines(moduleCanonical, moduleVersion)
 getVaccineGroups(moduleCanonical, moduleVersion)
 getSeries(moduleCanonical, moduleVersion)
@@ -509,7 +530,12 @@ getDiseases(moduleCanonical, moduleVersion)
 getCodeSystem(moduleCanonical, moduleVersion, name)
 ```
 
-Build the FHIR `Parameters` envelope internally. Do not force downstream callers to assemble raw `parameter[]` arrays themselves.
+Build the FHIR `Parameters` envelope internally. The forecast request must
+include the required `knowledgeBase` canonical value. Do not force downstream
+callers to assemble raw `parameter[]` arrays themselves. The
+`moduleCanonical`/`moduleVersion` arguments shown for supporting-data methods
+are supporting-data query parameters; they are not the old forecast request
+`module` parameter.
 
 ## 11. Notes for vMR Migration
 
@@ -522,8 +548,10 @@ concept in the forecast output. Under the FHIR contract, disease targeting is re
 - `ImmunizationRecommendation.recommendation.targetDisease`
 
 Those `targetDisease` values are disease `CodeableConcept` values, not vaccine group values. When an implementation needs to group
-FHIR evaluations or recommendations by the legacy ICE vaccine group, or compare FHIR output to vMR output during A/B testing, it
+FHIR evaluations or recommendations by the SOAP/vMR vaccine group, or compare FHIR output to vMR output during A/B testing, it
 must normalize disease indicators back to vaccine groups.
+
+The supported SNOMED CT codings for `targetDisease` are listed in [Target Diseases](../reference/target-diseases.md).
 
 Use the supporting-data endpoints to build the normalization map:
 
@@ -637,7 +665,8 @@ data.
 
 - Accept both `application/json` and `application/fhir+json`.
 - Always inspect the response body for `operationOutcome`.
-- Keep `moduleCanonical` and `moduleVersion` configurable.
+- Keep supporting-data `moduleCanonical` and `moduleVersion` query values
+  configurable. The forecast request uses required `knowledgeBase` instead.
 - Patch the generated type for `/cds/supporting-data/series-plan-definition` to a `PlanDefinition` collection if the generator still
   treats it as a non-array type.
 - Add contract tests that deserialize:
