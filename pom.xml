@@ -10,7 +10,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>4.1.1</version>
+        <version>4.1.2</version>
     </parent>
 
     <properties>
@@ -19,14 +19,15 @@
         <java.version>25</java.version>
         <maven.compiler.proc>full</maven.compiler.proc>
 
-        <tomcat.version>11.0.25</tomcat.version>
         <drools.version>10.2.0</drools.version>
-        <guava.version>33.7.1-jre</guava.version>
-        <cxf.version>4.2.3</cxf.version>
-        <springdoc.version>3.1.0</springdoc.version>
+        <kie-maven-plugin.version>10.1.0-source-generation-SNAPSHOT</kie-maven-plugin.version>
+        <guava.version>33.7.2-jre</guava.version>
+        <cxf.version>4.2.4</cxf.version>
+        <springdoc.version>3.1.1</springdoc.version>
         <jaxb-maven-plugin.version>4.0.16</jaxb-maven-plugin.version>
-        <jackson-bom.version>3.1.7</jackson-bom.version>
-        <jackson-2-bom.version>2.22.3</jackson-2-bom.version>
+
+        <!-- security overrides -->
+        <jackson-2-bom.version>2.22.4</jackson-2-bom.version>
     </properties>
 
     <dependencyManagement>
@@ -53,6 +54,21 @@
             </releases>
         </repository>
     </repositories>
+
+    <pluginRepositories>
+        <pluginRepository>
+            <id>my-local-repo</id>
+            <url>file://${maven.multiModuleProjectDirectory}/local-repo</url>
+            <releases>
+                <checksumPolicy>ignore</checksumPolicy>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+                <checksumPolicy>ignore</checksumPolicy>
+                <updatePolicy>always</updatePolicy>
+            </snapshots>
+        </pluginRepository>
+    </pluginRepositories>
 
     <modules>
         <module>opencds-decision-support-opencds</module>

@@ -127,6 +127,7 @@ to those accepted by each Vaccine Group.
 | 187        | Zoster vaccine recombinant                                                                           |
 | 188        | Zoster vaccine, unspecified formulation (NOS)                                                        |
 | 189        | Hep B, adjuvanted                                                                                    |
+| 193        | Hep A-Hep B, adolescent/pediatric (non-US)                                                           |
 | 194        | Influenza, Southern Hemisphere, unspecified formulation                                              |
 | 195        | DT-IPV adsorbed Non-US                                                                               |
 | 196        | Td (adult) adsorbed, preservative free, Lf unspecified                                               |
@@ -223,22 +224,23 @@ to those accepted by each Vaccine Group.
 
 #### Hep B
 
-| **CVX Code** | **Name**                             |
-|--------------|--------------------------------------|
-| 08           | HepB peds `&lt;20yrs                 |
-| 42           | HepB high risk infant                |
-| 45           | HepB NOS                             |
-| 43           | HepB adult =&gt;`20yrs               |
-| 44           | HepB-dialysis                        |
-| 51           | Hib/HepB (Comvax)                    |
-| 102          | DTP-Hib-HepB                         |
-| 110          | DTaP-HepB-IPV (Pediarix)             |
-| 104          | HepA-HepB (Twinrix)                  |
-| 132          | **DTaP-IPV-Hib-HepB, historical**    |
-| 146          | **DTaP, IPV, Hib, Hep B**            |
-| 189          | **Hep B, adjuvanted**                |
-| 198          | **DTP-Hep B-Hib Pentavalent Non-US** |
-| 220          | HepB recombinant, 3-antigen, Al(OH)3 |
+| **CVX Code** | **Name**                                   |
+|--------------|--------------------------------------------|
+| 08           | HepB peds `&lt;20yrs                       |
+| 42           | HepB high risk infant                      |
+| 45           | HepB NOS                                   |
+| 43           | HepB adult =&gt;`20yrs                     |
+| 44           | HepB-dialysis                              |
+| 51           | Hib/HepB (Comvax)                          |
+| 102          | DTP-Hib-HepB                               |
+| 110          | DTaP-HepB-IPV (Pediarix)                   |
+| 104          | HepA-HepB (Twinrix)                        |
+| 132          | **DTaP-IPV-Hib-HepB, historical**          |
+| 146          | **DTaP, IPV, Hib, Hep B**                  |
+| 189          | **Hep B, adjuvanted**                      |
+| 193          | Hep A-Hep B, adolescent/pediatric (non-US) |
+| 198          | **DTP-Hep B-Hib Pentavalent Non-US**       |
+| 220          | HepB recombinant, 3-antigen, Al(OH)3       |
 
 #### MMR
 

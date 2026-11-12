@@ -2,13 +2,7 @@
 schema-version = "0.2"
 
 [io.buildpacks]
-builder = "paketobuildpacks/builder-noble-java-tiny"
-
-[[io.buildpacks.group]]
-id = "docker.io/paketobuildpacks/adoptium"
-
-[[io.buildpacks.group]]
-id = "docker.io/paketobuildpacks/java"
+builder = "us-central1-docker.pkg.dev/hln-internal/builders/java-resolute:latest"
 
 [[io.buildpacks.build.env]]
 name = "BP_JVM_VERSION"

@@ -44,26 +44,6 @@ rule "MMR: If a CVX 03, CVX 04, or CVX 05 is administered at >= 6 months-4 days 
 		Log that this dose rule fired for the dose $currentShot in the Series $associatedTargetSeries
 end
 
-rule "MMR: Mark Target Dose 2 as Accepted / EXTRA_DOSE if the shot is administered when patient >= 19 yrs"
-	dialect "mvel"
-	ruleflow-group "HistoryEvaluation^customEvaluationRule"
-	activation-group "doseAgeCheck"
-	when
-		There is an Administered Shot $currentShot that needs to be Evaluated
-			- the shot belongs to the vaccine group "VACCINE_GROUP_CONCEPT.MMR"
-			- the dose number in the Series is == 2
-			- make note of the date this Shot was Administered as $assign_dtAdministrationDate
-			- make note of the associated series as $associatedTargetSeries
-		The patient information $oEvaluatedPerson must be known to complete writing this rule
-			- make note of the patient's birthdate as $dtBirthDate
-		Confirm elapsed time between $dtBirthDate and $assign_dtAdministrationDate >= "19y"
-	then
-		Include the reason for shot $currentShot Accepted due to "Extra Dose"
-		Mark the Series $associatedTargetSeries Complete
-		Record that this dose rule was processed for the TargetDose $currentShot
-		Log that this dose rule fired for the dose $currentShot in the Series $associatedTargetSeries
-end
-
 rule "MMR: Mark the series complete if Patient >= 19 yrs and there is 1 dose in the Series"
 	dialect "mvel"
 	ruleflow-group "HistoryEvaluation^postEvaluationCheck"

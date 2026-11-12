@@ -166,8 +166,14 @@ forecasts by vaccine group.
 
 SOAP/vMR evaluation and recommendation focus values use ICE vaccine-group
 codes. FHIR R6 output does not use those numeric vaccine-group focus
-values as a direct replacement. `targetDisease` is a disease `CodeableConcept`,
-typically with SNOMED CT coding.
+values as a direct replacement. `targetDisease` is an array of disease
+`CodeableConcept` values, typically with SNOMED CT coding. Each concept represents
+one disease: MMR and DTP each return three concepts. Evaluations derive diseases
+from the evaluated component CVX mapping in `supportedVaccines.yml`, so MR and DT
+return only two concepts. Recommendations use the vaccine-group mapping.
+Evaluation `targetDisease`
+requires at least one entry and uses an array even for a single disease. Clients
+that handled the previous single-object evaluation shape must update their parsing.
 
 For a vMR-to-FHIR comparison, use the supporting data to normalize the
 concepts in this direction:
@@ -220,13 +226,18 @@ configuration. Depending on configuration and the forecast, this can include:
 
 - selected series and series selection type;
 - selected season;
-- number of doses remaining;
+- recommendation `seriesDosesRemaining`;
 - vaccine-group rules artifact or Wiki URL; and
 - schedule authority information.
 
 In FHIR, these values may be represented by resource fields or ICE-defined
-extensions, including the immunization-selection-context,
-vaccine-group-rules-artifact, and schedule-authority extensions. Review the
+extensions, including the immunization-selection-context and
+vaccine-group-rules-artifact extensions. Series and season use native
+`CodeableConcept` fields on evaluations and recommendation backbones; the context
+extension retains only selection type. Schedule authority uses the native
+`ImmunizationRecommendation.recommendation.authority` array (`0..*`). Evaluation
+`authority` is also an optional array. Multiple authorities share the same backbone
+or evaluation; even one authority uses an array. Review the
 effective deployment settings in [Output Configuration](../configuration/output-configuration.md)
 and the exact FHIR representations in the [FHIR R6 Implementation
 Guide](ICE-FHIR-R6-Implementation-Guide.md). Series and season behavior itself

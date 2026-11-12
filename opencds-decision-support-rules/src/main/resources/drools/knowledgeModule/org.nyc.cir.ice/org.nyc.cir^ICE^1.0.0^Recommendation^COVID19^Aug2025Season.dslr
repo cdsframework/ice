@@ -256,6 +256,32 @@ rule "COVID-19(Aug2025 2–64y Series): If <19y, ≥1 pre-season valid dose and 
 end
 
 /**
+ * The conditional override is added after interval text captures the initial forecast status.
+ * Keep that text associated with the conditional result so output status filtering retains it.
+ */
+rule "COVID-19(Aug2025 2–64y Series): Preserve target dose 1 supplemental text when the recommendation becomes conditional"
+    dialect "mvel"
+    ruleflow-group "RecommendationForecast^postCustomRecommendationCheck^COVID_19_AUG_2025_SEASON"
+    when
+        There is a Series $targetSeries
+            - the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.COVID_19"
+            - the name of the Series is "SUPPORTED_SERIES.COVID_19_AUG_2025_2_Y_TO_64_Y_SERIES"
+            - post processing on the Series forecast has not already been run
+        There is a Recommendation $conditionalRecommendation
+            - the Recommendation is associated with Series $targetSeries
+            - the Recommendation Reason is "RECOMMENDATION_REASON_CONCEPT.CLINICAL_PATIENT_DISCRETION"
+            - the Recommendation Status is RecommendationStatus.CONDITIONALLY_RECOMMENDED
+        There is a Recommendation $supplementalText
+            - the Recommendation is associated with Series $targetSeries
+            - the Recommendation Reason is "SUPPLEMENTAL_RECOMMENDATION_REASON_CONCEPT.TARGET_DOSE1_NOVAVAX_3W_OTHERS_8_12W"
+            - the Recommendation Status is not RecommendationStatus.CONDITIONALLY_RECOMMENDED
+    then
+        Change the Status of Recommendation $supplementalText to RecommendationStatus.CONDITIONALLY_RECOMMENDED
+        Record that this Series Rule was Processed for the TargetSeries $targetSeries
+        Log that this Series Rule fired for the Series $targetSeries
+end
+
+/**
  * Series: Seasonal 1-dose COVID-19 Series (2-64 years) End
  */
 

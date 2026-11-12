@@ -1,14 +1,31 @@
 # ICE FHIR R6 Implementation Guide
 
-## Release 2.58.1 — FHIR Partner Update
+ICE provides the proposed ImmDS forecast operation through the ICE FHIR API (FHIR R6). The operation is experimental and is
+available only when `cds-engine.experimental-features.enable-fhir-r6=true` is enabled.
 
-ICE 2.58.1 introduced the proposed ImmDS forecast operation for the ICE FHIR
-API (FHIR R6). The operation is experimental and is available only when
-`cds-engine.experimental-features.enable-fhir-r6=true` is enabled.
+## Upgrading to ICE 2.61.1
 
-### Migration required for existing FHIR forecast clients
+FHIR clients upgrading from 2.60.1 should review their response parsing and output configuration:
 
-The prior experimental FHIR forecast contract has changed:
+- **Series and season:** Evaluation and recommendation `series` and optional `season` are native `CodeableConcept` values.
+  The `immunization-selection-context` extension carries the series selection type.
+- **Dose counts:** `seriesDoses` is the size of the selected series. On recommendations, `seriesDosesRemaining` is the
+  remaining count. Update clients that relied on the previous representation.
+- **Schedule authorities:** When enabled, authorities use native `authority` arrays of `Organization` references on recommendation
+  entries, replacing the previous custom schedule-authority extension.
+- **Target diseases:** `targetDisease` is an array of disease concepts. Clients must handle multiple diseases, including for
+  combination vaccines.
+- **Output configuration:** Replace the removed `output-series-information` setting with
+  `output-series-information-for-evaluations` and `output-series-information-for-recommendations`. Doses-remaining output
+  requires recommendation series information. See [Output Configuration](../configuration/output-configuration.md#series-information-and-doses-remaining).
+- **Warnings:** `OperationOutcome` issue classification and warning detection have changed. Test clients that inspect issue
+  codes or severity.
+
+Review the [release changelog](../release-changelog.md) and test representative requests and responses before upgrading.
+
+## Upgrading from the pre-2.58.1 FHIR interface
+
+ICE 2.58.1 introduced the proposed ImmDS forecast operation and changed the earlier experimental FHIR forecast contract:
 
 | Previous contract                                            | ICE 2.58.1 contract                                                       |
 |--------------------------------------------------------------|---------------------------------------------------------------------------|
@@ -20,21 +37,23 @@ The prior experimental FHIR forecast contract has changed:
 Partners should update clients to use the new endpoint, parameter name, HTTPS canonical URLs, and top-level response parameters. The
 service publishes its FHIR capability statement at `GET /cds/metadata`.
 
-### New R6 capabilities and integration considerations
+## FHIR integration considerations
 
 - Requests are FHIR `Parameters` resources with required `patient`, `assessmentDate`, and `knowledgeBase` inputs; optional repeating
   `immunization`, contextual-condition `observation`, and `scheduleFlag` inputs are supported.
 - The operation accepts `application/fhir+json` and `application/json`.
-- `Immunization.isSubpotent = true` is treated as an invalid administration during forecast evaluation.
+- `Immunization.isSubpotent = true` maps to vMR `isValid=false`. When the dose override feature is enabled, ICE uses that input
+  to treat the administration as invalid. See [Dose override feature](../configuration/runtime-configuration.md#dose-override-feature).
 - Contextual-condition observations use `Observation.code` and `valueDateTime`. Unsupported codes are omitted from the forecast
   input and returned as an `OperationOutcome` warning rather than rejecting the request.
-- Optional extensions can provide series-selection context, vaccine-group rule artifacts, and schedule authorities. These outputs
-  are configuration-controlled and disabled by default.
+- Optional extensions can provide series-selection context and vaccine-group rule artifacts. Schedule authorities use the native
+  `ImmunizationRecommendation.recommendation.authority` array (`0..*`). These outputs are configuration-controlled and disabled by
+  default.
 - Consume structured FHIR fields and extensions rather than narrative text. `ImmunizationRecommendation.date` equals the submitted
   `assessmentDate`; runtime timestamps and `durationMs` are not clinical timing values.
 
-ICE 2.58.1 also includes current ICE clinical-content updates, including DTP/Tdap, pneumococcal, meningococcal B, zoster, and
-schedule-authority behavior. Forecast results may therefore change independently of this API migration.
+Clinical-content changes may affect forecast results independently of FHIR interface changes. See the
+[release changelog](../release-changelog.md) for the changes in each release.
 
 ## Contextual Conditions
 
@@ -45,7 +64,7 @@ Each contextual-condition `Observation` SHALL include:
 
 - `resourceType: "Observation"`
 - `status: "final"`
-- `code.coding` containing one supported code from `http://ivci.org/CodeSystem/contextual-condition`
+- `code.coding` containing one supported code from `https://ivci.org/contextual-conditions/usa/cdc-cdsi`
 - `valueDateTime`, the date on which the condition was documented, verified, or established
 
 ICE translates a supported IVCI code to the disease and disease-immunity-source concepts shown below. Clients do not provide the
@@ -79,7 +98,7 @@ The following `observation` parameter records provider-verified varicella histor
     "code": {
       "coding": [
         {
-          "system": "http://ivci.org/CodeSystem/contextual-condition",
+          "system": "https://ivci.org/contextual-conditions/usa/cdc-cdsi",
           "code": "024",
           "display": "Healthcare provider verified history of or diagnosis of Varicella"
         }
@@ -189,13 +208,12 @@ Implementation Implications:
     - `ImmunizationEvaluation`
     - `ImmunizationRecommendation.recommendation`
 - Shape:
-    - Parent extension with nested slices (2..3 total):
-        - `selectedSeries` (`CodeableConcept`, required)
+    - Parent extension with one nested slice:
         - `seriesSelectionType` (`CodeableConcept`, required)
-        - `selectedSeason` (`CodeableConcept`, optional)
+    - Series and season use native `CodeableConcept` fields.
 - Implementation guarantee:
     - Extension is emitted only when series selection context is present.
-    - A `selectedSeason`-only extension is not emitted.
+    - Native optional season may be populated independently of the extension.
 
 ### 2) Vaccine Group Rules Artifact
 
@@ -215,9 +233,17 @@ Implementation Implications:
 
 ## Runtime Mapping Rules
 
-- `targetDisease` can include multiple codings (for component/multi-disease contexts) under a single `CodeableConcept`.
+- `targetDisease` is an array of one or more `CodeableConcept` values, one per disease. MMR and DTP each have three entries.
+  Evaluation diseases come from the evaluated component CVX mapping in `supportedVaccines.yml`; MR and DT each have two entries.
+  A component without a mapping uses its vaccine group's diseases, and ICE logs a warning.
+  Recommendations use the vaccine-group disease mapping. Codings within a concept describe the same disease.
   See [Target Diseases](../reference/target-diseases.md) for the supported ICE disease keys and SNOMED CT codings.
-- `seriesDoses.text = "0"` is suppressed and not emitted in FHIR output.
+- Evaluation and recommendation `series` are `CodeableConcept` values containing selected series coding and text.
+- Both also have optional `season` (`CodeableConcept`, `0..1`), populated from selected-season observations.
+- Evaluation and recommendation `seriesDoses` (`CodeableConcept`, `0..1`) is the number of doses in the selected series,
+  from its series definition and any configured series override.
+- Recommendation `seriesDosesRemaining` (`CodeableConcept`, `0..1`) carries only the remaining count, including zero when
+  supplied. Evaluations have no remaining count.
 - Narrative and description fields are human-readable convenience text only.
     - Consumers should rely on structured fields and extensions, not text parsing.
 

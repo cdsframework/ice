@@ -12,7 +12,7 @@
   "type": false,
   "instance": false,
   "affectsState": false,
-  "description": "Produces immunization forecast output from patient demographics, immunizations, observations, and a selected forecasting knowledge base using the proposed R6 HLN ImmDS operation. Output includes ImmunizationRecommendation and ImmunizationEvaluation resources with ICE-specific extensions for series selection type and season.",
+  "description": "Produces immunization forecast output from patient demographics, immunizations, observations, and a selected forecasting knowledge base using the proposed R6 HLN ImmDS operation. Output includes ImmunizationRecommendation and ImmunizationEvaluation resources with native coded series and season fields and an ICE-specific extension for series selection type.",
   "parameter": [
     {
       "name": "patient",
@@ -107,7 +107,7 @@
       "use": "out",
       "min": 0,
       "max": "*",
-      "documentation": "ImmunizationEvaluation resources produced by the forecast. extension may include url https://terminology.cdsframework.org/ice/StructureDefinition/immunization-selection-context with nested extensions selectedSeries, seriesSelectionType, and selectedSeason, or url https://terminology.cdsframework.org/ice/StructureDefinition/vaccine-group-rules-artifact containing a RelatedArtifact. targetDisease is represented as a single CodeableConcept and may contain multiple codings for component/multi-disease vaccines.",
+      "documentation": "ImmunizationEvaluation resources produced by the forecast. series and optional season (0..1) are CodeableConcept values containing the selected series and season coding and text, emitted when series information is output for evaluations; optional seriesDoses (0..1) contains the number of doses in the selected series. extension may include url https://terminology.cdsframework.org/ice/StructureDefinition/immunization-selection-context with nested extension seriesSelectionType, or url https://terminology.cdsframework.org/ice/StructureDefinition/vaccine-group-rules-artifact containing a RelatedArtifact. targetDisease is a required array of one or more CodeableConcept values, with a separate concept for each disease. authority is an optional array (0..*) of Organization references populated from associated authority observations when outputScheduleAuthorities is enabled. Evaluation diseases are derived from the evaluated component CVX diseaseImmunity mapping in supportedVaccines.yml. MMR and DTP each contain three entries, while MR and DT each contain two; codings within a concept represent the same disease.",
       "type": "ImmunizationEvaluation"
     },
     {
@@ -115,7 +115,7 @@
       "use": "out",
       "min": 0,
       "max": "*",
-      "documentation": "ImmunizationRecommendation resources produced by the forecast. recommendation.extension may include url https://terminology.cdsframework.org/ice/StructureDefinition/immunization-selection-context with nested extensions selectedSeries, seriesSelectionType, and selectedSeason, or url https://terminology.cdsframework.org/ice/StructureDefinition/vaccine-group-rules-artifact containing a RelatedArtifact.",
+      "documentation": "ImmunizationRecommendation resources produced by the forecast. recommendation.series and optional recommendation.season (0..1) are CodeableConcept values. Optional recommendation.seriesDoses (0..1) is a CodeableConcept containing the number of doses in the selected series. Optional recommendation.seriesDosesRemaining (0..1) is a CodeableConcept containing only the remaining count, including zero when supplied. recommendation.extension may include url https://terminology.cdsframework.org/ice/StructureDefinition/immunization-selection-context with nested extension seriesSelectionType, or url https://terminology.cdsframework.org/ice/StructureDefinition/vaccine-group-rules-artifact containing a RelatedArtifact. When outputScheduleAuthorities is enabled, recommendation.authority is an optional array (0..*) of Organization references identifying the schedule authorities. Multiple distinct authorities share one recommendation backbone entry.",
       "type": "ImmunizationRecommendation"
     },
     {

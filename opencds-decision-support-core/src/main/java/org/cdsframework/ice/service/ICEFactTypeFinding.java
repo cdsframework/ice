@@ -40,6 +40,7 @@ public class ICEFactTypeFinding
     private TargetDose associatedTargetDose;
     private TargetSeries associatedTargetSeries;
     private SeriesRules associatedSeriesRules;
+    private String diagnosticMessage;
 
     public ICEFactTypeFinding(final String pIceResultFinding)
     {
@@ -69,6 +70,13 @@ public class ICEFactTypeFinding
         this.associatedSeriesRules = pTargetSeries != null ? pTargetSeries.getSeriesRules() : null;
     }
 
+    public ICEFactTypeFinding(final String pIceResultFinding, final TargetDose pTargetDose, final TargetSeries pTargetSeries,
+            final String pDiagnosticMessage)
+    {
+        this(pIceResultFinding, pTargetDose, pTargetSeries);
+        this.diagnosticMessage = pDiagnosticMessage;
+    }
+
     public ICEFactTypeFinding(final String pIceResultFinding, final SeriesRules pSeriesRules)
     {
         this.iceResultFinding = pIceResultFinding;
@@ -80,4 +88,3 @@ public class ICEFactTypeFinding
         return associatedTargetDose;
     }
 }
-

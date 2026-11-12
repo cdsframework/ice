@@ -15,9 +15,7 @@ public class SelectionContextExtensionBuilder
 {
     private static final String SELECTION_CONTEXT_EXTENSION_URL =
             "https://terminology.cdsframework.org/ice/StructureDefinition/immunization-selection-context";
-    private static final String SELECTION_CONTEXT_CHILD_URL_SELECTED_SERIES = "selectedSeries";
     private static final String SELECTION_CONTEXT_CHILD_URL_SERIES_SELECTION_TYPE = "seriesSelectionType";
-    private static final String SELECTION_CONTEXT_CHILD_URL_SELECTED_SEASON = "selectedSeason";
     private static final String SERIES_SELECTION_TYPE_CODE_SYSTEM = "2.16.840.1.113883.3.795.12.100.501";
     private static final String SERIES_CODE_SYSTEM = "2.16.840.1.113883.3.795.12.100.10";
 
@@ -28,24 +26,13 @@ public class SelectionContextExtensionBuilder
         this.supportingDataService = supportingDataService;
     }
 
+    // The season is the resources' own season element; seasonInfo is no longer part of this extension.
     Optional<Extension> build(final String kmId, final SeriesSelectionInfo seriesSelectionInfo, final SeasonInfo seasonInfo)
     {
         if (seriesSelectionInfo == null)
             return Optional.empty();
 
-        final List<Extension> nestedExtensions = new ArrayList<>(3);
-
-        nestedExtensions.add(Extension.builder()
-                .url(SELECTION_CONTEXT_CHILD_URL_SELECTED_SERIES)
-                .valueCodeableConcept(CodeableConcept.builder()
-                        .coding(Coding.builder()
-                                .system(supportingDataService.toFhirCodeSystemUrl(kmId, SERIES_CODE_SYSTEM))
-                                .code(seriesSelectionInfo.seriesCode())
-                                .display(seriesSelectionInfo.seriesDisplay())
-                                .build())
-                        .text(seriesSelectionInfo.seriesDisplay())
-                        .build())
-                .build());
+        final List<Extension> nestedExtensions = new ArrayList<>(1);
 
         final String selectionTypeDisplay = Optional.ofNullable(
                         supportingDataService.getSeriesSelectionTypeDisplayName(kmId, seriesSelectionInfo.selectionTypeCode()))
@@ -64,21 +51,34 @@ public class SelectionContextExtensionBuilder
                         .build())
                 .build());
 
-        if (seasonInfo != null)
-        {
-            nestedExtensions.add(Extension.builder()
-                    .url(SELECTION_CONTEXT_CHILD_URL_SELECTED_SEASON)
-                    .valueCodeableConcept(CodeableConcept.builder()
-                            .coding(Coding.builder()
-                                    .system(supportingDataService.toFhirCodeSystemUrl(kmId, seasonInfo.seasonCodeSystem()))
-                                    .code(seasonInfo.seasonCode())
-                                    .display(seasonInfo.seasonDisplay())
-                                    .build())
-                            .text(seasonInfo.seasonDisplay())
-                            .build())
-                    .build());
-        }
-
         return Optional.of(Extension.builder().url(SELECTION_CONTEXT_EXTENSION_URL).extension(nestedExtensions).build());
+    }
+
+    CodeableConcept buildSelectedSeries(final String kmId, final SeriesSelectionInfo seriesSelectionInfo)
+    {
+        if (seriesSelectionInfo == null)
+            return null;
+        return CodeableConcept.builder()
+                .coding(Coding.builder()
+                        .system(supportingDataService.toFhirCodeSystemUrl(kmId, SERIES_CODE_SYSTEM))
+                        .code(seriesSelectionInfo.seriesCode())
+                        .display(seriesSelectionInfo.seriesDisplay())
+                        .build())
+                .text(seriesSelectionInfo.seriesDisplay())
+                .build();
+    }
+
+    CodeableConcept buildSelectedSeason(final String kmId, final SeasonInfo seasonInfo)
+    {
+        if (seasonInfo == null)
+            return null;
+        return CodeableConcept.builder()
+                .coding(Coding.builder()
+                        .system(supportingDataService.toFhirCodeSystemUrl(kmId, seasonInfo.seasonCodeSystem()))
+                        .code(seasonInfo.seasonCode())
+                        .display(seasonInfo.seasonDisplay())
+                        .build())
+                .text(seasonInfo.seasonDisplay())
+                .build();
     }
 }

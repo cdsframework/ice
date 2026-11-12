@@ -5,10 +5,10 @@ import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
@@ -53,24 +53,11 @@ public record KnowledgePackageService(AsyncTaskExecutor pool,
 
     public void preloadKnowledgePackages(final List<KnowledgeModule> knowledgeModules)
     {
-        final AtomicInteger counter = new AtomicInteger();
-        knowledgeModules.parallelStream()
+        CompletableFuture.allOf(knowledgeModules.stream()
                 .filter(KnowledgeModule::preload)
-                .peek(km -> log.debug("Preloading KnowledgePackage: {}", km.kmId()))
-                .map(this::submitLoadTask)
-                .toList()
-                .forEach(task ->
-                {
-                    try
-                    {
-                        task.get();
-                        log.debug("Task : {}", counter.incrementAndGet());
-                    }
-                    catch (final Exception e)
-                    {
-                        log.error("Task encountered exception: {}", e.getMessage(), e);
-                    }
-                });
+                .peek((final KnowledgeModule km) -> log.debug("Preloading KnowledgePackage: {}", km.kmId()))
+                .map((final KnowledgeModule km) -> pool.submitCompletable(loader(km)))
+                .toArray(CompletableFuture<?>[]::new)).join();
         log.debug("Tasks finished.");
     }
 

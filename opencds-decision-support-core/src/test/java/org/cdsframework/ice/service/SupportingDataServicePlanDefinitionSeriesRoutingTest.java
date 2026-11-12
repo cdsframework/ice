@@ -104,8 +104,8 @@ class SupportingDataServicePlanDefinitionSeriesRoutingTest
         final IceProperties properties = new IceProperties();
         properties.setIceBaseKnowledgeBase(KNOWLEDGE_BASE);
         properties.setKnowledgeBases(Map.of(KNOWLEDGE_BASE,
-                new IceProperties.KnowledgeBaseProperties(true, false, true, false, true, false, false, false, List.of(), List.of(),
-                        false, IceProperties.SupplementalTextMode.LEGACY, new ByteArrayResource(new byte[0]))));
+                new IceProperties.KnowledgeBaseProperties(true, false, true, false, true, true, false, false, false, List.of(),
+                        List.of(), false, IceProperties.SupplementalTextMode.LEGACY, new ByteArrayResource(new byte[0]))));
         return properties;
     }
 

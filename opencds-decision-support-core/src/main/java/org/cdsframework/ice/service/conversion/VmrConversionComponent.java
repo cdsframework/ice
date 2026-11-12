@@ -10,7 +10,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -117,7 +116,10 @@ public class VmrConversionComponent
     private final SelectionContextExtensionBuilder selectionContextExtensionBuilder;
     private final VaccineGroupRulesArtifactExtensionBuilder vaccineGroupRulesArtifactExtensionBuilder;
     private final ScheduleAuthorityExtensionBuilder scheduleAuthorityExtensionBuilder;
-    private final Map<String, Boolean> outputSeriesContextByKm;
+    private final Map<String, Boolean> outputEarliestAndOverdueDatesByKm;
+    private final Map<String, Boolean> outputEvaluationSeriesContextByKm;
+    private final Map<String, Boolean> outputRecommendationSeriesContextByKm;
+    private final Map<String, Boolean> outputNumberOfDosesRemainingByKm;
     private final Map<String, Boolean> outputVaccineGroupRulesArtifactByKm;
     private final Map<String, Boolean> outputScheduleAuthoritiesByKm;
 
@@ -133,24 +135,39 @@ public class VmrConversionComponent
         this.selectionContextExtensionBuilder = selectionContextExtensionBuilder;
         this.vaccineGroupRulesArtifactExtensionBuilder = vaccineGroupRulesArtifactExtensionBuilder;
         this.scheduleAuthorityExtensionBuilder = scheduleAuthorityExtensionBuilder;
-        this.outputSeriesContextByKm = supportingDataService.getKnowledgeBasePropertiesByKmId()
+        outputEarliestAndOverdueDatesByKm = supportingDataService.getKnowledgeBasePropertiesByKmId()
                 .entrySet()
                 .stream()
-                .collect(Collectors.toMap(Map.Entry::getKey, entry -> entry.getValue() != null && (Boolean.TRUE.equals(
-                        iceProperties.getOutputSeriesInformation().orElseGet(entry.getValue()::outputSeriesInformation))
-                        || Boolean.TRUE.equals(iceProperties.getOutputNumberOfDosesRemaining()
-                        .orElseGet(entry.getValue()::outputNumberOfDosesRemaining)))));
-        this.outputVaccineGroupRulesArtifactByKm = supportingDataService.getKnowledgeBasePropertiesByKmId()
+                .collect(Collectors.toMap(Map.Entry::getKey,
+                        entry -> entry.getValue() != null && iceProperties.resolveOutputEarliestAndOverdueDates(entry.getValue())));
+        outputEvaluationSeriesContextByKm = supportingDataService.getKnowledgeBasePropertiesByKmId()
                 .entrySet()
                 .stream()
-                .collect(Collectors.toMap(Map.Entry::getKey, entry -> entry.getValue() != null && Boolean.TRUE.equals(
-                        iceProperties.getOutputVaccineGroupRulesArtifact()
-                                .orElseGet(entry.getValue()::outputVaccineGroupRulesArtifact))));
-        this.outputScheduleAuthoritiesByKm = supportingDataService.getKnowledgeBasePropertiesByKmId()
+                .collect(Collectors.toMap(Map.Entry::getKey,
+                        entry -> entry.getValue() != null && iceProperties.resolveOutputSeriesInformationForEvaluations(
+                                entry.getValue())));
+        outputRecommendationSeriesContextByKm = supportingDataService.getKnowledgeBasePropertiesByKmId()
                 .entrySet()
                 .stream()
-                .collect(Collectors.toMap(Map.Entry::getKey, entry -> entry.getValue() != null && Boolean.TRUE.equals(
-                        iceProperties.getOutputScheduleAuthorities().orElseGet(entry.getValue()::outputScheduleAuthorities))));
+                .collect(Collectors.toMap(Map.Entry::getKey,
+                        entry -> entry.getValue() != null && iceProperties.resolveOutputSeriesInformationForRecommendations(
+                                entry.getValue())));
+        outputNumberOfDosesRemainingByKm = supportingDataService.getKnowledgeBasePropertiesByKmId()
+                .entrySet()
+                .stream()
+                .collect(Collectors.toMap(Map.Entry::getKey,
+                        entry -> entry.getValue() != null && iceProperties.resolveOutputNumberOfDosesRemaining(entry.getValue())));
+        outputVaccineGroupRulesArtifactByKm = supportingDataService.getKnowledgeBasePropertiesByKmId()
+                .entrySet()
+                .stream()
+                .collect(Collectors.toMap(Map.Entry::getKey,
+                        entry -> entry.getValue() != null && iceProperties.resolveOutputVaccineGroupRulesArtifact(
+                                entry.getValue())));
+        outputScheduleAuthoritiesByKm = supportingDataService.getKnowledgeBasePropertiesByKmId()
+                .entrySet()
+                .stream()
+                .collect(Collectors.toMap(Map.Entry::getKey,
+                        entry -> entry.getValue() != null && iceProperties.resolveOutputScheduleAuthorities(entry.getValue())));
     }
 
     private CodeableConcept toFhirCodeableConcept(final String kmId, final CD cd)
@@ -266,11 +283,11 @@ public class VmrConversionComponent
                         .extension(eval.extension())
                         .description(eval.description())
                         .series(eval.series())
+                        .season(eval.season())
                         .doseNumber(eval.doseNumber())
                         .seriesDoses(eval.seriesDoses())
                         .build())
-                .sorted(Comparator.comparing(
-                        eval -> Optional.ofNullable(eval.targetDisease()).map(CodeableConcept::text).orElse(""),
+                .sorted(Comparator.comparing(eval -> targetDiseaseText(eval.targetDisease()),
                         Comparator.nullsLast(String::compareTo)))
                 .toList();
     }
@@ -577,6 +594,10 @@ public class VmrConversionComponent
         final List<RelatedClinicalStatement> relatedClinicalStatements =
                 getRelatedClinicalStatements(substanceAdministrationProposal);
 
+        recommendationBuilder.authority(shouldOutputScheduleAuthorities(kmId)
+                                        ? scheduleAuthorityExtensionBuilder.build(relatedClinicalStatements)
+                                        : List.of());
+
         recommendationBuilder.vaccineCode(Optional.ofNullable(substanceAdministrationProposal.getSubstance())
                 .map(AdministrableSubstance::getSubstanceCode)
                 .map(cd -> toFhirCodeableConcept(kmId, cd))
@@ -587,10 +608,10 @@ public class VmrConversionComponent
 
         final Optional<ObservationResult> observationResult = findPrimaryObservationResultFromStatements(relatedClinicalStatements);
 
-        final CodeableConcept targetDisease = observationResult.map(ObservationResult::getObservationFocus)
-                .map(focus -> buildTargetDiseaseCodeableConcept(kmId, focus))
-                .orElse(null);
-        recommendationBuilder.targetDisease(Optional.ofNullable(targetDisease).stream().toList());
+        final List<CodeableConcept> targetDiseases = observationResult.map(ObservationResult::getObservationFocus)
+                .map(focus -> buildTargetDiseaseCodeableConcepts(kmId, focus))
+                .orElse(List.of());
+        recommendationBuilder.targetDisease(targetDiseases);
 
         final CodeableConcept forecastStatus = observationResult.map(ObservationResult::getObservationValue)
                 .map(ObservationResult.ObservationValue::getConcept)
@@ -607,15 +628,18 @@ public class VmrConversionComponent
                 .toList();
         recommendationBuilder.forecastReason(forecastReasons);
 
-        final ProtocolContext protocolContext =
-                extractProtocolContext(kmId, relatedClinicalStatements, shouldOutputSeriesContext(kmId), true);
+        final ProtocolContext protocolContext = extractProtocolContext(kmId, relatedClinicalStatements,
+                Boolean.TRUE.equals(outputRecommendationSeriesContextByKm.get(kmId)),
+                Boolean.TRUE.equals(outputNumberOfDosesRemainingByKm.get(kmId)), true);
         recommendationBuilder.series(protocolContext.series());
         recommendationBuilder.seriesDoses(protocolContext.seriesDoses());
         recommendationBuilder.description(Optional.ofNullable(
                         buildProtocolDetailsDescription(protocolContext.seriesSelectionInfo(), protocolContext.seasonInfo(),
-                                protocolContext.series(), protocolContext.seriesDoses()))
+                                protocolContext.seriesDisplay(), protocolContext.seriesDosesRemaining()))
                 .orElseGet(() -> buildRecommendationDescriptionFallback(forecastStatus, forecastReasons)));
         recommendationBuilder.extension(protocolContext.extensions());
+        recommendationBuilder.season(protocolContext.season());
+        recommendationBuilder.seriesDosesRemaining(protocolContext.seriesDosesRemaining());
 
         final List<ImmunizationRecommendationDateCriterion> dateCriteria = new ArrayList<>();
         Optional.ofNullable(substanceAdministrationProposal.getProposedAdministrationTimeInterval())
@@ -624,7 +648,7 @@ public class VmrConversionComponent
                 {
                     if (proposedTimeInterval.low() != null)
                         dateCriteria.add(createDateCriterion(DATE_CRITERION_DUE, proposedTimeInterval.low()));
-                    if (proposedTimeInterval.high() != null)
+                    if (Boolean.TRUE.equals(outputEarliestAndOverdueDatesByKm.get(kmId)) && proposedTimeInterval.high() != null)
                         dateCriteria.add(createDateCriterion(DATE_CRITERION_OVERDUE, proposedTimeInterval.high()));
                 });
 
@@ -632,7 +656,7 @@ public class VmrConversionComponent
                 .map(ConversionDateSupport::toTimeInterval)
                 .ifPresent(validTimeInterval ->
                 {
-                    if (validTimeInterval.low() != null)
+                    if (Boolean.TRUE.equals(outputEarliestAndOverdueDatesByKm.get(kmId)) && validTimeInterval.low() != null)
                         dateCriteria.add(createDateCriterion(DATE_CRITERION_EARLIEST, validTimeInterval.low()));
                     if (validTimeInterval.high() != null)
                         dateCriteria.add(createDateCriterion(DATE_CRITERION_LATEST, validTimeInterval.high()));
@@ -703,9 +727,30 @@ public class VmrConversionComponent
 
         final Optional<ObservationResult> observationResult = findPrimaryObservationResultFromStatements(relatedClinicalStatements);
 
-        final CodeableConcept targetDisease = observationResult.map(ObservationResult::getObservationFocus)
-                .map(focus -> buildTargetDiseaseCodeableConcept(kmId, focus))
+        final CodeableConcept evaluatedVaccine = Optional.ofNullable(substanceAdministrationEvent.getSubstance())
+                .map(AdministrableSubstance::getSubstanceCode)
+                .map(cd -> toFhirCodeableConcept(kmId, cd))
                 .orElse(null);
+        final List<CodeableConcept> componentDiseases = Optional.ofNullable(evaluatedVaccine)
+                .filter(this::isCvxCodeableConcept)
+                .stream()
+                .flatMap(concept -> concept.coding().stream())
+                .filter(coding -> "http://hl7.org/fhir/sid/cvx".equals(coding.system()))
+                .flatMap(coding -> supportingDataService.getDiseasesForVaccine(kmId, coding.code()).stream())
+                .distinct()
+                .toList();
+        // A component without a disease mapping is a supporting-data gap; the vaccine group's diseases keep the rest of the
+        // forecast instead of failing the whole response.
+        final List<CodeableConcept> targetDiseases = !componentDiseases.isEmpty()
+                                                     ? componentDiseases
+                                                     : observationResult.map(ObservationResult::getObservationFocus)
+                                                             .map(focus -> buildTargetDiseaseCodeableConcepts(kmId, focus))
+                                                             .orElse(List.of());
+        if (componentDiseases.isEmpty())
+            log.warn("No diseases mapped for evaluated vaccine {} in {}; using its vaccine group's diseases.",
+                    Optional.ofNullable(evaluatedVaccine).map(CodeableConcept::coding).orElse(List.of()), kmId);
+        if (targetDiseases.isEmpty())
+            throw new IllegalArgumentException("No target diseases mapped for evaluated vaccine or its vaccine group");
 
         final CodeableConcept doseStatus = observationResult.map(ObservationResult::getObservationValue)
                 .map(ObservationResult.ObservationValue::getConcept)
@@ -720,11 +765,14 @@ public class VmrConversionComponent
                 .map(this::withTextFromCodingDisplay)
                 .toList();
 
-        final ProtocolContext protocolContext =
-                extractProtocolContext(kmId, relatedClinicalStatements, shouldOutputSeriesContext(kmId), false);
+        final ProtocolContext protocolContext = extractProtocolContext(kmId, relatedClinicalStatements,
+                Boolean.TRUE.equals(outputEvaluationSeriesContextByKm.get(kmId)), false, false);
 
         return Stream.of(ImmunizationEvaluation.builder()
                 .id(extension)
+                .authority(shouldOutputScheduleAuthorities(kmId)
+                           ? scheduleAuthorityExtensionBuilder.build(relatedClinicalStatements)
+                           : List.of())
                 .status(STATUS_COMPLETED)
                 .date(Optional.ofNullable(substanceAdministrationEvent)
                         .map(SubstanceAdministrationEvent::getAdministrationTimeInterval)
@@ -732,7 +780,7 @@ public class VmrConversionComponent
                         .map(TimeInterval::low)
                         .map(this::toFhirDate)
                         .orElse(null))
-                .targetDisease(targetDisease)
+                .targetDisease(targetDiseases)
                 .immunizationEvent(!StringUtils.hasText(extension)
                                    ? null
                                    : Reference.builder()
@@ -743,9 +791,10 @@ public class VmrConversionComponent
                 .extension(protocolContext.extensions())
                 .description(Optional.ofNullable(
                                 buildProtocolDetailsDescription(protocolContext.seriesSelectionInfo(), protocolContext.seasonInfo(),
-                                        protocolContext.series(), protocolContext.seriesDoses()))
+                                        protocolContext.seriesDisplay(), null))
                         .orElseGet(() -> buildEvaluationDescriptionFallback(doseStatus, doseStatusReasons)))
                 .series(protocolContext.series())
+                .season(protocolContext.season())
                 .doseNumber(doseNumber)
                 .seriesDoses(protocolContext.seriesDoses())
                 .build());
@@ -873,6 +922,16 @@ public class VmrConversionComponent
         return CodeableConcept.builder().coding(concept.coding()).text(display).build();
     }
 
+    /** The number of doses in the selected series. */
+    private CodeableConcept seriesDoses(final String kmId, final SeriesSelectionInfo seriesSelectionInfo)
+    {
+        return Optional.ofNullable(seriesSelectionInfo)
+                .map(SeriesSelectionInfo::seriesCode)
+                .map(seriesCode -> supportingDataService.getNumberOfDosesInSeries(kmId, seriesCode))
+                .map(this::toNumericCodeableConcept)
+                .orElse(null);
+    }
+
     private CodeableConcept toNumericCodeableConcept(final Integer value)
     {
         if (value == null)
@@ -893,13 +952,7 @@ public class VmrConversionComponent
                         .isPresent())
                 .map(this::extractObservationValueAsCodeableConcept)
                 .flatMap(Optional::stream)
-                .filter(seriesDoses -> !isSuppressedSeriesDoses(seriesDoses))
                 .findFirst();
-    }
-
-    private boolean isSuppressedSeriesDoses(final CodeableConcept seriesDoses)
-    {
-        return extractCodeableConceptValueText(seriesDoses).map("0"::equals).orElse(false);
     }
 
     private Optional<CodeableConcept> extractObservationValueAsCodeableConcept(final ObservationResult observationResult)
@@ -956,19 +1009,17 @@ public class VmrConversionComponent
                 .findFirst();
     }
 
+    // includeScheduleAuthorities is unused since schedule authorities became the resources' authority references.
     private ProtocolContext extractProtocolContext(final String kmId,
             final List<RelatedClinicalStatement> relatedClinicalStatements, final boolean outputSeriesContext,
-            final boolean includeScheduleAuthorities)
+            final boolean outputNumberOfDosesRemaining, final boolean includeScheduleAuthorities)
     {
         final List<Extension> extensions = new ArrayList<>();
         if (shouldOutputVaccineGroupRulesArtifact(kmId))
             vaccineGroupRulesArtifactExtensionBuilder.build(relatedClinicalStatements).ifPresent(extensions::add);
 
-        if (includeScheduleAuthorities && shouldOutputScheduleAuthorities(kmId))
-            extensions.addAll(scheduleAuthorityExtensionBuilder.build(relatedClinicalStatements));
-
         if (!outputSeriesContext)
-            return new ProtocolContext(null, null, null, null, extensions);
+            return ProtocolContext.withoutSeries(extensions);
 
         final SeriesSelectionInfo seriesSelectionInfo = extractSeriesSelectionInfo(kmId, relatedClinicalStatements).orElse(null);
         final SeasonInfo seasonInfo = extractSeasonInfo(relatedClinicalStatements).orElse(null);
@@ -976,9 +1027,22 @@ public class VmrConversionComponent
                 .map(SeriesSelectionInfo::seriesDisplay)
                 .filter(StringUtils::hasText)
                 .orElse(Optional.ofNullable(seriesSelectionInfo).map(SeriesSelectionInfo::seriesCode).orElse(null));
-        final CodeableConcept seriesDoses = extractSeriesDosesFromRelatedClinicalStatements(relatedClinicalStatements).orElse(null);
+        final CodeableConcept seriesDoses =
+                outputNumberOfDosesRemaining ? extractSeriesDosesFromRelatedClinicalStatements(relatedClinicalStatements).orElse(
+                        null) : null;
         selectionContextExtensionBuilder.build(kmId, seriesSelectionInfo, seasonInfo).ifPresent(extensions::add);
-        return new ProtocolContext(seriesSelectionInfo, seasonInfo, series, seriesDoses, extensions);
+        return toProtocolContext(kmId, seriesSelectionInfo, seasonInfo, series, seriesDoses, extensions);
+    }
+
+    /** The FHIR series values; the engine's remaining count is seriesDosesRemaining, and seriesDoses is the series size. */
+    private ProtocolContext toProtocolContext(final String kmId, final SeriesSelectionInfo seriesSelectionInfo,
+            final SeasonInfo seasonInfo, final String seriesDisplay, final CodeableConcept seriesDosesRemaining,
+            final List<Extension> extensions)
+    {
+        return new ProtocolContext(seriesSelectionInfo, seasonInfo, seriesDisplay,
+                selectionContextExtensionBuilder.buildSelectedSeries(kmId, seriesSelectionInfo),
+                selectionContextExtensionBuilder.buildSelectedSeason(kmId, seasonInfo), seriesDoses(kmId, seriesSelectionInfo),
+                seriesDosesRemaining, extensions);
     }
 
     private List<RelatedClinicalStatement> getRelatedClinicalStatements(
@@ -997,45 +1061,18 @@ public class VmrConversionComponent
                 .orElse(List.of());
     }
 
-    private CodeableConcept buildTargetDiseaseCodeableConcept(final String kmId, final CD observationFocus)
+    private List<CodeableConcept> buildTargetDiseaseCodeableConcepts(final String kmId, final CD observationFocus)
     {
         if (observationFocus == null)
-            return null;
+            return List.of();
 
-        final CodeableConcept focusConcept = withTextFromCodingDisplay(toFhirCodeableConcept(kmId, observationFocus));
         final List<CodeableConcept> mappedDiseases = Optional.ofNullable(observationFocus.getCode())
                 .map(code -> supportingDataService.getDiseasesForVaccineGroup(kmId, code))
                 .orElse(List.of());
+        if (!mappedDiseases.isEmpty())
+            return mappedDiseases;
 
-        final Stream<CodeableConcept> conceptSource =
-                mappedDiseases.isEmpty() ? Optional.ofNullable(focusConcept).stream() : mappedDiseases.stream();
-
-        final List<Coding> codings = conceptSource.map(CodeableConcept::coding)
-                .filter(Objects::nonNull)
-                .flatMap(Collection::stream)
-                .filter(Objects::nonNull)
-                .collect(Collectors.collectingAndThen(Collectors.toMap(
-                        coding -> "%s|%s".formatted(Optional.ofNullable(coding.system()).orElse(""),
-                                Optional.ofNullable(coding.code()).orElse("")), coding -> coding, (left, _) -> left,
-                        LinkedHashMap::new), map -> map.values().stream().toList()));
-
-        final String displayText =
-                codings.stream().map(Coding::display).filter(StringUtils::hasText).distinct().collect(Collectors.joining(", "));
-        final String codeText =
-                codings.stream().map(Coding::code).filter(StringUtils::hasText).distinct().collect(Collectors.joining(", "));
-        final String text = StringUtils.hasText(displayText)
-                            ? displayText
-                            : StringUtils.hasText(codeText)
-                              ? codeText
-                              : Optional.ofNullable(focusConcept)
-                                      .map(CodeableConcept::text)
-                                      .orElse(Optional.ofNullable(observationFocus.getDisplayName())
-                                              .orElse(observationFocus.getCode()));
-
-        if (codings.isEmpty() && !StringUtils.hasText(text))
-            return null;
-
-        return CodeableConcept.builder().coding(codings).text(text).build();
+        return Optional.ofNullable(withTextFromCodingDisplay(toFhirCodeableConcept(kmId, observationFocus))).stream().toList();
     }
 
     private Optional<SeasonInfo> extractSeasonInfo(final List<RelatedClinicalStatement> relatedClinicalStatements)
@@ -1130,7 +1167,7 @@ public class VmrConversionComponent
     }
 
     private String buildProtocolDetailsDescription(final SeriesSelectionInfo seriesSelectionInfo, final SeasonInfo seasonInfo,
-            final String series, final CodeableConcept seriesDoses)
+            final String series, final CodeableConcept seriesDosesRemaining)
     {
         final List<String> segments = new ArrayList<>();
 
@@ -1143,19 +1180,17 @@ public class VmrConversionComponent
         if (StringUtils.hasText(seasonDisplay))
             segments.add("Season: %s".formatted(seasonDisplay));
 
-        final String recommendedDoses = extractCodeableConceptValueText(seriesDoses).orElse(null);
-        if (StringUtils.hasText(recommendedDoses))
-            segments.add("Recommended number of doses for immunity: %s".formatted(recommendedDoses));
+        final String dosesRemaining = extractCodeableConceptValueText(seriesDosesRemaining).orElse(null);
+        // A count or "Recurring" is labeled; the engine's longer explanations already say what they are.
+        if (StringUtils.hasText(dosesRemaining))
+            segments.add(dosesRemaining.matches("\\d+|Recurring")
+                         ? "Doses remaining in series: %s".formatted(dosesRemaining)
+                         : dosesRemaining);
 
         if (segments.isEmpty())
             return null;
 
         return "%s.".formatted(String.join(". ", segments));
-    }
-
-    private boolean shouldOutputSeriesContext(final String kmId)
-    {
-        return Boolean.TRUE.equals(outputSeriesContextByKm.get(kmId));
     }
 
     private boolean shouldOutputVaccineGroupRulesArtifact(final String kmId)
@@ -1211,13 +1246,19 @@ public class VmrConversionComponent
                 .build();
     }
 
+    private String targetDiseaseText(final List<CodeableConcept> targetDiseases)
+    {
+        final String text =
+                targetDiseases.stream().map(CodeableConcept::text).filter(StringUtils::hasText).collect(Collectors.joining(", "));
+        return StringUtils.hasText(text) ? text : "unknown disease";
+    }
+
     private String buildEvaluationNarrative(final ImmunizationEvaluation evaluation)
     {
         if (evaluation == null)
             return null;
 
-        return "Evaluation for %s with dose status %s.".formatted(
-                Optional.ofNullable(evaluation.targetDisease()).map(CodeableConcept::text).orElse("unknown disease"),
+        return "Evaluation for %s with dose status %s.".formatted(targetDiseaseText(evaluation.targetDisease()),
                 Optional.ofNullable(evaluation.doseStatus()).map(CodeableConcept::text).orElse("unknown"));
     }
 
@@ -1225,8 +1266,7 @@ public class VmrConversionComponent
     {
         if (recommendation == null)
             return null;
-        final String targetDisease =
-                recommendation.targetDisease().stream().findFirst().map(CodeableConcept::text).orElse("unknown disease");
+        final String targetDisease = targetDiseaseText(recommendation.targetDisease());
         final String status = Optional.ofNullable(recommendation.forecastStatus()).map(CodeableConcept::text).orElse("unknown");
         return "Recommendation for %s with forecast status %s.".formatted(targetDisease, status);
     }

@@ -14,7 +14,6 @@ public record ImmunizationRecommendation(String resourceType,
                                          Narrative text,
                                          Reference patient,
                                          LocalDate date,
-                                         Reference authority,
                                          @Singular("recommendation")
                                          List<ImmunizationRecommendationRecommendation> recommendation) implements FhirResource
 {

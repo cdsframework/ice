@@ -7,6 +7,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Consumer;
 
 import org.cdsframework.cds.CdsConcept;
 import org.cdsframework.cds.supportingdata.LocallyCodedCdsListItem;
@@ -15,6 +16,7 @@ import org.cdsframework.ice.supportingdata.BaseDataRecommendationReason;
 import org.cdsframework.ice.supportingdata.ICEConceptType;
 import org.cdsframework.ice.supportingdata.LocallyCodedVaccineGroupItem;
 import org.cdsframework.ice.supportingdata.SupplementalReasonSupport;
+import org.drools.core.rule.consequence.KnowledgeHelper;
 import org.drools.model.Drools;
 import org.jspecify.annotations.NonNull;
 import org.opencds.vmr.v1_0.internal.AdministrableSubstance;
@@ -386,7 +388,7 @@ public class PayloadHelper
     }
 
     private final Schedule backingSchedule;
-    private final Drools drools;
+    private final Consumer<Object> factInserter;
     private final Map<String, Object> namedObjects;
     private final boolean outputSupplementalText;
     private final boolean outputScheduleAuthorities;
@@ -396,6 +398,23 @@ public class PayloadHelper
             final boolean outputSupplementalText, final boolean outputScheduleAuthorities,
             final boolean outputVaccineGroupRulesArtifact)
     {
+        this(backingSchedule, drools == null ? null : drools::insert, namedObjects, outputSupplementalText,
+                outputScheduleAuthorities, outputVaccineGroupRulesArtifact);
+    }
+
+    // Classic MVEL supplies KnowledgeHelper; the executable model supplies Drools.
+    public PayloadHelper(final Schedule backingSchedule, final KnowledgeHelper drools, final Map<String, Object> namedObjects,
+            final boolean outputSupplementalText, final boolean outputScheduleAuthorities,
+            final boolean outputVaccineGroupRulesArtifact)
+    {
+        this(backingSchedule, drools == null ? null : drools::insert, namedObjects, outputSupplementalText,
+                outputScheduleAuthorities, outputVaccineGroupRulesArtifact);
+    }
+
+    private PayloadHelper(final Schedule backingSchedule, final Consumer<Object> factInserter,
+            final Map<String, Object> namedObjects, final boolean outputSupplementalText, final boolean outputScheduleAuthorities,
+            final boolean outputVaccineGroupRulesArtifact)
+    {
         if (backingSchedule == null || !backingSchedule.isScheduleInitialized())
         {
             final String lExStr = "Schedule has not been provided or has not been initialized; cannot continue";
@@ -403,7 +422,7 @@ public class PayloadHelper
             throw new IllegalArgumentException(lExStr);
         }
 
-        if (drools == null)
+        if (factInserter == null)
         {
             final String lExStr = "Drools has not been provided; cannot continue";
             log.error("PayloadHelper(): " + lExStr);
@@ -418,7 +437,7 @@ public class PayloadHelper
         }
 
         this.backingSchedule = backingSchedule;
-        this.drools = drools;
+        this.factInserter = factInserter;
         this.namedObjects = namedObjects;
         this.outputSupplementalText = outputSupplementalText;
         this.outputScheduleAuthorities = outputScheduleAuthorities;
@@ -754,7 +773,7 @@ public class PayloadHelper
     {
         final String _METHODNAME = "outputRootImmRecommendationSubstanceAdministrationProposal: ";
 
-        if (namedObjects == null || drools == null)
+        if (namedObjects == null || factInserter == null)
         {
             final String lErrStr =
                     "Error outputting SubstanceAdministrationProposal: one or more method parameters not initialized";
@@ -1439,7 +1458,7 @@ public class PayloadHelper
 
     private void droolsInsert(final String key, final Object object)
     {
-        this.drools.insert(object);
+        this.factInserter.accept(object);
         this.namedObjects.put(key, object);
     }
 }

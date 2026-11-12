@@ -28,6 +28,8 @@ cds-engine:
               type: boolean
             - code: selectAdjuvantProduct
               type: boolean
+            - code: validInMultipleVaccineGroups
+              type: boolean
             - code: minimumDateForUse
               type: string
             - code: maximumDateForUse
@@ -439,7 +441,7 @@ cds-engine:
                 - code: supported
                   valueBoolean: true
             - code: '106'
-              display: DT, PediatricDTaP, 5 pertussis antigens
+              display: DTaP, 5 pertussis antigens
               property:
                 - code: liveVirusVaccine
                   valueBoolean: false
@@ -862,6 +864,13 @@ cds-engine:
                     code: ZOSTER
                     system: 2.16.840.1.113883.3.795.12.1.1
                     display: Zoster
+                - code: diseaseImmunity
+                  valueCoding:
+                    code: VARICELLA
+                    system: 2.16.840.1.113883.3.795.12.1.1
+                    display: Varicella
+                - code: validInMultipleVaccineGroups
+                  valueBoolean: true
                 - code: validMinimumAgeForUse
                   valueString: 50y
                 - code: maximumDateForUse
@@ -1303,7 +1312,7 @@ cds-engine:
                 - code: supported
                   valueBoolean: true
             - code: '144'
-              display: Influenza, seasonal, intradermal, preservative
+              display: Influenza, seasonal, intradermal, preservative free
               property:
                 - code: liveVirusVaccine
                   valueBoolean: false
@@ -1408,7 +1417,7 @@ cds-engine:
                 - code: conceptMapping
                   valueCoding:
                     code: VACCINE_CVX_147
-                    display: Meningococcal MCV4, unspecified forumation
+                    display: Meningococcal MCV4, unspecified formulation
                 - code: supported
                   valueBoolean: true
             - code: '148'
@@ -1481,7 +1490,7 @@ cds-engine:
                 - code: supported
                   valueBoolean: true
             - code: '150'
-              display: Influenza, injectable, quadrivalent, preservative
+              display: Influenza, injectable, quadrivalent, preservative free
               property:
                 - code: liveVirusVaccine
                   valueBoolean: false
@@ -1500,7 +1509,7 @@ cds-engine:
                 - code: conceptMapping
                   valueCoding:
                     code: VACCINE_CVX_150
-                    display: Influenza, injectable, quadrivalent, preservative
+                    display: Influenza, injectable, quadrivalent, preservative free
                 - code: supported
                   valueBoolean: true
             - code: '151'
@@ -1579,7 +1588,7 @@ cds-engine:
                 - code: supported
                   valueBoolean: true
             - code: '155'
-              display: Influenza, recombinant, injectable, preservative
+              display: Influenza, recombinant, injectable, preservative free
               property:
                 - code: liveVirusVaccine
                   valueBoolean: false
@@ -1648,7 +1657,7 @@ cds-engine:
                 - code: supported
                   valueBoolean: true
             - code: '161'
-              display: Influenza, injectable, quadrivalent, preservative
+              display: Influenza, injectable, quadrivalent, preservative free, pediatric
               property:
                 - code: liveVirusVaccine
                   valueBoolean: false
@@ -1669,7 +1678,7 @@ cds-engine:
                 - code: conceptMapping
                   valueCoding:
                     code: VACCINE_CVX_161
-                    display: Influenza, injectable, quadrivalent, preservative
+                    display: Influenza, injectable, quadrivalent, preservative free, pediatric
                 - code: supported
                   valueBoolean: true
             - code: '162'
@@ -1763,7 +1772,7 @@ cds-engine:
                 - code: supported
                   valueBoolean: true
             - code: '166'
-              display: Influenza, intradermal, quadrivalent, preservative
+              display: Influenza, intradermal, quadrivalent, preservative free, injectable
               property:
                 - code: liveVirusVaccine
                   valueBoolean: false
@@ -1784,11 +1793,11 @@ cds-engine:
                 - code: conceptMapping
                   valueCoding:
                     code: VACCINE_CVX_166
-                    display: Influenza, intradermal, quadrivalent, preservative
+                    display: Influenza, intradermal, quadrivalent, preservative free, injectable
                 - code: supported
                   valueBoolean: true
             - code: '168'
-              display: Influenza, trivalent, adjuvanted, preservative
+              display: Influenza, trivalent, adjuvanted, preservative free
               property:
                 - code: liveVirusVaccine
                   valueBoolean: false
@@ -1887,7 +1896,7 @@ cds-engine:
                 - code: supported
                   valueBoolean: true
             - code: '171'
-              display: Influenza, injectable, MDCK, preservative free,
+              display: Influenza, injectable, MDCK, preservative free, quadrivalent
               property:
                 - code: liveVirusVaccine
                   valueBoolean: false
@@ -2069,7 +2078,7 @@ cds-engine:
                 - code: supported
                   valueBoolean: true
             - code: '185'
-              display: Influenza, recombinant, quadrivalent,injectable,
+              display: Influenza, recombinant, quadrivalent,injectable, preservative free
               property:
                 - code: liveVirusVaccine
                   valueBoolean: false
@@ -2088,7 +2097,7 @@ cds-engine:
                 - code: conceptMapping
                   valueCoding:
                     code: VACCINE_CVX_185
-                    display: Influenza, recombinant, quadrivalent,injectable, preservative
+                    display: Influenza, recombinant, quadrivalent,injectable, preservative free
                 - code: supported
                   valueBoolean: true
             - code: '186'
@@ -2189,6 +2198,29 @@ cds-engine:
                   valueCoding:
                     code: VACCINE_CVX_189
                     display: Hep B, adjuvanted
+                - code: supported
+                  valueBoolean: true
+            - code: '193'
+              display: Hep A-Hep B, adolescent/pediatric (non-US)
+              property:
+                - code: liveVirusVaccine
+                  valueBoolean: false
+                - code: vaccineComponent
+                  valueCoding:
+                    code: '08'
+                    system: 2.16.840.1.113883.12.292
+                    display: Hep B, adolescent or pediatric
+                - code: diseaseImmunity
+                  valueCoding:
+                    code: HEP_B
+                    system: 2.16.840.1.113883.3.795.12.1.1
+                    display: Hepatitis B
+                - code: validMaximumAgeForUse
+                  valueString: 18y-1d
+                - code: conceptMapping
+                  valueCoding:
+                    code: VACCINE_CVX_193
+                    display: Hep A-Hep B, adolescent/pediatric (non-US)
                 - code: supported
                   valueBoolean: true
             - code: '194'
@@ -2382,7 +2414,7 @@ cds-engine:
                 - code: supported
                   valueBoolean: true
             - code: '200'
-              display: Influenza, Southern Hemisphere, pediatric, preservative
+              display: Influenza, Southern Hemisphere, pediatric, preservative free
               property:
                 - code: liveVirusVaccine
                   valueBoolean: false
@@ -2399,11 +2431,11 @@ cds-engine:
                 - code: conceptMapping
                   valueCoding:
                     code: VACCINE_CVX_200
-                    display: Influenza, Southern Hemisphere, pediatric, preservative
+                    display: Influenza, Southern Hemisphere, pediatric, preservative free
                 - code: supported
                   valueBoolean: true
             - code: '201'
-              display: Influenza, Southern Hemisphere, quadrivalent, preservative
+              display: Influenza, Southern Hemisphere, quadrivalent, preservative free
               property:
                 - code: liveVirusVaccine
                   valueBoolean: false
@@ -2420,11 +2452,11 @@ cds-engine:
                 - code: conceptMapping
                   valueCoding:
                     code: VACCINE_CVX_201
-                    display: Influenza, Southern Hemisphere, quadrivalent, preservative
+                    display: Influenza, Southern Hemisphere, quadrivalent, preservative free
                 - code: supported
                   valueBoolean: true
             - code: '202'
-              display: Influenza, Southern Hemisphere, quadrivalent, with
+              display: Influenza, Southern Hemisphere, quadrivalent, with preservative
               property:
                 - code: liveVirusVaccine
                   valueBoolean: false
@@ -2441,11 +2473,11 @@ cds-engine:
                 - code: conceptMapping
                   valueCoding:
                     code: VACCINE_CVX_202
-                    display: Influenza, Southern Hemisphere, quadrivalent, with
+                    display: Influenza, Southern Hemisphere, quadrivalent, with preservative
                 - code: supported
                   valueBoolean: true
             - code: '203'
-              display: Meningococcal MenACWY-TT ((MenQuadfi))
+              display: Meningococcal MenACWY-TT (MenQuadfi)
               property:
                 - code: liveVirusVaccine
                   valueBoolean: false
@@ -2460,11 +2492,11 @@ cds-engine:
                     system: 2.16.840.1.113883.3.795.12.1.1
                     display: Meningococcal ACWY
                 - code: validMinimumAgeForUse
-                  valueString: 2y-4d
+                  valueString: 6w-4d
                 - code: conceptMapping
                   valueCoding:
                     code: VACCINE_CVX_203
-                    display: Meningococcal MenACWY-TT ((MenQuadfi))
+                    display: Meningococcal MenACWY-TT (MenQuadfi)
                 - code: supported
                   valueBoolean: true
             - code: '205'
@@ -2493,7 +2525,7 @@ cds-engine:
                 - code: supported
                   valueBoolean: true
             - code: '206'
-              display: Vaccinia, smallpox Mpox vaccine live, PF, SQ or
+              display: Vaccinia, smallpox Mpox vaccine live, PF, SQ or ID injection
               property:
                 - code: liveVirusVaccine
                   valueBoolean: false
@@ -2512,7 +2544,7 @@ cds-engine:
                 - code: conceptMapping
                   valueCoding:
                     code: VACCINE_CVX_206
-                    display: Vaccinia, smallpox Mpox vaccine live, PF, SQ or ID
+                    display: Vaccinia, smallpox Mpox vaccine live, PF, SQ or ID injection
                 - code: supported
                   valueBoolean: true
             - code: '207'
@@ -2937,7 +2969,7 @@ cds-engine:
                 - code: supported
                   valueBoolean: true
             - code: '229'
-              display: COVID-19, mRNA, 6yrs-11yrs / >= 12yrs, bivalent
+              display: COVID-19, mRNA, 6yrs-11yrs / >= 12yrs, bivalent booster, Moderna
               property:
                 - code: liveVirusVaccine
                   valueBoolean: false
@@ -2956,7 +2988,7 @@ cds-engine:
                 - code: conceptMapping
                   valueCoding:
                     code: VACCINE_CVX_229
-                    display: COVID-19, mRNA, 6yrs-11yrs / >= 12yrs, bivalent booster,
+                    display: COVID-19, mRNA, 6yrs-11yrs / >= 12yrs, bivalent booster, Moderna
                 - code: supported
                   valueBoolean: true
             - code: '230'
@@ -3004,7 +3036,7 @@ cds-engine:
                 - code: supported
                   valueBoolean: true
             - code: '24'
-              display: Anthrax, pre-exposure prophylaxis, post-exposure
+              display: Anthrax, pre-exposure prophylaxis, post-exposure prophylaxis
               property:
                 - code: liveVirusVaccine
                   valueBoolean: false
@@ -3147,7 +3179,7 @@ cds-engine:
                 - code: supported
                   valueBoolean: true
             - code: '303'
-              display: RSV, recombinant, protein subunit RSVpreF, adjuvant
+              display: RSV, recombinant, protein subunit RSVpreF, adjuvant reconstituted, 0.5 mL, PF
               property:
                 - code: liveVirusVaccine
                   valueBoolean: false
@@ -3164,7 +3196,7 @@ cds-engine:
                 - code: conceptMapping
                   valueCoding:
                     code: VACCINE_CVX_303
-                    display: RSV, recombinant, protein subunit RSVpreF, adjuvant
+                    display: RSV, recombinant, protein subunit RSVpreF, adjuvant reconstituted, 0.5 mL, PF
                 - code: supported
                   valueBoolean: true
             - code: '304'
@@ -3182,6 +3214,8 @@ cds-engine:
                     code: RSV
                     system: 2.16.840.1.113883.3.795.12.1.1
                     display: RSV
+                - code: unspecifiedFormulation
+                  valueBoolean: true
                 - code: conceptMapping
                   valueCoding:
                     code: VACCINE_CVX_304
@@ -3256,7 +3290,7 @@ cds-engine:
                 - code: supported
                   valueBoolean: true
             - code: '308'
-              display: COVID-19, mRNA, LNP-S, PF, tris-sucrose, 3 mcg/0.3
+              display: COVID-19, mRNA, LNP-S, PF, tris-sucrose, 3 mcg/0.3 mL, Pfizer (Comirnaty, 6 mos-4 yrs)
               property:
                 - code: liveVirusVaccine
                   valueBoolean: false
@@ -3285,11 +3319,11 @@ cds-engine:
                 - code: conceptMapping
                   valueCoding:
                     code: VACCINE_CVX_308
-                    display: COVID-19, mRNA, LNP-S, PF, tris-sucrose, 3 mcg/0.3
+                    display: COVID-19, mRNA, LNP-S, PF, tris-sucrose, 3 mcg/0.3 mL, Pfizer (Comirnaty, 6 mos-4 yrs)
                 - code: supported
                   valueBoolean: true
             - code: '309'
-              display: COVID-19, mRNA, LNP-S, PF, tris-sucrose, 30 mcg/0.3
+              display: COVID-19, mRNA, LNP-S, PF, tris-sucrose, 30 mcg/0.3 mL, Pfizer (Comirnaty, 12+ yrs)
               property:
                 - code: liveVirusVaccine
                   valueBoolean: false
@@ -3312,7 +3346,7 @@ cds-engine:
                 - code: conceptMapping
                   valueCoding:
                     code: VACCINE_CVX_309
-                    display: COVID-19, mRNA, LNP-S, PF, tris-sucrose, 30 mcg/0.3
+                    display: COVID-19, mRNA, LNP-S, PF, tris-sucrose, 30 mcg/0.3 mL, Pfizer (Comirnaty, 12+ yrs)
                 - code: supported
                   valueBoolean: true
             - code: '31'
@@ -3341,7 +3375,7 @@ cds-engine:
                 - code: supported
                   valueBoolean: true
             - code: '310'
-              display: COVID-19, mRNA, LNP-S, PF, tris-sucrose, 10 mcg/0.3
+              display: COVID-19, mRNA, LNP-S, PF, tris-sucrose, 10 mcg/0.3 mL, Pfizer (Comirnaty, 5-11 yrs)
               property:
                 - code: liveVirusVaccine
                   valueBoolean: false
@@ -3368,11 +3402,11 @@ cds-engine:
                 - code: conceptMapping
                   valueCoding:
                     code: VACCINE_CVX_310
-                    display: COVID-19, mRNA, LNP-S, PF, tris-sucrose, 10 mcg/0.3
+                    display: COVID-19, mRNA, LNP-S, PF, tris-sucrose, 10 mcg/0.3 mL, Pfizer (Comirnaty, 5-11 yrs)
                 - code: supported
                   valueBoolean: true
             - code: '311'
-              display: COVID-19, mRNA, LNP-S, PF, 25mcg/0.25 mL, Moderna
+              display: COVID-19, mRNA, LNP-S, PF, 25mcg/0.25 mL, Moderna (Spikevax, 6 mos-11 yrs)
               property:
                 - code: liveVirusVaccine
                   valueBoolean: false
@@ -3399,11 +3433,11 @@ cds-engine:
                 - code: conceptMapping
                   valueCoding:
                     code: VACCINE_CVX_311
-                    display: COVID-19, mRNA, LNP-S, PF, 25mcg/0.25 mL, Moderna
+                    display: COVID-19, mRNA, LNP-S, PF, 25mcg/0.25 mL, Moderna (Spikevax, 6 mos-11 yrs)
                 - code: supported
                   valueBoolean: true
             - code: '312'
-              display: COVID-19, mRNA, LNP-S, PF, 50 mcg/0.5 mL, Moderna
+              display: COVID-19, mRNA, LNP-S, PF, 50 mcg/0.5 mL, Moderna (Spikevax, 12+ yrs)
               property:
                 - code: liveVirusVaccine
                   valueBoolean: false
@@ -3426,11 +3460,11 @@ cds-engine:
                 - code: conceptMapping
                   valueCoding:
                     code: VACCINE_CVX_312
-                    display: COVID-19, mRNA, LNP-S, PF, 50 mcg/0.5 mL, Moderna
+                    display: COVID-19, mRNA, LNP-S, PF, 50 mcg/0.5 mL, Moderna (Spikevax, 12+ yrs)
                 - code: supported
                   valueBoolean: true
             - code: '313'
-              display: COVID-19, subunit, rS-nanoparticle, adjuvanted,
+              display: COVID-19, subunit, rS-nanoparticle, adjuvanted, PF, 5 mcg/0.5 mL, Novavax (12+ yrs)
               property:
                 - code: liveVirusVaccine
                   valueBoolean: false
@@ -3451,7 +3485,7 @@ cds-engine:
                 - code: conceptMapping
                   valueCoding:
                     code: VACCINE_CVX_313
-                    display: COVID-19, subunit, rS-nanoparticle, adjuvanted, PF,
+                    display: COVID-19, subunit, rS-nanoparticle, adjuvanted, PF, 5 mcg/0.5 mL, Novavax (12+ yrs)
                 - code: supported
                   valueBoolean: true
             - code: '314'
@@ -3469,6 +3503,8 @@ cds-engine:
                     code: RSV
                     system: 2.16.840.1.113883.3.795.12.1.1
                     display: RSV
+                - code: unspecifiedFormulation
+                  valueBoolean: true
                 - code: conceptMapping
                   valueCoding:
                     code: VACCINE_CVX_314
@@ -3492,6 +3528,8 @@ cds-engine:
                     display: RSV
                 - code: validMaximumAgeForUse
                   valueString: 24m-1d
+                - code: unspecifiedFormulation
+                  valueBoolean: true
                 - code: conceptMapping
                   valueCoding:
                     code: VACCINE_CVX_315
@@ -3499,7 +3537,7 @@ cds-engine:
                 - code: supported
                   valueBoolean: true
             - code: '316'
-              display: Meningococcal polysaccharide (MenACWY-TT conjugate),
+              display: Meningococcal polysaccharide (MenACWY-TT conjugate), (MenB), PF
               property:
                 - code: liveVirusVaccine
                   valueBoolean: false
@@ -3526,7 +3564,7 @@ cds-engine:
                 - code: conceptMapping
                   valueCoding:
                     code: VACCINE_CVX_316
-                    display: Meningococcal polysaccharide (MenACWY-TT conjugate),
+                    display: Meningococcal polysaccharide (MenACWY-TT conjugate), (MenB), PF
                 - code: supported
                   valueBoolean: true
             - code: '317'
@@ -3594,6 +3632,8 @@ cds-engine:
                     display: Meningococcal MPSv4 (Menomume)
                 - code: supported
                   valueBoolean: true
+                - code: maximumDateForUse
+                  valueString: '2017-09-30'
             - code: '320'
               display: Influenza, MDCK, trivalent, preservative
               property:
@@ -3762,7 +3802,7 @@ cds-engine:
                 - code: supported
                   valueBoolean: true
             - code: '331'
-              display: Influenza, Southern Hemisphere, trivalent, preservative
+              display: Influenza, Southern Hemisphere, trivalent, preservative free
               property:
                 - code: liveVirusVaccine
                   valueBoolean: false
@@ -3781,7 +3821,7 @@ cds-engine:
                 - code: conceptMapping
                   valueCoding:
                     code: VACCINE_CVX_331
-                    display: Influenza, Southern Hemisphere, trivalent, preservative
+                    display: Influenza, Southern Hemisphere, trivalent, preservative free
                 - code: supported
                   valueBoolean: true
             - code: '332'
@@ -3835,7 +3875,7 @@ cds-engine:
                 - code: supported
                   valueBoolean: true
             - code: '334'
-              display: COVID-19, mRNA, LNP-S, PF, 10 mcg/0.2 mL, Moderna
+              display: COVID-19, mRNA, LNP-S, PF, 10 mcg/0.2 mL, Moderna (mNEXSPIKE, 12+ yrs)
               property:
                 - code: liveVirusVaccine
                   valueBoolean: false
@@ -3858,7 +3898,7 @@ cds-engine:
                 - code: conceptMapping
                   valueCoding:
                     code: VACCINE_CVX_334
-                    display: COVID-19, mRNA, LNP-S, PF, 10 mcg/0.2 mL, Moderna
+                    display: COVID-19, mRNA, LNP-S, PF, 10 mcg/0.2 mL, Moderna (mNEXSPIKE, 12+ yrs)
                 - code: supported
                   valueBoolean: true
             - code: '337'
@@ -4306,7 +4346,7 @@ cds-engine:
                 - code: supported
                   valueBoolean: true
             - code: '506'
-              display: COVID-19 VVnr Non-US Vaccine (CanSino Biological
+              display: COVID-19 VVnr Non-US Vaccine (CanSino Biological Inc./Beijing Institute of Biotechnology)
               property:
                 - code: liveVirusVaccine
                   valueBoolean: false
@@ -4325,11 +4365,11 @@ cds-engine:
                 - code: conceptMapping
                   valueCoding:
                     code: VACCINE_CVX_506
-                    display: COVID-19 VVnr Non-US Vaccine (CanSino Biological Inc./Beijing
+                    display: COVID-19 VVnr Non-US Vaccine (CanSino Biological Inc./Beijing Institute of Biotechnology)
                 - code: supported
                   valueBoolean: true
             - code: '507'
-              display: COVID-19 vaccine, PS, non-US, Anhui Zhifei Longcom
+              display: COVID-19 vaccine, PS, non-US, Anhui Zhifei Longcom Biopharmaceutical, Chinese Academy of Sciences
               property:
                 - code: liveVirusVaccine
                   valueBoolean: false
@@ -4348,11 +4388,11 @@ cds-engine:
                 - code: conceptMapping
                   valueCoding:
                     code: VACCINE_CVX_507
-                    display: COVID-19 vaccine, PS, non-US, Anhui Zhifei Longcom
+                    display: COVID-19 vaccine, PS, non-US, Anhui Zhifei Longcom Biopharmaceutical, Chinese Academy of Sciences
                 - code: supported
                   valueBoolean: true
             - code: '508'
-              display: COVID-19 PS Non-US (Jiangsu Province Centers for
+              display: COVID-19 PS Non-US (Jiangsu Province Centers for Disease Control and Prevention)
               property:
                 - code: liveVirusVaccine
                   valueBoolean: false
@@ -4371,7 +4411,7 @@ cds-engine:
                 - code: conceptMapping
                   valueCoding:
                     code: VACCINE_CVX_508
-                    display: COVID-19 PS Non-US (Jiangsu Province Centers for Disease
+                    display: COVID-19 PS Non-US (Jiangsu Province Centers for Disease Control and Prevention)
                 - code: supported
                   valueBoolean: true
             - code: '509'
@@ -4498,7 +4538,7 @@ cds-engine:
                 - code: supported
                   valueBoolean: true
             - code: '513'
-              display: COVID-19 PS Non-US Vaccine (Anhui Zhifei Longcom,
+              display: COVID-19 PS Non-US Vaccine (Anhui Zhifei Longcom, Zifivax)
               property:
                 - code: liveVirusVaccine
                   valueBoolean: false
@@ -4515,7 +4555,7 @@ cds-engine:
                 - code: conceptMapping
                   valueCoding:
                     code: VACCINE_CVX_513
-                    display: COVID-19 PS Non-US Vaccine (Anhui Zhifei Longcom,
+                    display: COVID-19 PS Non-US Vaccine (Anhui Zhifei Longcom, Zifivax)
                 - code: supported
                   valueBoolean: true
             - code: '514'
@@ -4561,7 +4601,7 @@ cds-engine:
                 - code: supported
                   valueBoolean: true
             - code: '516'
-              display: COVID-19 Inactivated Non-US Vaccine (Minhai Biotechnology
+              display: COVID-19 Inactivated Non-US Vaccine (Minhai Biotechnology Co, KCONVAC)
               property:
                 - code: liveVirusVaccine
                   valueBoolean: false
@@ -4578,11 +4618,11 @@ cds-engine:
                 - code: conceptMapping
                   valueCoding:
                     code: VACCINE_CVX_516
-                    display: COVID-19 Inactivated Non-US Vaccine (Minhai Biotechnology
+                    display: COVID-19 Inactivated Non-US Vaccine (Minhai Biotechnology Co, KCONVAC)
                 - code: supported
                   valueBoolean: true
             - code: '517'
-              display: COVID-19 PS Non-US Vaccine (Biological E Limited,
+              display: COVID-19 PS Non-US Vaccine (Biological E Limited, Corbevax)
               property:
                 - code: liveVirusVaccine
                   valueBoolean: false
@@ -4599,11 +4639,11 @@ cds-engine:
                 - code: conceptMapping
                   valueCoding:
                     code: VACCINE_CVX_517
-                    display: COVID-19 PS Non-US Vaccine (Biological E Limited,
+                    display: COVID-19 PS Non-US Vaccine (Biological E Limited, Corbevax)
                 - code: supported
                   valueBoolean: true
             - code: '518'
-              display: COVID-19 Inactivated, Non-US Vaccine (VLA2001,
+              display: COVID-19 Inactivated, Non-US Vaccine (VLA2001, Valneva)
               property:
                 - code: liveVirusVaccine
                   valueBoolean: false
@@ -4624,7 +4664,7 @@ cds-engine:
                 - code: supported
                   valueBoolean: true
             - code: '519'
-              display: COVID-19 mRNA, bivalent, original/Omicron BA.1,
+              display: COVID-19 mRNA, bivalent, original/Omicron BA.1, Non-US Vaccine (Spikevax Bivalent), Moderna
               property:
                 - code: liveVirusVaccine
                   valueBoolean: false
@@ -4641,7 +4681,7 @@ cds-engine:
                 - code: conceptMapping
                   valueCoding:
                     code: VACCINE_CVX_519
-                    display: COVID-19 mRNA, bivalent, original/Omicron BA.1, Non-US
+                    display: COVID-19 mRNA, bivalent, original/Omicron BA.1, Non-US Vaccine (Spikevax Bivalent), Moderna
                 - code: supported
                   valueBoolean: true
             - code: '52'
@@ -4668,7 +4708,7 @@ cds-engine:
                 - code: supported
                   valueBoolean: true
             - code: '520'
-              display: COVID-19 mRNA, bivalent, original/Omicron BA.1,
+              display: COVID-19 mRNA, bivalent, original/Omicron BA.1, Non-US Vaccine Product, Pfizer-BioNTech
               property:
                 - code: liveVirusVaccine
                   valueBoolean: false
@@ -4685,11 +4725,11 @@ cds-engine:
                 - code: conceptMapping
                   valueCoding:
                     code: VACCINE_CVX_520
-                    display: COVID-19 mRNA, bivalent, original/Omicron BA.1, Non-US
+                    display: COVID-19 mRNA, bivalent, original/Omicron BA.1, Non-US Vaccine Product, Pfizer-BioNTech
                 - code: supported
                   valueBoolean: true
             - code: '521'
-              display: COVID-19 SP, protein-based, adjuvanted (VidPrevtyn
+              display: COVID-19 SP, protein-based, adjuvanted (VidPrevtyn Beta), Sanofi-GSK
               property:
                 - code: liveVirusVaccine
                   valueBoolean: false
@@ -4708,7 +4748,7 @@ cds-engine:
                 - code: conceptMapping
                   valueCoding:
                     code: VACCINE_CVX_521
-                    display: COVID-19 SP, protein-based, adjuvanted (VidPrevtyn
+                    display: COVID-19 SP, protein-based, adjuvanted (VidPrevtyn Beta), Sanofi-GSK
                 - code: supported
                   valueBoolean: true
             - code: '62'

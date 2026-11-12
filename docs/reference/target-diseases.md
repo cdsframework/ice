@@ -8,8 +8,38 @@ The ICE FHIR API returns target diseases on `ImmunizationEvaluation.targetDiseas
 CodeSystem](../../fhir/ice/disease.json). The table lists each CodeSystem concept
 key and the SNOMED CT code and display used for FHIR target-disease coding.
 
-A `targetDisease` may contain multiple codings in component or multi-disease
-contexts. The rows below describe the ICE disease concepts and their SNOMED CT
+`ImmunizationEvaluation.targetDisease` is a required array containing one or more
+`CodeableConcept` values. Recommendations also return an array. Each concept
+represents one disease; any additional codings within that concept represent the
+same disease. Evaluation diseases come from the evaluated component's CVX
+`diseaseImmunity` assignments in `supportedVaccines.yml`, resolved through the
+supported disease CodeSystem to SNOMED CT. They do not come from the broader
+vaccine group. Recommendation diseases continue to come from vaccine-group
+assignments.
+
+| Evaluated component | CVX  | Target diseases                | Concepts |
+|---------------------|------|--------------------------------|----------|
+| MMR                 | `03` | Measles, mumps, rubella        | 3        |
+| MR                  | `04` | Measles, rubella               | 2        |
+| DTP                 | `01` | Diphtheria, pertussis, tetanus | 3        |
+| DT                  | `28` | Diphtheria, tetanus            | 2        |
+| IPV                 | `10` | Polio                          | 1        |
+
+Single-disease evaluations still return an array with one entry. Missing CVX
+or disease mappings cause conversion to fail; evaluations do not substitute
+vaccine-group diseases.
+
+This follows the multi-disease proposal in [FHIR-58952](https://jira.hl7.org/browse/FHIR-58952)
+and the Immunization Focus Group discussion dated October 1, 2026. The supplied
+ticket snapshot was submitted and unresolved. ICE adopts the proposed cardinality
+ahead of its incorporation into the published specification.
+
+**Client migration:** Evaluation `targetDisease` previously serialized as one
+object. Clients must now iterate its array entries, then each concept's codings.
+Recommendations previously combined multiple diseases into one array entry and
+now expose one entry per disease as well.
+
+The rows below describe the ICE disease concepts and their SNOMED CT
 codings; they do not define a vaccine-group mapping. For vaccine-group comparisons,
 see [Vaccine Group Codes](vaccine-groups.md) and the [Vaccine Group Normalization
 section of the API Client Integration Guide](../implementation-guides/ICE-API-Client-Integration-Guide.md#vaccine-group-normalization).

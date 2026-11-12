@@ -96,8 +96,8 @@ class ConfiguredVmrScheduleFlagEvaluationRequestProcessorTest
         final IceProperties properties = new IceProperties();
         properties.setIceBaseKnowledgeBase(MODULE_CANONICAL);
         properties.setKnowledgeBases(Map.of(MODULE_CANONICAL,
-                new IceProperties.KnowledgeBaseProperties(true, false, true, false, true, false, false, false, List.of(), List.of(),
-                        false, IceProperties.SupplementalTextMode.LEGACY, new ByteArrayResource(new byte[0]))));
+                new IceProperties.KnowledgeBaseProperties(true, false, true, false, true, true, false, false, false, List.of(),
+                        List.of(), false, IceProperties.SupplementalTextMode.LEGACY, new ByteArrayResource(new byte[0]))));
         properties.setScheduleFlags(scheduleFlags);
         return properties;
     }

@@ -20,7 +20,7 @@
         <terminateEventDefinition />
     </endEvent>
     <businessRuleTask id="_3" name="Initialize Reference Data" g:ruleFlowGroup="ImmunizationReferenceData"
- implementation="http://www.jboss.org/drools/rule" >
+        implementation="http://www.jboss.org/drools/rule" >
       <ioSpecification>
         <inputSet>
         </inputSet>
@@ -29,7 +29,7 @@
       </ioSpecification>
     </businessRuleTask>
     <businessRuleTask id="_4" name="Return Results" g:ruleFlowGroup="ProcessResults"
- implementation="http://www.jboss.org/drools/rule" >
+        implementation="http://www.jboss.org/drools/rule" >
       <ioSpecification>
         <inputSet>
         </inputSet>
@@ -38,7 +38,7 @@
       </ioSpecification>
     </businessRuleTask>
     <businessRuleTask id="_5" name="Identify Candidate Series" g:ruleFlowGroup="CandidateSeriesIdentification"
- implementation="http://www.jboss.org/drools/rule" >
+        implementation="http://www.jboss.org/drools/rule" >
       <ioSpecification>
         <inputSet>
         </inputSet>
@@ -47,7 +47,7 @@
       </ioSpecification>
     </businessRuleTask>
     <businessRuleTask id="_6" name=" Evaluate History Against All Series" g:ruleFlowGroup="HistoryEvaluation"
- implementation="http://www.jboss.org/drools/rule" >
+        implementation="http://www.jboss.org/drools/rule" >
       <ioSpecification>
         <inputSet>
         </inputSet>
@@ -56,7 +56,7 @@
       </ioSpecification>
     </businessRuleTask>
     <businessRuleTask id="_7" name="Forecast Recommendations for Aggregate Series" g:ruleFlowGroup="RecommendationForecast"
- implementation="http://www.jboss.org/drools/rule" >
+        implementation="http://www.jboss.org/drools/rule" >
       <ioSpecification>
         <inputSet>
         </inputSet>
@@ -65,7 +65,7 @@
       </ioSpecification>
     </businessRuleTask>
     <businessRuleTask id="_8" name="Select Best Series for All Series Groups" g:ruleFlowGroup="SeriesSelection"
- implementation="http://www.jboss.org/drools/rule" >
+        implementation="http://www.jboss.org/drools/rule" >
       <ioSpecification>
         <inputSet>
         </inputSet>
@@ -74,7 +74,7 @@
       </ioSpecification>
     </businessRuleTask>
     <businessRuleTask id="_9" name="Record Disease Immunity" g:ruleFlowGroup="DiseaseImmunityRecord"
- implementation="http://www.jboss.org/drools/rule" >
+        implementation="http://www.jboss.org/drools/rule" >
       <ioSpecification>
         <inputSet>
         </inputSet>
@@ -92,7 +92,7 @@
       </ioSpecification>
     </businessRuleTask>
     <businessRuleTask id="_11" name="Initialize Series and Seasons" g:ruleFlowGroup="InitializeSeriesAndSeasons"
- implementation="http://www.jboss.org/drools/rule" >
+        implementation="http://www.jboss.org/drools/rule" >
       <ioSpecification>
         <inputSet>
         </inputSet>
@@ -101,7 +101,7 @@
       </ioSpecification>
     </businessRuleTask>
     <businessRuleTask id="_20" name="Revise Candidate Doses for Evaluation" g:ruleFlowGroup="CandidateDosesRevisions"
- implementation="http://www.jboss.org/drools/rule" >
+        implementation="http://www.jboss.org/drools/rule" >
       <ioSpecification>
         <inputSet>
         </inputSet>
@@ -109,20 +109,48 @@
         </outputSet>
       </ioSpecification>
     </businessRuleTask>
+    <businessRuleTask id="_21" name="Validate History Evaluation" g:ruleFlowGroup="HistoryEvaluationValidation"
+        implementation="http://www.jboss.org/drools/rule" >
+      <ioSpecification>
+        <inputSet>
+        </inputSet>
+        <outputSet>
+        </outputSet>
+      </ioSpecification>
+    </businessRuleTask>
+    <businessRuleTask id="_24" name="Return History Evaluation Validation Failure" g:ruleFlowGroup="HistoryEvaluationValidationFailure"
+        implementation="http://www.jboss.org/drools/rule" >
+      <ioSpecification>
+        <inputSet>
+        </inputSet>
+        <outputSet>
+        </outputSet>
+      </ioSpecification>
+    </businessRuleTask>
+    <exclusiveGateway id="_22" name="History Evaluation Validation Completed" gatewayDirection="Diverging" default="_22-_24" />
+    <exclusiveGateway id="_25" name="End" gatewayDirection="Converging" />
 
     <!-- connections -->
-    <sequenceFlow id="_4-_2" sourceRef="_4" targetRef="_2" />
-    <sequenceFlow id="_1-_3" sourceRef="_1" targetRef="_3" />
-    <sequenceFlow id="_7-_4" sourceRef="_7" targetRef="_4" />
-    <sequenceFlow id="_11-_5" sourceRef="_11" targetRef="_5" />
-    <sequenceFlow id="_9-_6" sourceRef="_9" targetRef="_6" />
-    <sequenceFlow id="_8-_7" sourceRef="_8" targetRef="_7" />
-    <sequenceFlow id="_6-_8" sourceRef="_6" targetRef="_8" />
-    <sequenceFlow id="_20-_9" sourceRef="_20" targetRef="_9" />
-    <sequenceFlow id="_5-_10" sourceRef="_5" targetRef="_10" />
-    <sequenceFlow id="_3-_11" sourceRef="_3" targetRef="_11" />
-    <sequenceFlow id="_10-_20" sourceRef="_10" targetRef="_20" />
-
+    <sequenceFlow id="_1-_3" name="Initialize reference data" sourceRef="_1" targetRef="_3" />
+    <sequenceFlow id="_3-_11" name="Initialize series and seasons" sourceRef="_3" targetRef="_11" />
+    <sequenceFlow id="_11-_5" name="Identify candidate series" sourceRef="_11" targetRef="_5" />
+    <sequenceFlow id="_5-_10" name="Identify candidate doses" sourceRef="_5" targetRef="_10" />
+    <sequenceFlow id="_10-_20" name="Revise candidate doses" sourceRef="_10" targetRef="_20" />
+    <sequenceFlow id="_20-_9" name="Record disease immunity" sourceRef="_20" targetRef="_9" />
+    <sequenceFlow id="_9-_6" name="Evaluate history" sourceRef="_9" targetRef="_6" />
+    <sequenceFlow id="_6-_21" name="Validate history evaluation" sourceRef="_6" targetRef="_21" />
+    <sequenceFlow id="_21-_22" name="Evaluate validation result" sourceRef="_21" targetRef="_22" />
+    <sequenceFlow id="_22-_8" name="Validation passed" sourceRef="_22" targetRef="_8">
+      <conditionExpression xsi:type="tFormalExpression" language="http://www.mvel.org/2.0">org.cdsframework.ice.service.HistoryEvaluationValidationState.hasValidationStatus(kcontext.getKieRuntime().getObjects(), org.cdsframework.ice.service.HistoryEvaluationValidationState.ValidationStatus.PASSED)</conditionExpression>
+    </sequenceFlow>
+    <sequenceFlow id="_22-_24" name="Validation failed" sourceRef="_22" targetRef="_24">
+      <conditionExpression xsi:type="tFormalExpression" language="http://www.mvel.org/2.0">org.cdsframework.ice.service.HistoryEvaluationValidationState.hasValidationStatus(kcontext.getKieRuntime().getObjects(), org.cdsframework.ice.service.HistoryEvaluationValidationState.ValidationStatus.FAILED)</conditionExpression>
+    </sequenceFlow>
+    <sequenceFlow id="_8-_7" name="Forecast recommendations" sourceRef="_8" targetRef="_7" />
+    <sequenceFlow id="_7-_4" name="Return results" sourceRef="_7" targetRef="_4" />
+    <sequenceFlow id="_4-_25" name="Complete normal evaluation" sourceRef="_4" targetRef="_25" />
+    <sequenceFlow id="_24-_25" name="Complete validation failure" sourceRef="_24" targetRef="_25" />
+    <sequenceFlow id="_25-_2" name="End evaluation" sourceRef="_25" targetRef="_2" />
   </process>
 
   <bpmndi:BPMNDiagram>
@@ -145,6 +173,18 @@
       <bpmndi:BPMNShape bpmnElement="_6" >
         <dc:Bounds x="642" y="148" width="209" height="55" />
       </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="_21" >
+        <dc:Bounds x="500" y="141" width="130" height="63" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="_22" >
+        <dc:Bounds x="450" y="154" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="_24" >
+        <dc:Bounds x="500" y="277" width="170" height="60" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="_25" >
+        <dc:Bounds x="950" y="289" width="36" height="36" />
+      </bpmndi:BPMNShape>
       <bpmndi:BPMNShape bpmnElement="_7" >
         <dc:Bounds x="160" y="277" width="394" height="60" />
       </bpmndi:BPMNShape>
@@ -163,9 +203,9 @@
       <bpmndi:BPMNShape bpmnElement="_20" >
         <dc:Bounds x="1391" y="151" width="335" height="48" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNEdge bpmnElement="_4-_2" >
+      <bpmndi:BPMNEdge bpmnElement="_4-_25" >
         <di:waypoint x="814" y="307" />
-        <di:waypoint x="1073" y="309" />
+        <di:waypoint x="968" y="307" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge bpmnElement="_1-_3" >
         <di:waypoint x="40" y="47" />
@@ -187,9 +227,29 @@
         <di:waypoint x="355" y="172" />
         <di:waypoint x="357" y="307" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge bpmnElement="_6-_8" >
+      <bpmndi:BPMNEdge bpmnElement="_6-_21" >
         <di:waypoint x="746" y="175" />
+        <di:waypoint x="565" y="172" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="_21-_22" >
+        <di:waypoint x="500" y="172" />
+        <di:waypoint x="468" y="172" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="_22-_8" >
+        <di:waypoint x="450" y="172" />
         <di:waypoint x="355" y="172" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="_22-_24" >
+        <di:waypoint x="468" y="190" />
+        <di:waypoint x="585" y="307" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="_24-_25" >
+        <di:waypoint x="670" y="307" />
+        <di:waypoint x="968" y="307" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="_25-_2" >
+        <di:waypoint x="986" y="307" />
+        <di:waypoint x="1073" y="309" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge bpmnElement="_20-_9" >
         <di:waypoint x="1558" y="175" />

@@ -4,9 +4,11 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
@@ -15,11 +17,14 @@ import java.util.stream.Collectors;
 
 import org.cdsframework.fhir.CodeSystem;
 import org.cdsframework.fhir.CodeSystemConcept;
+import org.cdsframework.fhir.CodeSystemConceptProperty;
+import org.cdsframework.fhir.CodeableConcept;
 import org.cdsframework.fhir.PlanDefinition;
 import org.cdsframework.ice.config.CdsEngineProperties;
 import org.cdsframework.ice.config.IceProperties;
 import org.cdsframework.ice.service.PlanDefinitionSeriesDataConsumer;
 import org.cdsframework.ice.service.SupportingDataService;
+import org.cdsframework.ice.service.Vaccine;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -69,6 +74,89 @@ public class FullSupportingDataLoadTest
     private CdsEngineProperties cdsEngineProperties;
 
     @Test
+    public void readsNumberOfDosesInSeriesFromSeriesPlanDefinitions()
+    {
+        final SupportingDataService supportingDataService = new SupportingDataService(cdsEngineProperties, iceProperties);
+        final String kmId = supportingDataService.getKmIdFromKnowledgeBaseUrl(
+                "https://terminology.cdsframework.org/PlanDefinition/ice-forecast|1.0.0");
+        assertEquals(2, supportingDataService.getNumberOfDosesInSeries(kmId, "HPV_2_DOSE_SERIES"));
+        assertEquals(3, supportingDataService.getNumberOfDosesInSeries(kmId, "ZOSTER_3_DOSE_SERIES"));
+        assertNull(supportingDataService.getNumberOfDosesInSeries(kmId, "NO_SUCH_SERIES"));
+    }
+
+    @Test
+    public void derivesTargetDiseasesFromMaintainedVaccineCvxMappings()
+    {
+        final SupportingDataService supportingDataService = new SupportingDataService(cdsEngineProperties, iceProperties);
+        final String kmId = supportingDataService.getKmIdFromKnowledgeBaseUrl(
+                "https://terminology.cdsframework.org/PlanDefinition/ice-forecast|1.0.0");
+        final Map<String, Set<String>> expectedDiseases =
+                Map.of("03", Set.of("14189004", "36989005", "36653000"), "04", Set.of("14189004", "36653000"), "01",
+                        Set.of("397428000", "27836007", "76902006"), "28", Set.of("397428000", "76902006"), "10",
+                        Set.of("398102009"));
+        for (final Map.Entry<String, Set<String>> entry : expectedDiseases.entrySet())
+        {
+            final List<CodeableConcept> diseases = supportingDataService.getDiseasesForVaccine(kmId, entry.getKey());
+            assertEquals(entry.getValue().size(), diseases.size(), "Disease count for CVX " + entry.getKey());
+            assertTrue(diseases.stream()
+                    .allMatch(disease -> disease.coding().size() == 1 && "http://snomed.info/sct".equals(
+                            disease.coding().getFirst().system())));
+            assertEquals(entry.getValue(),
+                    diseases.stream().map(disease -> disease.coding().getFirst().code()).collect(Collectors.toSet()),
+                    "Disease codes for CVX " + entry.getKey());
+        }
+        assertTrue(supportingDataService.getDiseasesForVaccine(kmId, "999").isEmpty());
+    }
+
+    @Test
+    public void everyEvaluableVaccineComponentMapsEachOfItsDiseases()
+    {
+        // FHIR evaluations take their target diseases from the evaluated component CVX: a vaccine without components is
+        // evaluated as itself, and a combination vaccine as each of its components.
+        final SupportingDataService supportingDataService = new SupportingDataService(cdsEngineProperties, iceProperties);
+        final String kmId = supportingDataService.getKmIdFromKnowledgeBaseUrl(
+                "https://terminology.cdsframework.org/PlanDefinition/ice-forecast|1.0.0");
+        final List<CodeSystemConcept> vaccines = cdsEngineProperties.getKnowledgeBaseDefinitionMap()
+                .get("https://terminology.cdsframework.org/PlanDefinition/ice-forecast|1.0.0")
+                .codeSystems()
+                .get("SUPPORTED_VACCINES")
+                .concept();
+        final Predicate<CodeSystemConceptProperty> isComponent = property -> "vaccineComponent".equals(property.code());
+        final Set<String> components = new TreeSet<>();
+        for (final CodeSystemConcept vaccine : vaccines)
+        {
+            final List<CodeSystemConceptProperty> properties = Optional.ofNullable(vaccine.property()).orElse(List.of());
+            if (properties.stream().noneMatch(isComponent))
+                components.add(vaccine.code());
+            properties.stream().filter(isComponent).map(property -> property.valueCoding().code()).forEach(components::add);
+        }
+
+        assertTrue(components.size() > 50, "Evaluable components: " + components.size());
+
+        final Map<String, CodeSystemConcept> vaccinesByCode =
+                vaccines.stream().collect(Collectors.toMap(CodeSystemConcept::code, vaccine -> vaccine, (first, _) -> first));
+        final List<String> problems = new java.util.ArrayList<>();
+        for (final String component : components)
+        {
+            final CodeSystemConcept vaccine = vaccinesByCode.get(component);
+            if (vaccine == null)
+            {
+                problems.add("component CVX %s is not a supported vaccine".formatted(component));
+                continue;
+            }
+            final long declared = Optional.ofNullable(vaccine.property())
+                    .orElse(List.of())
+                    .stream()
+                    .filter(property -> "diseaseImmunity".equals(property.code()))
+                    .count();
+            final int mapped = supportingDataService.getDiseasesForVaccine(kmId, component).size();
+            if (declared == 0 || mapped != declared)
+                problems.add("CVX %s declares %d diseaseImmunity values and maps %d".formatted(component, declared, mapped));
+        }
+        assertTrue(problems.isEmpty(), String.join("\n", problems));
+    }
+
+    @Test
     public void testLoadFullSupportingData_CommonAndNYC()
     {
         assertNotNull(iceProperties, "IceProperties should be injected");
@@ -85,6 +173,10 @@ public class FullSupportingDataLoadTest
         assertNotNull(configuration.getSupportedCdsLists());
         assertFalse(configuration.getSupportedCdsLists().isEmpty());
         assertFalse(configuration.getSupportedSeries().isEmpty());
+        final Vaccine cvx121 = configuration.getSupportedVaccines().getVaccineItem("SUPPORTED_VACCINES.121").getVaccine();
+        assertTrue(cvx121.isValidInMultipleVaccineGroups());
+        assertEquals(Set.of("SUPPORTED_DISEASE_CONCEPT.ZOSTER", "SUPPORTED_DISEASE_CONCEPT.VARICELLA"),
+                cvx121.getAllDiseasesTargetedForImmunity());
         final Set<String> configuredSeasonCodes = configuration.getSupportedSeasons()
                 .getCopyOfAllSeasons()
                 .stream()

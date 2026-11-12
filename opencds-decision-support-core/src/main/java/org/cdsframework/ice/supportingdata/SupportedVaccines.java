@@ -177,6 +177,7 @@ public class SupportedVaccines implements SupportingData
         boolean lLiveVirusVaccine = false;
         boolean lUnspecifiedFormulation = false;
         boolean lSelectAdjuvantProduct = false;
+        boolean lValidInMultipleVaccineGroups = false;
         LocalDate lMinimumDateForUse = null;
         LocalDate lMaximumDateForUse = null;
         TimePeriod lValidMinimumAgeForUse = null;
@@ -236,6 +237,11 @@ public class SupportedVaccines implements SupportingData
                 {
                     if (cp.valueBoolean() != null)
                         lSelectAdjuvantProduct = cp.valueBoolean();
+                }
+                case "validInMultipleVaccineGroups" ->
+                {
+                    if (cp.valueBoolean() != null)
+                        lValidInMultipleVaccineGroups = cp.valueBoolean();
                 }
                 case "minimumDateForUse" -> lMinimumDateForUse = parseDate(cp.valueString());
                 case "maximumDateForUse" -> lMaximumDateForUse = parseDate(cp.valueString());
@@ -346,6 +352,7 @@ public class SupportedVaccines implements SupportingData
         }
         lVaccine.setLiveVirusVaccine(lLiveVirusVaccine);
         lVaccine.setSelectAdjuvantProduct(lSelectAdjuvantProduct);
+        lVaccine.setValidInMultipleVaccineGroups(lValidInMultipleVaccineGroups);
         lVaccine.setMinimumDateForUse(lMinimumDateForUse);
         lVaccine.setMaximumDateForUse(lMaximumDateForUse);
 

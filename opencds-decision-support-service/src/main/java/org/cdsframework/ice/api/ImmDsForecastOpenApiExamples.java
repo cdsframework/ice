@@ -62,7 +62,7 @@ public final class ImmDsForecastOpenApiExamples
                                                             "code": {
                                                               "coding": [
                                                                 {
-                                                                  "system": "http://ivci.org/CodeSystem/contextual-condition",
+                                                                  "system": "https://ivci.org/contextual-conditions/usa/cdc-cdsi",
                                                                   "code": "024",
                                                                   "display": "Healthcare provider verified history of or diagnosis of Varicella"
                                                                 }

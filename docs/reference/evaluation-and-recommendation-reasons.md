@@ -5,7 +5,8 @@ evaluation and forecast results.
 
 The ICE FHIR API (FHIR R6) CodeSystems are maintained in [`evaluation-reason.json`](../../fhir/ice/evaluation-reason.json) and [
 `recommendation-reason.json`](../../fhir/ice/recommendation-reason.json). Specific supplemental text codes are listed in
-[Evaluation and Recommendation Supplemental Text](evaluation-and-recommendation-supplemental-text.md); output configuration and response modes are
+[Evaluation and Recommendation Supplemental Text](evaluation-and-recommendation-supplemental-text.md); output configuration and
+response modes are
 described in [Output Configuration](../configuration/output-configuration.md#supplemental-text). Disease Immunity reasons are
 documented with their paired values in [Disease Immunity Codes](disease-immunity.md).
 

@@ -310,32 +310,29 @@ public class ICESupportingDataLoaderPlugin implements OpencdsPlugin<PreProcessPl
         //context.globals().put("patientAgeTimeOfInterest", null);
 
         context.globals()
-                .put("outputEarliestOverdueDates", iceProperties.getOutputEarliestAndOverdueDates()
-                        .orElseGet(knowledgeBaseProperties::outputEarliestAndOverdueDates));
+                .put("outputEarliestOverdueDates", iceProperties.resolveOutputEarliestAndOverdueDates(knowledgeBaseProperties));
 
         context.globals()
-                .put("outputNumberOfDosesRemaining", iceProperties.getOutputNumberOfDosesRemaining()
-                        .orElseGet(knowledgeBaseProperties::outputNumberOfDosesRemaining));
+                .put("outputNumberOfDosesRemaining", iceProperties.resolveOutputNumberOfDosesRemaining(knowledgeBaseProperties));
 
         context.globals()
-                .put("outputSeriesInformation",
-                        iceProperties.getOutputSeriesInformation().orElseGet(knowledgeBaseProperties::outputSeriesInformation));
+                .put("outputSeriesInformationForEvaluations",
+                        iceProperties.resolveOutputSeriesInformationForEvaluations(knowledgeBaseProperties));
 
         context.globals()
-                .put("outputScheduleAuthorities",
-                        iceProperties.getOutputScheduleAuthorities().orElseGet(knowledgeBaseProperties::outputScheduleAuthorities));
+                .put("outputSeriesInformationForRecommendations",
+                        iceProperties.resolveOutputSeriesInformationForRecommendations(knowledgeBaseProperties));
+
+        context.globals().put("outputScheduleAuthorities", iceProperties.resolveOutputScheduleAuthorities(knowledgeBaseProperties));
 
         context.globals()
-                .put("doseOverrideFeatureEnabled",
-                        iceProperties.getEnableDoseOverrideFeature().orElseGet(knowledgeBaseProperties::enableDoseOverrideFeature));
+                .put("doseOverrideFeatureEnabled", iceProperties.resolveEnableDoseOverrideFeature(knowledgeBaseProperties));
+
+        context.globals().put("outputSupplementalText", iceProperties.resolveOutputSupplementalText(knowledgeBaseProperties));
 
         context.globals()
-                .put("outputSupplementalText",
-                        iceProperties.getOutputSupplementalText().orElseGet(knowledgeBaseProperties::outputSupplementalText));
-
-        context.globals()
-                .put("outputVaccineGroupRulesArtifact", iceProperties.getOutputVaccineGroupRulesArtifact()
-                        .orElseGet(knowledgeBaseProperties::outputVaccineGroupRulesArtifact));
+                .put("outputVaccineGroupRulesArtifact",
+                        iceProperties.resolveOutputVaccineGroupRulesArtifact(knowledgeBaseProperties));
 
         context.globals()
                 .put("vaccineGroupExclusions", normalizeVaccineGroupExclusionsForSchedule(
@@ -345,12 +342,12 @@ public class ICESupportingDataLoaderPlugin implements OpencdsPlugin<PreProcessPl
                                 .orElseGet(knowledgeBaseProperties::vaccineGroupInclusions), schedule, lKMId));
 
         context.globals()
-                .put("enableUnsupportedVaccinesGroup", iceProperties.getEnableUnsupportedVaccinesGroup()
-                        .orElseGet(knowledgeBaseProperties::enableUnsupportedVaccinesGroup));
+                .put("enableUnsupportedVaccinesGroup",
+                        iceProperties.resolveEnableUnsupportedVaccinesGroup(knowledgeBaseProperties));
 
         context.globals()
-                .put("disableCovid19DoseNumberReset", iceProperties.getDisableCovid19Sep2023DoseNumberReset()
-                        .orElseGet(knowledgeBaseProperties::disableCovid19Sep2023DoseNumberReset));
+                .put("disableCovid19DoseNumberReset",
+                        iceProperties.resolveDisableCovid19Sep2023DoseNumberReset(knowledgeBaseProperties));
     }
 
     /**

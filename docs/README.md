@@ -10,9 +10,10 @@ R6)**. The guides below document each interface and how to move between them.
 
 ## Getting Started
 
-- [Installation](https://github.com/cdsframework/ice#installation)
-- [Building ICE](https://github.com/cdsframework/ice#building-from-source)
-- [Running ICE](https://github.com/cdsframework/ice#running-ice)
+- [Download ICE](https://downloads.cdsframework.org/)
+- [Installation](../README.md#installation)
+- [Building ICE](../README.md#building-from-source)
+- [Running ICE](../README.md#running-ice)
 
 ## Implementation
 
@@ -56,9 +57,9 @@ Technical guidance for configuring ICE service behavior and request-specific for
 
 ## Releases and Upgrades
 
-- Release Notes
-- Upgrade Information
-- Action Required for Implementers
+- [Release Changelog and Upgrade Actions](release-changelog.md)
+- [Documentation Revision History](revision-history.md)
+- [Release Notes](https://cdsframework.atlassian.net/wiki/spaces/ICE/pages/78479371/Release+Notes)
 
 ## Security and Support
 

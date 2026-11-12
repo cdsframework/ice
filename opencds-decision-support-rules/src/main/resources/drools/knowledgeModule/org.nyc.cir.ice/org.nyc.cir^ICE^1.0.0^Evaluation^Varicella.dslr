@@ -22,7 +22,22 @@ expander ../../knowledgeCommon/org.cdsframework.ice/org.cdsframework^ICE^1.0.0.d
 
 global java.time.LocalDate evalTime;
 
-rule "Polio: Modify the absolute minimum interval from dose 1 to dose 2 to 24 days if shot administered at >= 13 yrs of age"
+/**
+ * Unconditionally remove CVX 121 from all Varicella target series (pending implementation of ICE3-1019)
+ */
+rule "Varicella: Remove all CVX 121 Target Doses"
+	ruleflow-group "HistoryEvaluation^customEvaluationRule"
+	when
+		There is an Administered Shot $currentShot
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.VARICELLA"
+			- the vaccine administered is "VACCINE_CVX_121"
+			- make note of the Associated Series as $associatedTargetSeries
+	then
+		Remove the Shot $currentShot from Evaluation as a part of the Series $associatedTargetSeries
+		Log that this dose rule fired for the dose $currentShot in the Series $associatedTargetSeries
+end
+
+rule "Varicella: Modify the absolute minimum interval from dose 1 to dose 2 to 24 days if shot administered at >= 13 yrs of age"
 	ruleflow-group "HistoryEvaluation^customEvaluationRule"
 	no-loop true
 	when

@@ -20,7 +20,7 @@ the mapped ICE disease or immunity source value in its place.
 | `023`     | Laboratory Evidence of Immunity or confirmation of Varicella disease   | SNOMED CT `38907003` — Varicella               | `PROOF_OF_IMMUNITY` — Proof of Immunity   |
 | `024`     | Healthcare provider verified history of or diagnosis of Varicella      | SNOMED CT `38907003` — Varicella               | `DISEASE_DOCUMENTED` — Disease Documented |
 
-The IVCI coding system is `http://ivci.org/CodeSystem/contextual-condition`. Disease codes use `http://snomed.info/sct`; source
+The IVCI coding system is `https://ivci.org/contextual-conditions/usa/cdc-cdsi`. Disease codes use `http://snomed.info/sct`; source
 codes use `https://terminology.cdsframework.org/ice/disease-immunity-source`.
 
 If an observation does not use a configured IVCI contextual-condition code, ICE omits it from the IMMDS forecast input and returns

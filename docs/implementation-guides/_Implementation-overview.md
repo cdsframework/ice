@@ -12,7 +12,8 @@ in them.
 
 ## ICE FHIR API
 
-Use the [ICE FHIR R6 Implementation Guide](ICE-FHIR-R6-Implementation-Guide.md) for the FHIR forecast operation, required and optional
+Use the [ICE FHIR R6 Implementation Guide](ICE-FHIR-R6-Implementation-Guide.md) for the FHIR forecast operation, required and
+optional
 inputs, response resources, and ICE-specific extensions. It also explains experimental feature availability and the changes from
 the previous experimental FHIR contract.
 
