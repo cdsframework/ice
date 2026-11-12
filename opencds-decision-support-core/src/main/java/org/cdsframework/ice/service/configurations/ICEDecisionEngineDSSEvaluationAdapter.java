@@ -33,10 +33,12 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.cdsframework.ice.config.IceProperties;
+import org.cdsframework.ice.service.HistoryEvaluationValidationState;
 import org.cdsframework.ice.service.ICEFactTypeFinding;
 import org.cdsframework.ice.service.SeriesRules;
 import org.cdsframework.ice.service.TargetDose;
 import org.cdsframework.ice.service.TargetSeries;
+import org.cdsframework.ice.supportingdatatmp.SupportedFactConcept;
 import org.kie.api.KieBase;
 import org.kie.api.command.Command;
 import org.kie.api.event.rule.AfterMatchFiredEvent;
@@ -44,6 +46,7 @@ import org.kie.api.event.rule.AgendaEventListener;
 import org.kie.api.event.rule.AgendaGroupPoppedEvent;
 import org.kie.api.event.rule.AgendaGroupPushedEvent;
 import org.kie.api.event.rule.BeforeMatchFiredEvent;
+import org.kie.api.event.rule.DefaultRuleRuntimeEventListener;
 import org.kie.api.event.rule.MatchCancelledEvent;
 import org.kie.api.event.rule.MatchCreatedEvent;
 import org.kie.api.event.rule.ObjectDeletedEvent;
@@ -192,7 +195,35 @@ public class ICEDecisionEngineDSSEvaluationAdapter
         }
     }
 
+    private static class HistoryEvaluationValidationFailureLogger extends DefaultRuleRuntimeEventListener
+    {
+        private boolean failureLogged;
+
+        @Override
+        public void objectInserted(final ObjectInsertedEvent event)
+        {
+            logFailure(event.getObject());
+        }
+
+        @Override
+        public void objectUpdated(final ObjectUpdatedEvent event)
+        {
+            logFailure(event.getObject());
+        }
+
+        private synchronized void logFailure(final Object object)
+        {
+            if (!failureLogged && object instanceof final HistoryEvaluationValidationState validationState
+                    && validationState.getValidationStatus() == HistoryEvaluationValidationState.ValidationStatus.FAILED)
+            {
+                log.error("HistoryEvaluationValidationFailure {}", validationState.getDiagnosticMessage());
+                failureLogged = true;
+            }
+        }
+    }
+
     private static final Logger droolsEventsLogger = LoggerFactory.getLogger("drools-events");
+
     @Setter
     private static IceProperties iceProperties;
 
@@ -206,16 +237,25 @@ public class ICEDecisionEngineDSSEvaluationAdapter
                             dose.getAdministeredVaccine().getCdsConceptName(), dose.getDoseNumberInSeries(),
                             dose.getTargetSeries().getSeriesName(), dose.getStatus());
             case final SeriesRules rules -> "SeriesRules=%s".formatted(rules.getSeriesName());
-            case final ICEFactTypeFinding fact -> "Fact=%s, %s, %s, %s".formatted(fact.getIceResultFinding(),
-                    Optional.ofNullable(fact.getAssociatedTargetDose())
-                            .map(ICEDecisionEngineDSSEvaluationAdapter::logObject)
-                            .orElse(null), Optional.ofNullable(fact.getAssociatedTargetSeries())
-                            .map(ICEDecisionEngineDSSEvaluationAdapter::logObject)
-                            .orElse(null), Optional.ofNullable(fact.getAssociatedSeriesRules())
-                            .map(ICEDecisionEngineDSSEvaluationAdapter::logObject)
-                            .orElse(null));
+            case final ICEFactTypeFinding fact -> logFinding(fact);
             default -> object.toString();
         };
+    }
+
+    private static String logFinding(final ICEFactTypeFinding fact)
+    {
+        if (SupportedFactConcept._MULTIPLE_VACCINE_GROUP_TARGET_DOSE_ASSOCIATION.getConceptCodeValue()
+                .equals(fact.getIceResultFinding()))
+            return "HistoryEvaluationValidationFailure findingCode=%s, %s".formatted(fact.getIceResultFinding(),
+                    fact.getDiagnosticMessage());
+
+        return "Fact=%s, %s, %s, %s".formatted(fact.getIceResultFinding(), Optional.ofNullable(fact.getAssociatedTargetDose())
+                .map(ICEDecisionEngineDSSEvaluationAdapter::logObject)
+                .orElse(null), Optional.ofNullable(fact.getAssociatedTargetSeries())
+                .map(ICEDecisionEngineDSSEvaluationAdapter::logObject)
+                .orElse(null), Optional.ofNullable(fact.getAssociatedSeriesRules())
+                .map(ICEDecisionEngineDSSEvaluationAdapter::logObject)
+                .orElse(null));
     }
 
     @Override
@@ -232,6 +272,8 @@ public class ICEDecisionEngineDSSEvaluationAdapter
         final ExecutionResults results;
         try (final KieSession knowledgeSession = kieBase.newKieSession())
         {
+            // BPMN can dispose the session before execute returns, so observe failures while facts are still available.
+            knowledgeSession.addEventListener(new HistoryEvaluationValidationFailureLogger());
             if (log.isDebugEnabled())
                 log.debug("KM (Drools) execution...");
             long d0 = 0L;

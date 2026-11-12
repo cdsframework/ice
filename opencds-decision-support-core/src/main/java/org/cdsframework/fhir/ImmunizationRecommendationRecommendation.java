@@ -12,15 +12,19 @@ public record ImmunizationRecommendationRecommendation(@Singular("vaccineCode")
                                                        List<CodeableConcept> targetDisease,
                                                        @Singular("contraindicatedVaccineCode")
                                                        List<CodeableConcept> contraindicatedVaccineCode,
+                                                       @Singular("authority")
+                                                       List<Reference> authority,
                                                        CodeableConcept forecastStatus,
                                                        @Singular("forecastReason")
                                                        List<CodeableConcept> forecastReason,
                                                        @Singular("dateCriterion")
                                                        List<ImmunizationRecommendationDateCriterion> dateCriterion,
                                                        String description,
-                                                       String series,
+                                                       CodeableConcept series,
+                                                       CodeableConcept season,
                                                        CodeableConcept doseNumber,
                                                        CodeableConcept seriesDoses,
+                                                       CodeableConcept seriesDosesRemaining,
                                                        @Singular("extension")
                                                        List<Extension> extension,
                                                        @Singular("supportingImmunization")

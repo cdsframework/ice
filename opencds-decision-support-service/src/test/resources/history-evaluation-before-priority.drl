@@ -1,0 +1,271 @@
+package knowledgeCommon.org.cdsframework.ice;
+
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import org.opencds.vmr.v1_0.internal.AdministrableSubstance;
+import org.opencds.vmr.v1_0.internal.ClinicalStatement;
+import org.opencds.vmr.v1_0.internal.ClinicalStatementRelationship;
+import org.opencds.vmr.v1_0.internal.EntityBase;
+import org.opencds.vmr.v1_0.internal.EvaluatedPerson;
+import org.opencds.vmr.v1_0.internal.EvalTime;
+import org.opencds.vmr.v1_0.internal.ObservationResult;
+import org.opencds.vmr.v1_0.internal.ObservationValue;
+import org.opencds.vmr.v1_0.internal.SubstanceAdministrationEvent;
+import org.opencds.vmr.v1_0.internal.SubstanceAdministrationProposal;
+import org.opencds.vmr.v1_0.internal.concepts.ImmunizationConcept;
+import org.opencds.vmr.v1_0.internal.concepts.ObservationCodedValueConcept;
+import org.opencds.vmr.v1_0.internal.concepts.ObservationFocusConcept;
+import org.opencds.vmr.v1_0.internal.datatypes.BL;
+import org.opencds.vmr.v1_0.internal.datatypes.CD;
+import org.opencds.vmr.v1_0.internal.datatypes.INT;
+import org.opencds.vmr.v1_0.internal.datatypes.IVLDate;
+import org.cdsframework.ice.service.DateFactType;
+import org.cdsframework.ice.service.DiseaseImmunity;
+import org.cdsframework.ice.service.DoseRule;
+import org.cdsframework.ice.service.DoseStatus;
+import org.cdsframework.ice.service.ICEFactTypeFinding;
+import org.cdsframework.ice.service.ICEIntervalFactTypeFinding;
+import org.cdsframework.ice.service.ICEIntervalFactTypeFinding.IntervalFactType;
+import org.cdsframework.ice.service.LiveVirusFact;
+import org.cdsframework.ice.service.InconsistentConfigurationException;
+import org.cdsframework.ice.service.ICELogicHelper;
+import org.cdsframework.ice.service.PayloadHelper;
+import org.cdsframework.ice.service.Recommendation;
+import org.cdsframework.ice.service.RecommendationStatus;
+import org.cdsframework.ice.service.Schedule;
+import org.cdsframework.ice.service.Season;
+import org.cdsframework.ice.service.SeriesRules;
+import org.cdsframework.ice.service.SeriesDisplaySelection;
+import org.cdsframework.ice.service.SeriesDisplaySelectionType;
+import org.cdsframework.ice.service.TargetDose;
+import org.cdsframework.ice.service.TargetDoseInitializationTracker;
+import org.cdsframework.ice.service.TargetSeasons;
+import org.cdsframework.ice.service.TargetSeries;
+import org.cdsframework.ice.service.TargetSeriesSelection;
+import org.cdsframework.ice.service.TargetSeriesSelection.SeriesSelectionStatus;
+import org.cdsframework.ice.supportingdata.BaseDataEvaluationReason;
+import org.cdsframework.ice.supportingdata.BaseDataRecommendationReason;
+import org.cdsframework.ice.supportingdatatmp.SupportedFactConcept;
+import org.cdsframework.ice.util.TimePeriod;
+import org.cdsframework.ice.util.TimePeriod.DurationType;
+import org.cdsframework.ice.service.Vaccine;
+import org.cdsframework.ice.service.VaccineComponent;
+import accumulate org.cdsframework.ice.service.DateMinAccumulateFunction minDate;
+import accumulate org.cdsframework.ice.service.DateMaxAccumulateFunction maxDate;
+
+// OpenCDS specific
+global java.lang.String clientLanguage;
+global java.lang.String clientTimeZoneOffset;
+global java.lang.String focalPersonId;
+global java.time.LocalDate evalTime;
+global java.util.Set assertions;
+global java.util.Map namedObjects;
+
+// ICE specific
+global java.time.LocalDate patientAgeTimeOfInterest;
+global org.cdsframework.ice.service.Schedule schedule;
+global java.lang.Boolean outputEarliestOverdueDates;
+global java.lang.Boolean doseOverrideFeatureEnabled;
+global java.lang.Boolean outputSupplementalText;
+global java.util.List vaccineGroupExclusions;
+global java.lang.Boolean enableUnsupportedVaccinesGroup;
+global java.lang.Boolean outputNumberOfDosesRemaining;
+global java.lang.Boolean outputSeriesInformation;
+global java.lang.Boolean outputScheduleAuthorities;
+global java.lang.Boolean outputVaccineGroupRulesArtifact;
+global java.lang.Boolean disableCovid19DoseNumberReset;
+global java.lang.Boolean disableOutputEarliestOverdueDatesForPneumococcalAdultSeries;
+global java.lang.String iceVersion;
+
+/**
+ * Initialize Immunization Schedule and other Reference Data
+ */
+
+/**
+ * General Design rule... Do not Edit
+ */
+
+// History evaluation rules from cleanup commit 0ce93cfc, for full-process A/B regression tests.
+// Frozen baseline: delete this file and the baseline comparison in HistoryEvaluationClinicalRegressionTest once ICE3-1996 is
+// released and its corpus regression comparison has passed.
+rule "HistoryEvaluation.evaluateNonSeasonalSeriesWhenNoTargetDosesForEvaluation"
+	ruleflow-group "HistoryEvaluation"
+	dialect "mvel"
+	when
+		not TargetDose(status == DoseStatus.EVALUATION_IN_PROCESS || status == DoseStatus.PRIMARY_SHOT_DETERMINATION_IN_PROCESS)
+		$ts : TargetSeries(targetSeasonExists() == false, numberOfShotsAdministeredInSeries == 0, isHistoryEvaluationInitiated() == false)
+	then
+		modify ($ts) {
+			setHistoryEvaluationInitiated(true)
+		};
+		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "in TargetSeries " + $ts.seriesName);
+		drools.setFocus("HistoryEvaluation^customEvaluationRule");
+end
+
+
+rule "HistoryEvaluation.setNonSeasonalNextTargetDoseNonNOSInSeriesForEvaluation"
+	ruleflow-group "HistoryEvaluation"
+	dialect "mvel"
+	when
+		not TargetDose(status == DoseStatus.EVALUATION_IN_PROCESS || status == DoseStatus.PRIMARY_SHOT_DETERMINATION_IN_PROCESS)
+		$td : TargetDose(status == DoseStatus.EVALUATION_NOT_STARTED, vaccineComponent.isUnspecifiedFormulation() == false, associatedTargetSeries.targetSeasonExists() == false)
+		not TargetDose(status == DoseStatus.EVALUATION_NOT_STARTED, administrationDate < $td.administrationDate, associatedTargetSeries == $td.associatedTargetSeries || associatedTargetSeries.seriesRules.seriesGroup < $td.associatedTargetSeries.seriesRules.seriesGroup)
+		$ts : TargetSeries(this == $td.associatedTargetSeries)
+	then
+		modify($td) {
+			setStatus(DoseStatus.PRIMARY_SHOT_DETERMINATION_IN_PROCESS)
+		};
+		modify($ts) {
+			setHistoryEvaluationInitiated(true)
+		};
+		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), $td.toString() + " in TargetSeries " + $ts.seriesName);
+end
+
+
+rule "HistoryEvaluation.setNonSeasonalNextTargetDoseNOSInSeriesForEvaluation"
+	ruleflow-group "HistoryEvaluation"
+	dialect "mvel"
+	when
+		not TargetDose(status == DoseStatus.EVALUATION_IN_PROCESS || status == DoseStatus.PRIMARY_SHOT_DETERMINATION_IN_PROCESS)
+		$td : TargetDose(status == DoseStatus.EVALUATION_NOT_STARTED, vaccineComponent.isUnspecifiedFormulation() == true, associatedTargetSeries.targetSeasonExists() == false)
+		not TargetDose(status == DoseStatus.EVALUATION_NOT_STARTED, administrationDate < $td.administrationDate, associatedTargetSeries == $td.associatedTargetSeries || associatedTargetSeries.seriesRules.seriesGroup < $td.associatedTargetSeries.seriesRules.seriesGroup)
+		not TargetDose(status == DoseStatus.EVALUATION_NOT_STARTED, associatedTargetSeries == $td.associatedTargetSeries, uniqueId != $td.uniqueId, administrationDate == $td.administrationDate, vaccineComponent.isUnspecifiedFormulation() == false)
+		$ts : TargetSeries(this == $td.associatedTargetSeries)
+	then
+		modify($td) {
+			setStatus(DoseStatus.PRIMARY_SHOT_DETERMINATION_IN_PROCESS)
+		};
+		modify($ts) {
+			setHistoryEvaluationInitiated(true)
+		};
+		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), $td.toString() + " in TargetSeries " + $ts.seriesName);
+end
+
+
+rule "HistoryEvaluation.evaluateSeasonalSeriesWhenNoTargetDosesForEvaluation"
+	ruleflow-group "HistoryEvaluation"
+	dialect "mvel"
+	when
+		not TargetDose(status == DoseStatus.EVALUATION_IN_PROCESS || status == DoseStatus.PRIMARY_SHOT_DETERMINATION_IN_PROCESS)
+		$ts : TargetSeries(numberOfShotsAdministeredInSeries == 0, isHistoryEvaluationInitiated() == false, targetSeasonExists() == true)
+		not TargetSeries(isHistoryEvaluationInitiated() == false, targetSeasonExists() == true, seasonStartDate < $ts.seasonStartDate)
+		not TargetDose(status == DoseStatus.EVALUATION_NOT_STARTED, associatedTargetSeries != $ts, associatedTargetSeries.targetSeasonExists() == true, associatedTargetSeries.seasonStartDate < $ts.seasonStartDate)
+	then
+		modify ($ts) {
+			setHistoryEvaluationInitiated(true)
+		};
+		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "in TargetSeries " + $ts.seriesName);
+		drools.setFocus("HistoryEvaluation^customEvaluationRule");
+end
+
+
+rule "HistoryEvaluation.setNextSeasonalTargetDoseNonNOSInSeriesForEvaluation"
+	ruleflow-group "HistoryEvaluation"
+	dialect "mvel"
+	when
+		not TargetDose(status == DoseStatus.EVALUATION_IN_PROCESS || status == DoseStatus.PRIMARY_SHOT_DETERMINATION_IN_PROCESS)
+		$ts : TargetSeries(targetSeasonExists() == true)
+		exists TargetDose(associatedVaccineGroup == $ts.vaccineGroup, status == DoseStatus.EVALUATION_NOT_STARTED) from $ts.targetDoses
+		not TargetSeries(isHistoryEvaluationInitiated() == false, targetSeasonExists() == true, seasonStartDate < $ts.seasonStartDate)
+		not TargetDose(status == DoseStatus.EVALUATION_NOT_STARTED, associatedTargetSeries != $ts, associatedTargetSeries.targetSeasonExists() == true, associatedTargetSeries.seasonStartDate < $ts.seasonStartDate)
+		$td : TargetDose(associatedTargetSeries == $ts, status == DoseStatus.EVALUATION_NOT_STARTED, vaccineComponent.isUnspecifiedFormulation() == false)
+		not TargetDose(status == DoseStatus.EVALUATION_NOT_STARTED, associatedTargetSeries == $td.associatedTargetSeries, administrationDate < $td.administrationDate)
+	then
+		modify($td) {
+			setStatus(DoseStatus.PRIMARY_SHOT_DETERMINATION_IN_PROCESS)
+		};
+		modify($ts) {
+			setHistoryEvaluationInitiated(true)
+		};
+		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), $td.toString() + " in TargetSeries " + $ts.seriesName);
+end
+
+
+rule "HistoryEvaluation.setNextSeasonalTargetDoseNOSInSeriesForEvaluation"
+	ruleflow-group "HistoryEvaluation"
+	dialect "mvel"
+	when
+		not TargetDose(status == DoseStatus.EVALUATION_IN_PROCESS || status == DoseStatus.PRIMARY_SHOT_DETERMINATION_IN_PROCESS)
+		$ts : TargetSeries(targetSeasonExists() == true)
+		exists TargetDose(associatedVaccineGroup == $ts.vaccineGroup, status == DoseStatus.EVALUATION_NOT_STARTED) from $ts.targetDoses
+		not TargetSeries(isHistoryEvaluationInitiated() == false, targetSeasonExists() == true, seasonStartDate < $ts.seasonStartDate)
+		not TargetDose(status == DoseStatus.EVALUATION_NOT_STARTED, associatedTargetSeries != $ts, associatedTargetSeries.targetSeasonExists() == true, associatedTargetSeries.seasonStartDate < $ts.seasonStartDate)
+		$td : TargetDose(associatedTargetSeries == $ts, status == DoseStatus.EVALUATION_NOT_STARTED, vaccineComponent.isUnspecifiedFormulation() == true)
+		not TargetDose(status == DoseStatus.EVALUATION_NOT_STARTED, associatedTargetSeries == $td.associatedTargetSeries, administrationDate < $td.administrationDate)
+		not TargetDose(status == DoseStatus.EVALUATION_NOT_STARTED, associatedTargetSeries == $td.associatedTargetSeries, uniqueId != $td.uniqueId, administrationDate == $td.administrationDate, vaccineComponent.isUnspecifiedFormulation() == false)
+	then
+		modify($td) {
+			setStatus(DoseStatus.PRIMARY_SHOT_DETERMINATION_IN_PROCESS)
+		};
+		modify($ts) {
+			setHistoryEvaluationInitiated(true)
+		};
+		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), $td.toString() + " in TargetSeries " + $ts.seriesName);
+end
+
+
+rule "HistoryEvaluation: If Dose Override Specified, set Dose Evaluation Status Accordingly and Bypass Evaluation Logic"
+	ruleflow-group "HistoryEvaluation"
+	dialect "mvel"
+	salience 10
+	when
+		exists ICEFactTypeFinding(iceResultFinding == "DOSE_OVERRIDE_FEATURE_ENABLED")
+		not TargetDose(status == DoseStatus.EVALUATION_IN_PROCESS || status == DoseStatus.PRIMARY_SHOT_DETERMINATION_IN_PROCESS)
+		$td : TargetDose(status == DoseStatus.EVALUATION_NOT_STARTED)
+		not TargetDose(status == DoseStatus.EVALUATION_NOT_STARTED, associatedTargetSeries == $td.associatedTargetSeries, administrationDate < $td.administrationDate)
+		$sae : SubstanceAdministrationEvent(id == $td.doseId, isValid != null)
+		$ts : TargetSeries(this == $td.associatedTargetSeries)
+		$tdsEvaluated : List() from accumulate($tdacc : TargetDose(associatedTargetSeries == $td.associatedTargetSeries, hasBeenEvaluated == true), collectList($tdacc))
+	then
+		DoseStatus evaluationStatus = $sae.getIsValid().isValue() == true ? DoseStatus.VALID : DoseStatus.INVALID;
+		if ($sae.getIsValid().isValue() == true) {
+			modify($td) {
+				setDoseStatusOverridden(true),
+				setIsPrimarySeriesShot(! $ts.isSeriesComplete()),
+				setDoseNumberCount($ts.determineNumberOfDosesAdministeredInSeries()+1),
+				setAdministeredShotNumberInSeries($tdsEvaluated.size()+1),
+				setStatus(evaluationStatus),
+				addValidReason(BaseDataEvaluationReason._DOSE_OVERRIDE_VALID.getCdsListItemName())
+			};
+		}
+		else {
+			modify($td) {
+				setDoseStatusOverridden(true),
+				setIsPrimarySeriesShot(! $ts.isSeriesComplete()),
+				setDoseNumberCount($ts.determineNumberOfDosesAdministeredInSeries()+1),
+				setAdministeredShotNumberInSeries($tdsEvaluated.size()+1),
+				setStatus(evaluationStatus),
+				addInvalidReason(BaseDataEvaluationReason._DOSE_OVERRIDE_INVALID.getCdsListItemName())
+			};
+		}
+		modify($ts) {
+			setHistoryEvaluationInitiated(true)
+		};
+		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "Dose Override Check Complete for TargetDose " + $td + " in TargetSeries " + $ts.seriesName);
+end
+
+
+rule "HistoryEvaluation: Check if Shot should be marked Accepted and Series Complete if Administered On or After Immunity Date"
+	dialect "mvel"
+	ruleflow-group "HistoryEvaluation^preEvaluationValidation"
+	when
+		$targetDose : TargetDose(status == DoseStatus.EVALUATION_IN_PROCESS, $diseasesTargetedByThisDose : vaccineComponent.allDiseasesTargetedForImmunity, $doseAdministrationDate : administrationDate)
+		$targetSeries : TargetSeries(this == $targetDose.associatedTargetSeries)
+		$diseaseImmunityList : List(size == $diseasesTargetedByThisDose.size()) from
+			accumulate($di : DiseaseImmunity($d : getDisease(), getDateOfImmunity() <= $doseAdministrationDate, $r : getImmunityReason(), disease memberOf $diseasesTargetedByThisDose), collectList($di))
+	then
+		Iterator dilIter = $diseaseImmunityList.iterator();
+		while (dilIter.hasNext()) {
+			$targetDose.addAcceptedReason(((DiseaseImmunity) dilIter.next()).getEvaluationReasonResult());
+		}
+		modify ($targetDose) {
+		    setStatus(DoseStatus.EVALUATION_COMPLETE)
+		};
+		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "Marking Evaluation Complete for TargetDose " + $targetDose.toString() + " in TargetSeries " + $targetSeries .getSeriesName());
+end
+

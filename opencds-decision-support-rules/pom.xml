@@ -4,7 +4,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <artifactId>opencds-decision-support-rules</artifactId>
-    <packaging>kjar</packaging>
+    <packaging>jar</packaging>
 
     <parent>
         <groupId>org.cdsframework</groupId>
@@ -13,7 +13,9 @@
     </parent>
 
     <properties>
-        <kie.plugin.phase>none</kie.plugin.phase>
+        <!-- Generated executable-model sources need no annotation processors; Lombok arrives transitively and would otherwise
+             process every generated file. -->
+        <maven.compiler.proc>none</maven.compiler.proc>
     </properties>
 
     <profiles>
@@ -25,9 +27,34 @@
                     <value>true</value>
                 </property>
             </activation>
-            <properties>
-                <kie.plugin.phase>compile</kie.plugin.phase>
-            </properties>
+            <build>
+                <resources>
+                    <resource>
+                        <directory>src/main/resources</directory>
+                        <excludes>
+                            <exclude>**/*.drl</exclude>
+                            <exclude>**/*.dsl</exclude>
+                            <exclude>**/*.dslr</exclude>
+                        </excludes>
+                    </resource>
+                </resources>
+                <plugins>
+                    <plugin>
+                        <groupId>org.kie</groupId>
+                        <artifactId>kie-maven-plugin</artifactId>
+                        <version>${kie-maven-plugin.version}</version>
+                        <executions>
+                            <execution>
+                                <id>generate-model-sources</id>
+                                <phase>generate-sources</phase>
+                                <goals>
+                                    <goal>generate-model-sources</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
         </profile>
     </profiles>
 
@@ -44,28 +71,5 @@
             <version>${project.parent.version}</version>
         </dependency>
     </dependencies>
-
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.kie</groupId>
-                <artifactId>kie-maven-plugin</artifactId>
-                <version>${drools.version}</version>
-                <extensions>true</extensions>
-                <executions>
-                    <execution>
-                        <id>default-build</id>
-                        <phase>${kie.plugin.phase}</phase>
-                        <goals>
-                            <goal>build</goal>
-                        </goals>
-                    </execution>
-                </executions>
-                <configuration>
-                    <generateModel>YES</generateModel>
-                </configuration>
-            </plugin>
-        </plugins>
-    </build>
 
 </project>

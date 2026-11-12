@@ -312,8 +312,7 @@ Expose a business-facing interface like:
 ```java
 public interface ImmunizationForecastGateway
 {
-    ForecastResult getForecast(Patient patient, LocalDate assessmentDate, String knowledgeBase,
-            List<Immunization> immunizations,
+    ForecastResult getForecast(Patient patient, LocalDate assessmentDate, String knowledgeBase, List<Immunization> immunizations,
             List<Observation> observations);
 }
 ```
@@ -547,7 +546,10 @@ concept in the forecast output. Under the FHIR contract, disease targeting is re
 - `ImmunizationEvaluation.targetDisease`
 - `ImmunizationRecommendation.recommendation.targetDisease`
 
-Those `targetDisease` values are disease `CodeableConcept` values, not vaccine group values. When an implementation needs to group
+Those `targetDisease` values are arrays of disease `CodeableConcept` values, with one concept per disease.
+MMR and DTP each contain three entries, MR and DT contain two, and single-disease evaluations contain one entry.
+Evaluations use the evaluated component CVX `diseaseImmunity` assignments in `supportedVaccines.yml`;
+recommendations use vaccine-group assignments. When an implementation needs to group
 FHIR evaluations or recommendations by the SOAP/vMR vaccine group, or compare FHIR output to vMR output during A/B testing, it
 must normalize disease indicators back to vaccine groups.
 
@@ -597,8 +599,7 @@ Normalize vMR output:
 
 Normalize FHIR output:
 
-1. For each `ImmunizationEvaluation.targetDisease` and each `ImmunizationRecommendation.recommendation.targetDisease`, read all
-   codings.
+1. Iterate the `targetDisease` array on each evaluation or recommendation. For each disease concept, read all its codings.
 2. Find SNOMED CT codings, normally using system `http://snomed.info/sct`, that match `/cds/supporting-data/diseases`
    `outboundCode.code` values.
 3. Resolve each SNOMED CT code through `diseaseSnomedCode -> diseaseCode`.

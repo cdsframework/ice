@@ -47,6 +47,7 @@ rule "Hep B: Verify Adherence to the Maximum Valid Age for the Vaccine if Hep B 
     	There is an Administered Shot $oTargetDose that needs to be evaluated
     		- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.HEP_B"
        		- the vaccine administered is "VACCINE_CVX_08"
+            - the vaccine administered is not "VACCINE_CVX_193"
        		- the vaccine administered has a maximum valid age
        		- make note of the Associated Series as $oTargetSeries
 		The patient information $oEvaluatedPerson must be known to complete writing this rule
@@ -56,6 +57,25 @@ rule "Hep B: Verify Adherence to the Maximum Valid Age for the Vaccine if Hep B 
         Include the reason for shot $oTargetDose Invalid due to "Insufficient Antigen"
         Record that this dose rule was Processed for the TargetDose $oTargetDose
 		Log that this dose rule fired for the dose $oTargetDose in the Series $oTargetSeries
+end
+
+rule "Hep B: CVX 193 administered at age 18 years or older is Invalid due to Insufficient Antigen"
+    dialect "mvel"
+    ruleflow-group "HistoryEvaluation^customEvaluationRule"
+    activation-group "maximumAgeVaccineCheck"
+    when
+        There is an Administered Shot $currentDose that needs to be evaluated
+            - the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.HEP_B"
+            - the vaccine administered is "VACCINE_CVX_193"
+            - make note of the date this shot was administered as $administrationDate
+            - make note of the Associated Series as $associatedSeries
+        The patient information $person must be known to complete writing this rule
+            - make note of the patient's birthdate as $birthDate
+        Confirm elapsed time between $birthDate and $administrationDate >= 18 DurationType.YEARS
+    then
+        Include the reason for shot $currentDose Invalid due to "Insufficient Antigen"
+        Record that this dose rule was Processed for the TargetDose $currentDose
+        Log that this dose rule fired for the dose $currentDose in the Series $associatedSeries
 end
 
 /**

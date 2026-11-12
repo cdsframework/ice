@@ -28,6 +28,13 @@ management:
   endpoints:
     access:
       max-permitted: none
+  tracing:
+    sampling:
+      probability: 1.0
+  otlp:
+    metrics:
+      export:
+        enabled: false
 
 server:
   servlet:
@@ -63,7 +70,8 @@ ice:
       enable-dose-override-feature: false
       output-supplemental-text: true
       output-number-of-doses-remaining: false
-      output-series-information: false
+      output-series-information-for-evaluations: false
+      output-series-information-for-recommendations: false
       output-vaccine-group-rules-artifact: false
       output-schedule-authorities: false
       enable-unsupported-vaccines-group: false
@@ -81,4 +89,4 @@ ice:
   ice-base-knowledge-base: https://terminology.cdsframework.org/ice/PlanDefinition/common-ice-forecast|1.0.0
   enable-drools-event-logging: false
   fire-limit: 25000
-  ice-version: ICE_2.60.1
+  ice-version: ICE_2.61.1

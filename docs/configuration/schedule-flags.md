@@ -46,6 +46,7 @@ patient's `clinicalStatements/observationResults`. The SOAP envelope itself is
 unchanged. The decoded payload must contain an `observationResult` like this:
 
 ```xml
+
 <observationResult>
     <templateId root="2.16.840.1.113883.3.795.11.6.3.1"/>
     <id root="2f0d8eb9-66c5-458a-a70f-ff1d539b3cc4"/>

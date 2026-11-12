@@ -4,7 +4,6 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.util.Map;
@@ -52,21 +51,9 @@ class VmrConversionComponentCodeSystemReverseMappingTest
         final IceProperties properties = new IceProperties();
         properties.setIceBaseKnowledgeBase(KNOWLEDGE_BASE);
         properties.setKnowledgeBases(Map.of(KNOWLEDGE_BASE,
-                new IceProperties.KnowledgeBaseProperties(true, false, true, false, true, false, false, false, java.util.List.of(),
-                        java.util.List.of(), false, IceProperties.SupplementalTextMode.LEGACY,
+                new IceProperties.KnowledgeBaseProperties(true, false, true, false, true, true, false, false, false,
+                        java.util.List.of(), java.util.List.of(), false, IceProperties.SupplementalTextMode.LEGACY,
                         new ByteArrayResource(new byte[0]))));
-        return properties;
-    }
-
-    private static IceProperties createIceProperties(final boolean outputNumberOfDosesRemaining,
-            @SuppressWarnings("SameParameterValue") final boolean outputSeriesInformation)
-    {
-        final IceProperties properties = new IceProperties();
-        properties.setIceBaseKnowledgeBase(KNOWLEDGE_BASE);
-        properties.setKnowledgeBases(Map.of(KNOWLEDGE_BASE,
-                new IceProperties.KnowledgeBaseProperties(true, false, true, outputNumberOfDosesRemaining, outputSeriesInformation,
-                        false, false, false, java.util.List.of(), java.util.List.of(), false,
-                        IceProperties.SupplementalTextMode.LEGACY, new ByteArrayResource(new byte[0]))));
         return properties;
     }
 
@@ -134,7 +121,7 @@ class VmrConversionComponentCodeSystemReverseMappingTest
                 .name("SUPPORTED_CONTEXTUAL_CONDITION_CODES")
                 .identifier(
                         Identifier.builder().system("urn:ietf:rfc:3986").value("urn:oid:2.16.840.1.113883.3.795.12.100.52").build())
-                .url("http://ivci.org/CodeSystem/contextual-condition")
+                .url("https://ivci.org/contextual-conditions/usa/cdc-cdsi")
                 .status(PublicationStatusEnum.ACTIVE)
                 .content(CodeSystemContentModeEnum.COMPLETE)
                 .concept(CodeSystemConcept.builder()
@@ -289,7 +276,7 @@ class VmrConversionComponentCodeSystemReverseMappingTest
                                 .status("final")
                                 .code(CodeableConcept.builder()
                                         .coding(Coding.builder()
-                                                .system("http://ivci.org/CodeSystem/contextual-condition")
+                                                .system("https://ivci.org/contextual-conditions/usa/cdc-cdsi")
                                                 .code("018")
                                                 .display("Laboratory Evidence of Immunity or confirmation of Hepatitis A disease")
                                                 .build())
@@ -719,31 +706,4 @@ class VmrConversionComponentCodeSystemReverseMappingTest
         assertTrue(xml.contains("codeSystem=\"2.16.840.1.113883.3.795.12.100.9\""));
     }
 
-    @Test
-    void outputSeriesContextGateUsesPrecomputedKnowledgeModuleFlags() throws Exception
-    {
-        final IceProperties iceProperties = createIceProperties(false, false);
-        final SupportingDataService supportingDataService = new SupportingDataService(createCdsEngineProperties(), iceProperties);
-        final VmrConversionComponent vmrConversionComponent = createVmrConversionComponent(supportingDataService, iceProperties);
-
-        final Method shouldOutputSeriesContext =
-                VmrConversionComponent.class.getDeclaredMethod("shouldOutputSeriesContext", String.class);
-        shouldOutputSeriesContext.setAccessible(true);
-
-        assertFalse((Boolean) shouldOutputSeriesContext.invoke(vmrConversionComponent, KM_ID));
-    }
-
-    @Test
-    void outputSeriesContextIsEnabledWhenNumberOfDosesRemainingIsEnabled() throws Exception
-    {
-        final IceProperties iceProperties = createIceProperties(true, false);
-        final SupportingDataService supportingDataService = new SupportingDataService(createCdsEngineProperties(), iceProperties);
-        final VmrConversionComponent vmrConversionComponent = createVmrConversionComponent(supportingDataService, iceProperties);
-
-        final Method shouldOutputSeriesContext =
-                VmrConversionComponent.class.getDeclaredMethod("shouldOutputSeriesContext", String.class);
-        shouldOutputSeriesContext.setAccessible(true);
-
-        assertTrue((Boolean) shouldOutputSeriesContext.invoke(vmrConversionComponent, KM_ID));
-    }
 }

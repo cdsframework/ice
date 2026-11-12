@@ -25,6 +25,15 @@ class TargetSeriesConversionTest
     private static final String OLDER_ADULT_SERIES = "SUPPORTED_SERIES.COVID_19_AUG_2025_GTE_65_SERIES";
     private static final LocalDate BIRTH_DATE = LocalDate.of(1960, 11, 20);
 
+    private static TargetDose dose(final TargetSeries series, final LocalDate administrationDate)
+    {
+        final VaccineComponent component = new VaccineComponent(new CdsConcept("VACCINE_CVX_309"), List.of("COVID_19"));
+        final Vaccine vaccine = new Vaccine(new CdsConcept("VACCINE_CVX_309"), new ArrayList<>(List.of(component)));
+        final SubstanceAdministrationEvent event = new SubstanceAdministrationEvent();
+        event.setId(administrationDate.toString());
+        return new TargetDose(vaccine, component, administrationDate, series, event);
+    }
+
     @Test
     void conversionPreservesOtherSeasonsAndTheCapturedDoseEvaluation() throws InconsistentConfigurationException
     {
@@ -68,8 +77,8 @@ class TargetSeriesConversionTest
         assertEquals(1, adultRules.getNumberOfDosesInSeries());
         assertEquals(ADULT_SERIES, dose6.getEvaluatedSeriesName());
         assertEquals(DoseStatus.VALID, dose6.getStatus());
-        assertEquals("65y-1d", pastSeason.obtainDoseRuleForSeriesByTargetDose(dose6)
-                .getAbsoluteMaximumAge().getTimePeriodStringRepresentation());
+        assertEquals("65y-1d",
+                pastSeason.obtainDoseRuleForSeriesByTargetDose(dose6).getAbsoluteMaximumAge().getTimePeriodStringRepresentation());
         assertNotSame(adultDoseRule, pastSeason.obtainDoseRuleForSeriesByTargetDose(dose6));
         assertNotSame(olderAdultSecondDoseRule, pastSeason.getSeriesRules().getSeriesDoseRuleByDoseNumber(2));
         assertNotSame(olderAdultFirstDoseRule.getAbsoluteMinimumInterval(),
@@ -79,14 +88,5 @@ class TargetSeriesConversionTest
         final TargetDose dose7 = dose(olderAdultCurrentSeason, LocalDate.of(2026, 9, 29));
         olderAdultCurrentSeason.evaluateVaccineGroupMaximumAgeandRecordReason(BIRTH_DATE, dose7);
         assertFalse(dose7.containsInvalidReason("EVALUATION_REASON_CONCEPT.ABOVE_MAXIMUM_AGE_SERIES"));
-    }
-
-    private static TargetDose dose(final TargetSeries series, final LocalDate administrationDate)
-    {
-        final VaccineComponent component = new VaccineComponent(new CdsConcept("VACCINE_CVX_309"), List.of("COVID_19"));
-        final Vaccine vaccine = new Vaccine(new CdsConcept("VACCINE_CVX_309"), new ArrayList<>(List.of(component)));
-        final SubstanceAdministrationEvent event = new SubstanceAdministrationEvent();
-        event.setId(administrationDate.toString());
-        return new TargetDose(vaccine, component, administrationDate, series, event);
     }
 }

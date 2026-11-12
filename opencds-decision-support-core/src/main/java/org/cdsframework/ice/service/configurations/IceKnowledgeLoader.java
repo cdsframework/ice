@@ -28,10 +28,8 @@ package org.cdsframework.ice.service.configurations;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
+import java.net.URL;
 import java.util.function.Function;
-import java.util.stream.Stream;
 
 import org.cdsframework.ice.service.SupportingDataService;
 import org.cdsframework.ice.util.KnowledgeModuleUtils;
@@ -48,7 +46,7 @@ import org.opencds.config.api.model.KnowledgeModule;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
-import org.springframework.core.io.support.ResourcePatternResolver;
+import org.springframework.util.ResourceUtils;
 
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -63,19 +61,22 @@ public class IceKnowledgeLoader implements KnowledgeLoader<InputStream, IceKnowl
     {
         final KieServices kieServices = KieServices.Factory.get();
 
-        final ResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
+        final PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
 
         final Resource[] droolsModelResources = resolver.getResources("classpath*:META-INF/kie/**/drools-model");
         if (droolsModelResources.length > 1)
             throw new IllegalStateException(
                     "Found %d instances of drools-model in classpath".formatted(droolsModelResources.length));
 
-        if (droolsModelResources.length == 1)
+        if (droolsModelResources.length == 1 && resolver.getResources("classpath*:drools/**/*.drl").length == 0)
         {
             log.info("Found pre-compiled Drools in classpath");
 
-            final String url = droolsModelResources[0].getURL().toString();
-            final Resource resource = new UrlResource(url.substring(4, url.indexOf("!/")));
+            final URL url = droolsModelResources[0].getURL();
+            if (ResourceUtils.isFileURL(url))
+                return kieServices.newKieClasspathContainer(Thread.currentThread().getContextClassLoader()).getKieBase();
+
+            final Resource resource = new UrlResource(ResourceUtils.extractJarFileURL(url));
             log.info("Loading ICE KnowledgeBase from jar: {}", resource);
 
             try (final InputStream is = resource.getInputStream())
@@ -92,27 +93,24 @@ public class IceKnowledgeLoader implements KnowledgeLoader<InputStream, IceKnowl
         if (kmoduleResources.length != 1)
             throw new IllegalStateException("Found %d instances of kmodule.xml in classpath".formatted(kmoduleResources.length));
 
-        final Resource resource = kmoduleResources[0].createRelative("../drools");
-        log.info("Loading ICE KnowledgeBase from filesystem: {}", resource);
-
-        final Path droolsPath = Path.of(resource.getURI());
-
+        log.info("Loading ICE KnowledgeBase from classpath resources");
+        final String droolsPattern = "%s**/*".formatted(kmoduleResources[0].createRelative("../drools/").getURL());
         final KieFileSystem kfs = kieServices.newKieFileSystem();
-
-        try (final Stream<Path> stream = Files.find(droolsPath, Integer.MAX_VALUE, (p, a) -> a.isRegularFile()))
+        for (final Resource resource : resolver.getResources(droolsPattern))
         {
-            for (final Path path : stream.toList())
-            {
-                final ResourceType resourceType = ResourceType.determineResourceType(path.getFileName().toString());
-                if (resourceType == null)
-                    continue;
+            if (resource.getFilename() == null)
+                continue;
 
-                final org.kie.api.io.Resource droolsResource =
-                        kieServices.getResources().newInputStreamResource(Files.newInputStream(path));
-                droolsResource.setTargetPath(droolsPath.relativize(path).toString());
-                droolsResource.setResourceType(resourceType);
-                kfs.write(droolsResource);
-            }
+            final ResourceType resourceType = ResourceType.determineResourceType(resource.getFilename());
+            if (resourceType == null)
+                continue;
+
+            final org.kie.api.io.Resource droolsResource =
+                    kieServices.getResources().newByteArrayResource(resource.getContentAsByteArray());
+            droolsResource.setTargetPath(
+                    resolver.getPathMatcher().extractPathWithinPattern(droolsPattern, resource.getURL().toString()));
+            droolsResource.setResourceType(resourceType);
+            kfs.write(droolsResource);
         }
 
         final KieBuilder kieBuilder = kieServices.newKieBuilder(kfs).buildAll(ExecutableModelProject.class);

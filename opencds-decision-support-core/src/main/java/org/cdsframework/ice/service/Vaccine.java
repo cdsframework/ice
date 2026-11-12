@@ -56,6 +56,7 @@ public class Vaccine extends AbstractVaccine
 
         final Vaccine lVaccine = new Vaccine(pV);
         lVaccine.setCombinationVaccine(pV.combinationVaccine);
+        lVaccine.setValidInMultipleVaccineGroups(pV.validInMultipleVaccineGroups);
         for (final VaccineComponent pVC : pV.vaccineComponents)
             lVaccine.getVaccineComponents().add(VaccineComponent.constructDeepCopyOfVaccineComponentObject(pVC));
 
@@ -64,6 +65,7 @@ public class Vaccine extends AbstractVaccine
 
     private final List<VaccineComponent> vaccineComponents;
     private boolean combinationVaccine;
+    private boolean validInMultipleVaccineGroups;
 
     private Vaccine(final Vaccine pVaccine)
     {

@@ -56,7 +56,7 @@ public class TargetDose
     private final Vaccine administeredVaccine;
     private final Set<String> notEvaluatedReasons;
     private final Set<String> doseRulesProcessed;
-    private VaccineComponent vaccineComponent;
+    private final VaccineComponent vaccineComponent;
     private VaccineComponent reportingVaccineComponent;
     private int administeredShotNumberInSeries;
     private LocalDate administrationDate;

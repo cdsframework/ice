@@ -1,6 +1,7 @@
 package org.cdsframework.fhir;
 
 import java.util.List;
+import java.util.Objects;
 
 import lombok.Builder;
 import lombok.Singular;
@@ -14,8 +15,10 @@ public record ImmunizationEvaluation(String resourceType,
                                      String status,
                                      Reference patient,
                                      String date,
-                                     Reference authority,
-                                     CodeableConcept targetDisease,
+                                     @Singular("authority")
+                                     List<Reference> authority,
+                                     @Singular("targetDisease")
+                                     List<CodeableConcept> targetDisease,
                                      Reference immunizationEvent,
                                      CodeableConcept doseStatus,
                                      @Singular("doseStatusReason")
@@ -23,7 +26,8 @@ public record ImmunizationEvaluation(String resourceType,
                                      @Singular("extension")
                                      List<Extension> extension,
                                      String description,
-                                     String series,
+                                     CodeableConcept series,
+                                     CodeableConcept season,
                                      CodeableConcept doseNumber,
                                      CodeableConcept seriesDoses) implements FhirResource
 {
@@ -32,5 +36,8 @@ public record ImmunizationEvaluation(String resourceType,
     public ImmunizationEvaluation
     {
         resourceType = FhirResource.normalizeResourceType(resourceType, RESOURCE_TYPE);
+        targetDisease = List.copyOf(Objects.requireNonNull(targetDisease, "targetDisease is required"));
+        if (targetDisease.isEmpty())
+            throw new IllegalArgumentException("targetDisease must contain at least one disease");
     }
 }

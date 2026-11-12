@@ -1,0 +1,93 @@
+package knowledgeCommon.org.cdsframework.ice;
+
+import java.util.List;
+import org.cdsframework.ice.service.DoseStatus;
+import org.cdsframework.ice.service.HistoryEvaluationValidationHelper;
+import org.cdsframework.ice.service.HistoryEvaluationValidationHelper.ValidationResult;
+import org.cdsframework.ice.service.HistoryEvaluationValidationHelper.Violation;
+import org.cdsframework.ice.service.HistoryEvaluationValidationState;
+import org.cdsframework.ice.service.HistoryEvaluationValidationState.ValidationStatus;
+import org.cdsframework.ice.service.ICELogicHelper;
+import org.cdsframework.ice.service.PayloadHelper;
+import org.cdsframework.ice.service.TargetDose;
+import org.cdsframework.ice.service.TargetSeries;
+
+rule "HistoryEvaluationValidation: Initialize validation state"
+	ruleflow-group "HistoryEvaluationValidation"
+	dialect "mvel"
+	when
+		not HistoryEvaluationValidationState()
+	then
+		insert(new HistoryEvaluationValidationState());
+end
+
+rule "HistoryEvaluationValidation: Compute multi-vaccine-group dose validation result"
+	ruleflow-group "HistoryEvaluationValidation"
+	dialect "mvel"
+	when
+		HistoryEvaluationValidationState(validationStatus == ValidationStatus.NOT_RUN)
+		not TargetSeries(historyEvaluationInitiated == false)
+		// NOT_EVALUATED is a terminal outcome but deliberately leaves hasBeenEvaluated false.
+		not TargetDose(hasBeenEvaluated == false, status != DoseStatus.NOT_EVALUATED)
+		$targetDoses : List() from collect(TargetDose())
+		not ValidationResult()
+	then
+		insert(HistoryEvaluationValidationHelper.validate($targetDoses));
+end
+
+rule "HistoryEvaluationValidation: Pass when no multi-vaccine-group doses remain"
+	ruleflow-group "HistoryEvaluationValidation"
+	dialect "mvel"
+	when
+		$validationState : HistoryEvaluationValidationState(validationStatus == ValidationStatus.NOT_RUN)
+		$validationResult : ValidationResult(violations().isEmpty())
+	then
+		modify($validationState) {
+			setValidationStatus(ValidationStatus.PASSED)
+		};
+		retract($validationResult);
+end
+
+rule "HistoryEvaluationValidation: Fail when multi-vaccine-group doses remain"
+	ruleflow-group "HistoryEvaluationValidation"
+	dialect "mvel"
+	when
+		$validationState : HistoryEvaluationValidationState(validationStatus == ValidationStatus.NOT_RUN)
+		$validationResult : ValidationResult($violations : violations(), $diagnosticMessage : diagnosticMessage(), violations().size() > 0)
+	then
+		for (Violation violation : $violations) {
+			insert(violation.finding());
+		}
+
+		modify($validationState) {
+			setValidationStatus(ValidationStatus.FAILED),
+			setDiagnosticMessage($diagnosticMessage)
+		};
+		retract($validationResult);
+end
+
+rule "HistoryEvaluationValidationFailure: Fail when validation did not run"
+	ruleflow-group "HistoryEvaluationValidationFailure"
+	dialect "mvel"
+	when
+		$validationState : HistoryEvaluationValidationState(validationStatus == ValidationStatus.NOT_RUN)
+	then
+		modify($validationState) {
+			setValidationStatus(ValidationStatus.FAILED),
+			setDiagnosticMessage("History evaluation validation did not run; one or more series or doses have not finished history evaluation")
+		};
+end
+
+rule "HistoryEvaluationValidationFailure: Return controlled validation error result"
+	ruleflow-group "HistoryEvaluationValidationFailure"
+	dialect "mvel"
+	when
+		$validationState : HistoryEvaluationValidationState(validationStatus == ValidationStatus.FAILED, controlledErrorResponseGenerated == false)
+	then
+		PayloadHelper payloadHelper = new PayloadHelper(schedule, drools, namedObjects, Boolean.TRUE.equals(outputSupplementalText), Boolean.TRUE.equals(outputScheduleAuthorities), Boolean.TRUE.equals(outputVaccineGroupRulesArtifact));
+		payloadHelper.outputOtherImmRecommendationSubstanceAdministrationProposal(focalPersonId, iceVersion);
+		modify($validationState) {
+			setControlledErrorResponseGenerated(true)
+		};
+		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "History evaluation validation failed; returning controlled error result");
+end

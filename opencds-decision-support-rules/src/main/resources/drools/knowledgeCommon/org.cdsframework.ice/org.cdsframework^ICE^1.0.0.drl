@@ -75,7 +75,8 @@ global java.lang.Boolean outputSupplementalText;
 global java.util.List vaccineGroupExclusions;
 global java.lang.Boolean enableUnsupportedVaccinesGroup;
 global java.lang.Boolean outputNumberOfDosesRemaining;
-global java.lang.Boolean outputSeriesInformation;
+global java.lang.Boolean outputSeriesInformationForEvaluations;
+global java.lang.Boolean outputSeriesInformationForRecommendations;
 global java.lang.Boolean outputScheduleAuthorities;
 global java.lang.Boolean outputVaccineGroupRulesArtifact;
 global java.lang.Boolean disableCovid19DoseNumberReset;
@@ -204,15 +205,26 @@ end
 /**
  * General Design rule... Do not Edit
  */
-rule "InitializeReferenceData: Output Series Information Fact Object"
+rule "InitializeReferenceData: Output Series Information For Evaluations Fact Object"
 	ruleflow-group "ImmunizationReferenceData"
 	dialect "mvel"
     when
-        not ICEFactTypeFinding(iceResultFinding == SupportedFactConcept._OUTPUT_SERIES_INFORMATION.conceptCodeValue)
-        eval(outputSeriesInformation != null && outputSeriesInformation.booleanValue() == true)
+        not ICEFactTypeFinding(iceResultFinding == SupportedFactConcept._OUTPUT_SERIES_INFORMATION_FOR_EVALUATIONS.conceptCodeValue)
+        eval(outputSeriesInformationForEvaluations != null && outputSeriesInformationForEvaluations.booleanValue() == true)
     then
-        insert(new ICEFactTypeFinding(SupportedFactConcept._OUTPUT_SERIES_INFORMATION.conceptCodeValue));
-        ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "Output series information Initialized");
+        insert(new ICEFactTypeFinding(SupportedFactConcept._OUTPUT_SERIES_INFORMATION_FOR_EVALUATIONS.conceptCodeValue));
+        ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "Output evaluation series information Initialized");
+end
+
+rule "InitializeReferenceData: Output Series Information For Recommendations Fact Object"
+	ruleflow-group "ImmunizationReferenceData"
+	dialect "mvel"
+    when
+        not ICEFactTypeFinding(iceResultFinding == SupportedFactConcept._OUTPUT_SERIES_INFORMATION_FOR_RECOMMENDATIONS.conceptCodeValue)
+        eval(outputSeriesInformationForRecommendations != null && outputSeriesInformationForRecommendations.booleanValue() == true)
+    then
+        insert(new ICEFactTypeFinding(SupportedFactConcept._OUTPUT_SERIES_INFORMATION_FOR_RECOMMENDATIONS.conceptCodeValue));
+        ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "Output recommendation series information Initialized");
 end
 
 /**
@@ -703,7 +715,37 @@ end
 
 /**
  * Evaluation of doses
+ * Finish higher-priority vaccine groups before starting lower-priority groups. Date, season, and series-group ordering
+ * applies within the same priority. Uninitiated empty series also participate, so their custom routing runs first.
+ * Every higher-priority dose must reach a terminal status (VALID, INVALID, ACCEPTED, or NOT_EVALUATED); otherwise no
+ * lower-priority group starts history evaluation and HistoryEvaluationValidation fails the whole evaluation.
  */
+
+/**
+ * Route candidate doses before selecting or overriding any dose in this series. Startup rules require the routing marker;
+ * salience 20 prioritizes dispatch ahead of overrides (10) and ordinary selection (0). The separate marker preserves
+ * existing history-initiation and seasonal ordering.
+ *
+ * General Design rule... Do not Edit
+ *
+ */
+rule "HistoryEvaluation: Route candidate doses before series evaluation"
+	ruleflow-group "HistoryEvaluation"
+	dialect "mvel"
+	salience 20
+	when
+		not TargetDose(status == DoseStatus.EVALUATION_IN_PROCESS || status == DoseStatus.PRIMARY_SHOT_DETERMINATION_IN_PROCESS)
+		$ts : TargetSeries(historyEvaluationRoutingInitiated == false, $priority : vaccineGroupPriority)
+		not TargetSeries(isHistoryEvaluationInitiated() == false, vaccineGroupPriority > $priority)
+		not TargetDose(hasBeenEvaluated == false, status != DoseStatus.NOT_EVALUATED,
+			associatedTargetSeries.vaccineGroupPriority > $priority)
+	then
+		modify ($ts) {
+			setHistoryEvaluationRoutingInitiated(true)
+		};
+		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "in TargetSeries " + $ts.seriesName);
+		drools.setFocus("HistoryEvaluation^preEvaluationRouting");
+end
 
 /**
  * General Design rule... Do not Edit
@@ -713,7 +755,9 @@ rule "HistoryEvaluation.evaluateNonSeasonalSeriesWhenNoTargetDosesForEvaluation"
 	dialect "mvel"
 	when
 		not TargetDose(status == DoseStatus.EVALUATION_IN_PROCESS || status == DoseStatus.PRIMARY_SHOT_DETERMINATION_IN_PROCESS)
-		$ts : TargetSeries(targetSeasonExists() == false, numberOfShotsAdministeredInSeries == 0, isHistoryEvaluationInitiated() == false)
+		$ts : TargetSeries(historyEvaluationRoutingInitiated == true, targetSeasonExists() == false, numberOfShotsAdministeredInSeries == 0, isHistoryEvaluationInitiated() == false, $priority : vaccineGroupPriority)
+		not TargetSeries(isHistoryEvaluationInitiated() == false, vaccineGroupPriority > $priority)
+		not TargetDose(hasBeenEvaluated == false, status != DoseStatus.NOT_EVALUATED, associatedTargetSeries.vaccineGroupPriority > $priority)
 	then
 		modify ($ts) {
 			setHistoryEvaluationInitiated(true)
@@ -731,8 +775,10 @@ rule "HistoryEvaluation.setNonSeasonalNextTargetDoseNonNOSInSeriesForEvaluation"
 	when
 		not TargetDose(status == DoseStatus.EVALUATION_IN_PROCESS || status == DoseStatus.PRIMARY_SHOT_DETERMINATION_IN_PROCESS)
 		$td : TargetDose(status == DoseStatus.EVALUATION_NOT_STARTED, vaccineComponent.isUnspecifiedFormulation() == false, associatedTargetSeries.targetSeasonExists() == false)
-		not TargetDose(status == DoseStatus.EVALUATION_NOT_STARTED, administrationDate < $td.administrationDate, associatedTargetSeries == $td.associatedTargetSeries || associatedTargetSeries.seriesRules.seriesGroup < $td.associatedTargetSeries.seriesRules.seriesGroup)
-		$ts : TargetSeries(this == $td.associatedTargetSeries)
+		$ts : TargetSeries(historyEvaluationRoutingInitiated == true, this == $td.associatedTargetSeries, $priority : vaccineGroupPriority)
+		not TargetSeries(isHistoryEvaluationInitiated() == false, vaccineGroupPriority > $priority)
+		not TargetDose(hasBeenEvaluated == false, status != DoseStatus.NOT_EVALUATED, associatedTargetSeries.vaccineGroupPriority > $priority)
+		not TargetDose(status == DoseStatus.EVALUATION_NOT_STARTED, administrationDate < $td.administrationDate, associatedTargetSeries.vaccineGroupPriority == $priority, associatedTargetSeries == $td.associatedTargetSeries || associatedTargetSeries.seriesRules.seriesGroup < $td.associatedTargetSeries.seriesRules.seriesGroup)
 	then
 		modify($td) {
 			setStatus(DoseStatus.PRIMARY_SHOT_DETERMINATION_IN_PROCESS)
@@ -752,9 +798,11 @@ rule "HistoryEvaluation.setNonSeasonalNextTargetDoseNOSInSeriesForEvaluation"
 	when
 		not TargetDose(status == DoseStatus.EVALUATION_IN_PROCESS || status == DoseStatus.PRIMARY_SHOT_DETERMINATION_IN_PROCESS)
 		$td : TargetDose(status == DoseStatus.EVALUATION_NOT_STARTED, vaccineComponent.isUnspecifiedFormulation() == true, associatedTargetSeries.targetSeasonExists() == false)
-		not TargetDose(status == DoseStatus.EVALUATION_NOT_STARTED, administrationDate < $td.administrationDate, associatedTargetSeries == $td.associatedTargetSeries || associatedTargetSeries.seriesRules.seriesGroup < $td.associatedTargetSeries.seriesRules.seriesGroup)
+		$ts : TargetSeries(historyEvaluationRoutingInitiated == true, this == $td.associatedTargetSeries, $priority : vaccineGroupPriority)
+		not TargetSeries(isHistoryEvaluationInitiated() == false, vaccineGroupPriority > $priority)
+		not TargetDose(hasBeenEvaluated == false, status != DoseStatus.NOT_EVALUATED, associatedTargetSeries.vaccineGroupPriority > $priority)
+		not TargetDose(status == DoseStatus.EVALUATION_NOT_STARTED, administrationDate < $td.administrationDate, associatedTargetSeries.vaccineGroupPriority == $priority, associatedTargetSeries == $td.associatedTargetSeries || associatedTargetSeries.seriesRules.seriesGroup < $td.associatedTargetSeries.seriesRules.seriesGroup)
 		not TargetDose(status == DoseStatus.EVALUATION_NOT_STARTED, associatedTargetSeries == $td.associatedTargetSeries, uniqueId != $td.uniqueId, administrationDate == $td.administrationDate, vaccineComponent.isUnspecifiedFormulation() == false)
-		$ts : TargetSeries(this == $td.associatedTargetSeries)
 	then
 		modify($td) {
 			setStatus(DoseStatus.PRIMARY_SHOT_DETERMINATION_IN_PROCESS)
@@ -773,9 +821,11 @@ rule "HistoryEvaluation.evaluateSeasonalSeriesWhenNoTargetDosesForEvaluation"
 	dialect "mvel"
 	when
 		not TargetDose(status == DoseStatus.EVALUATION_IN_PROCESS || status == DoseStatus.PRIMARY_SHOT_DETERMINATION_IN_PROCESS)
-		$ts : TargetSeries(numberOfShotsAdministeredInSeries == 0, isHistoryEvaluationInitiated() == false, targetSeasonExists() == true)
-		not TargetSeries(isHistoryEvaluationInitiated() == false, targetSeasonExists() == true, seasonStartDate < $ts.seasonStartDate)
-		not TargetDose(status == DoseStatus.EVALUATION_NOT_STARTED, associatedTargetSeries != $ts, associatedTargetSeries.targetSeasonExists() == true, associatedTargetSeries.seasonStartDate < $ts.seasonStartDate)
+		$ts : TargetSeries(historyEvaluationRoutingInitiated == true, numberOfShotsAdministeredInSeries == 0, isHistoryEvaluationInitiated() == false, targetSeasonExists() == true, $priority : vaccineGroupPriority)
+		not TargetSeries(isHistoryEvaluationInitiated() == false, vaccineGroupPriority > $priority)
+		not TargetDose(hasBeenEvaluated == false, status != DoseStatus.NOT_EVALUATED, associatedTargetSeries.vaccineGroupPriority > $priority)
+		not TargetSeries(isHistoryEvaluationInitiated() == false, targetSeasonExists() == true, vaccineGroupPriority == $priority, seasonStartDate < $ts.seasonStartDate)
+		not TargetDose(status == DoseStatus.EVALUATION_NOT_STARTED, associatedTargetSeries != $ts, associatedTargetSeries.vaccineGroupPriority == $priority, associatedTargetSeries.targetSeasonExists() == true, associatedTargetSeries.seasonStartDate < $ts.seasonStartDate)
 	then
 		modify ($ts) {
 			setHistoryEvaluationInitiated(true)
@@ -792,10 +842,12 @@ rule "HistoryEvaluation.setNextSeasonalTargetDoseNonNOSInSeriesForEvaluation"
 	dialect "mvel"
 	when
 		not TargetDose(status == DoseStatus.EVALUATION_IN_PROCESS || status == DoseStatus.PRIMARY_SHOT_DETERMINATION_IN_PROCESS)
-		$ts : TargetSeries(targetSeasonExists() == true)
+		$ts : TargetSeries(historyEvaluationRoutingInitiated == true, targetSeasonExists() == true, $priority : vaccineGroupPriority)
+		not TargetSeries(isHistoryEvaluationInitiated() == false, vaccineGroupPriority > $priority)
+		not TargetDose(hasBeenEvaluated == false, status != DoseStatus.NOT_EVALUATED, associatedTargetSeries.vaccineGroupPriority > $priority)
 		exists TargetDose(associatedVaccineGroup == $ts.vaccineGroup, status == DoseStatus.EVALUATION_NOT_STARTED) from $ts.targetDoses
-		not TargetSeries(isHistoryEvaluationInitiated() == false, targetSeasonExists() == true, seasonStartDate < $ts.seasonStartDate)
-		not TargetDose(status == DoseStatus.EVALUATION_NOT_STARTED, associatedTargetSeries != $ts, associatedTargetSeries.targetSeasonExists() == true, associatedTargetSeries.seasonStartDate < $ts.seasonStartDate)
+		not TargetSeries(isHistoryEvaluationInitiated() == false, targetSeasonExists() == true, vaccineGroupPriority == $priority, seasonStartDate < $ts.seasonStartDate)
+		not TargetDose(status == DoseStatus.EVALUATION_NOT_STARTED, associatedTargetSeries != $ts, associatedTargetSeries.vaccineGroupPriority == $priority, associatedTargetSeries.targetSeasonExists() == true, associatedTargetSeries.seasonStartDate < $ts.seasonStartDate)
 		$td : TargetDose(associatedTargetSeries == $ts, status == DoseStatus.EVALUATION_NOT_STARTED, vaccineComponent.isUnspecifiedFormulation() == false)
 		not TargetDose(status == DoseStatus.EVALUATION_NOT_STARTED, associatedTargetSeries == $td.associatedTargetSeries, administrationDate < $td.administrationDate)
 	then
@@ -817,10 +869,12 @@ rule "HistoryEvaluation.setNextSeasonalTargetDoseNOSInSeriesForEvaluation"
 	dialect "mvel"
 	when
 		not TargetDose(status == DoseStatus.EVALUATION_IN_PROCESS || status == DoseStatus.PRIMARY_SHOT_DETERMINATION_IN_PROCESS)
-		$ts : TargetSeries(targetSeasonExists() == true)
+		$ts : TargetSeries(historyEvaluationRoutingInitiated == true, targetSeasonExists() == true, $priority : vaccineGroupPriority)
+		not TargetSeries(isHistoryEvaluationInitiated() == false, vaccineGroupPriority > $priority)
+		not TargetDose(hasBeenEvaluated == false, status != DoseStatus.NOT_EVALUATED, associatedTargetSeries.vaccineGroupPriority > $priority)
 		exists TargetDose(associatedVaccineGroup == $ts.vaccineGroup, status == DoseStatus.EVALUATION_NOT_STARTED) from $ts.targetDoses
-		not TargetSeries(isHistoryEvaluationInitiated() == false, targetSeasonExists() == true, seasonStartDate < $ts.seasonStartDate)
-		not TargetDose(status == DoseStatus.EVALUATION_NOT_STARTED, associatedTargetSeries != $ts, associatedTargetSeries.targetSeasonExists() == true, associatedTargetSeries.seasonStartDate < $ts.seasonStartDate)
+		not TargetSeries(isHistoryEvaluationInitiated() == false, targetSeasonExists() == true, vaccineGroupPriority == $priority, seasonStartDate < $ts.seasonStartDate)
+		not TargetDose(status == DoseStatus.EVALUATION_NOT_STARTED, associatedTargetSeries != $ts, associatedTargetSeries.vaccineGroupPriority == $priority, associatedTargetSeries.targetSeasonExists() == true, associatedTargetSeries.seasonStartDate < $ts.seasonStartDate)
 		$td : TargetDose(associatedTargetSeries == $ts, status == DoseStatus.EVALUATION_NOT_STARTED, vaccineComponent.isUnspecifiedFormulation() == true)
 		not TargetDose(status == DoseStatus.EVALUATION_NOT_STARTED, associatedTargetSeries == $td.associatedTargetSeries, administrationDate < $td.administrationDate)
 		not TargetDose(status == DoseStatus.EVALUATION_NOT_STARTED, associatedTargetSeries == $td.associatedTargetSeries, uniqueId != $td.uniqueId, administrationDate == $td.administrationDate, vaccineComponent.isUnspecifiedFormulation() == false)
@@ -850,7 +904,9 @@ rule "HistoryEvaluation: If Dose Override Specified, set Dose Evaluation Status 
 		$td : TargetDose(status == DoseStatus.EVALUATION_NOT_STARTED)
 		not TargetDose(status == DoseStatus.EVALUATION_NOT_STARTED, associatedTargetSeries == $td.associatedTargetSeries, administrationDate < $td.administrationDate)
 		$sae : SubstanceAdministrationEvent(id == $td.doseId, isValid != null)
-		$ts : TargetSeries(this == $td.associatedTargetSeries)
+		$ts : TargetSeries(historyEvaluationRoutingInitiated == true, this == $td.associatedTargetSeries, $priority : vaccineGroupPriority)
+		not TargetSeries(isHistoryEvaluationInitiated() == false, vaccineGroupPriority > $priority)
+		not TargetDose(hasBeenEvaluated == false, status != DoseStatus.NOT_EVALUATED, associatedTargetSeries.vaccineGroupPriority > $priority)
 		$tdsEvaluated : List() from accumulate($tdacc : TargetDose(associatedTargetSeries == $td.associatedTargetSeries, hasBeenEvaluated == true), collectList($tdacc))
 	then
 		DoseStatus evaluationStatus = $sae.getIsValid().isValue() == true ? DoseStatus.VALID : DoseStatus.INVALID;
@@ -878,6 +934,8 @@ rule "HistoryEvaluation: If Dose Override Specified, set Dose Evaluation Status 
 			setHistoryEvaluationInitiated(true)
 		};
 		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "Dose Override Check Complete for TargetDose " + $td + " in TargetSeries " + $ts.seriesName);
+		// Group routing still applies to a caller-specified evaluation outcome.
+		drools.setFocus("HistoryEvaluation^customEvaluationRule");
 end
 
 /**
@@ -928,6 +986,8 @@ rule "HistoryEvaluation: Check if Shot should be marked Accepted and Series Comp
 		    setStatus(DoseStatus.EVALUATION_COMPLETE)
 		};
 		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "Marking Evaluation Complete for TargetDose " + $targetDose.toString() + " in TargetSeries " + $targetSeries .getSeriesName());
+		// Immunity completes pre-validation before the usual duplicate-shot path invokes group routing.
+		drools.setFocus("HistoryEvaluation^customEvaluationRule");
 end
 
 /**
@@ -1121,7 +1181,7 @@ end
 	dialect "mvel"
 	salience 100
 	when
-	    exists (ICEFactTypeFinding(iceResultFinding == SupportedFactConcept._OUTPUT_SERIES_INFORMATION.conceptCodeValue))
+	    exists (ICEFactTypeFinding(iceResultFinding == SupportedFactConcept._OUTPUT_SERIES_INFORMATION_FOR_EVALUATIONS.conceptCodeValue))
         $td : TargetDose(status == DoseStatus.EVALUATION_COMPLETE, $ts : associatedTargetSeries)
 		accumulate($srthis : SeriesRules(vaccineGroup == $ts.vaccineGroup); $numberOfSeriesInVG : count($srthis); $numberOfSeriesInVG > 0)
 	then
@@ -1710,14 +1770,13 @@ end
  */
 
 /**
- * Supplemental rule... Output Series Selection Information, if _OUTPUT_NUMBER_OF_DOSES_REMAINING option enabled
+ * Supplemental rule... Output Series Selection Information, if recommendation series information is enabled
  */
 rule "RecommendationForecast: Make a Record of all Non-Seasonal TargetSeries of the Vaccine Group for Series Selection Display purposes, if the Series Selection Display Option is Enabled"
 	ruleflow-group "RecommendationForecast"
 	dialect "mvel"
 	when
-		exists (ICEFactTypeFinding(iceResultFinding == SupportedFactConcept._OUTPUT_NUMBER_OF_DOSES_REMAINING.conceptCodeValue)) or
-		exists (ICEFactTypeFinding(iceResultFinding == SupportedFactConcept._OUTPUT_SERIES_INFORMATION.conceptCodeValue))
+		exists (ICEFactTypeFinding(iceResultFinding == SupportedFactConcept._OUTPUT_SERIES_INFORMATION_FOR_RECOMMENDATIONS.conceptCodeValue))
 		$ts : TargetSeries(isSelectedSeries() == true, targetSeason == null)
 		not SeriesDisplaySelection(targetSeries == $ts)
 	then
@@ -1727,17 +1786,17 @@ rule "RecommendationForecast: Make a Record of all Non-Seasonal TargetSeries of 
 end
 
 /**
- * Supplemental rule... Output Series Selection Information, if _OUTPUT_NUMBER_OF_DOSES_REMAINING option enabled
+ * Supplemental rule... Output Series Selection Information, if recommendation series information is enabled
  */
 rule "RecommendationForecast: Maka a Record of Seasonal TargetSeries in the Current Season of the Vaccine Group for Series Selection Display purposes, if the Series Selection Display Option is Enabled"
 	ruleflow-group "RecommendationForecast"
 	dialect "mvel"
 	when
-		exists (ICEFactTypeFinding(iceResultFinding == SupportedFactConcept._OUTPUT_NUMBER_OF_DOSES_REMAINING.conceptCodeValue)) or
-		exists (ICEFactTypeFinding(iceResultFinding == SupportedFactConcept._OUTPUT_SERIES_INFORMATION.conceptCodeValue))
+		exists (ICEFactTypeFinding(iceResultFinding == SupportedFactConcept._OUTPUT_SERIES_INFORMATION_FOR_RECOMMENDATIONS.conceptCodeValue))
 		$ts : TargetSeries(isSelectedSeries() == true, targetSeason != null)
 		not SeriesDisplaySelection(targetSeries == $ts)
 		not TargetSeries(vaccineGroup == $ts.vaccineGroup, targetSeason != null, targetSeason.fullySpecifiedSeasonStartDate.isAfter($ts.targetSeason.fullySpecifiedSeasonStartDate))
+		not TargetSeries(vaccineGroup == $ts.vaccineGroup, seriesRules.seriesGroup > $ts.seriesRules.seriesGroup)
 	then
 		SeriesDisplaySelection ss = new SeriesDisplaySelection($ts);
 		insert(ss);
@@ -3041,8 +3100,7 @@ rule "Series Display(Abstract): Determine Series Display Options Enabled"
 	dialect "mvel"
 	salience 8
 	when
-		exists ICEFactTypeFinding(iceResultFinding in (SupportedFactConcept._OUTPUT_NUMBER_OF_DOSES_REMAINING.conceptCodeValue,
-		        SupportedFactConcept._OUTPUT_SERIES_INFORMATION.conceptCodeValue))
+		exists ICEFactTypeFinding(iceResultFinding == SupportedFactConcept._OUTPUT_SERIES_INFORMATION_FOR_RECOMMENDATIONS.conceptCodeValue)
     then
         ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "Series Display Options Enabled");
 end

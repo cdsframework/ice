@@ -36,6 +36,7 @@
 [condition][]- [Tt]he [Uu]nique [Ii]dentifier of the [Ss]hot is {aOp} {sUniqueId}={sUniqueId} {aOp} uniqueId
 [condition][]- [Tt]hat is the [Ss]ame [Ss]hot as {refer_oTargetDose}=this == {refer_oTargetDose}
 [condition][]- [Tt]hat is [Nn]ot the [Ss]ame [Ss]hot as {refer_oTargetDose}=this != {refer_oTargetDose}
+[condition][]- [Tt]he [Ss]hot is part of the [Ss]ame [Dd]ose [Aa]dministration as {refer_oTargetDose}=doseId != null && !doseId.isBlank() && doseId == {refer_oTargetDose}.doseId
 [condition][]- [Tt]he [Ss]hot has [Nn]ot been [Ee]valuated yet=status == DoseStatus.EVALUATION_IN_PROCESS || status == DoseStatus.EVALUATION_NOT_STARTED
 [condition][]- [Tt]he [Ss]hot belongs to the [Pp]rimary [Ss]eries=isPrimarySeriesShot() == true
 [condition][]- [Tt]he [Ss]hot does not belong to the [Pp]rimary [Ss]eries=isPrimarySeriesShot() == false
@@ -100,6 +101,7 @@
 [condition][]- [Mm]ake [Nn]ote of the [Rr]ecommended [Ii]nterval from [Tt]his [Dd]ose to the [Nn]ext [Dd]ose as {assign_oTimePeriod}=getAssociatedTargetSeries().obtainDoseRuleForSeriesByDoseNumber(this.getDoseNumberInSeries()) != null, {assign_oTimePeriod} : getAssociatedTargetSeries().obtainDoseRuleForSeriesByDoseNumber(this.getDoseNumberInSeries()).getEarliestRecommendedInterval(), {assign_oTimePeriod} != null
 [condition][]- [Mm]ake [Nn]ote of the [Aa]ssociated [Ss]eries as {assign_oTargetSeries}={assign_oTargetSeries} : associatedTargetSeries, {assign_oTargetSeries} != null
 [condition][]- [Mm]ake [Nn]ote of the [Aa]ssociated [Vv]accine [Gg]roup as {assign_oVaccineGroup}={assign_oVaccineGroup} : associatedVaccineGroup, {assign_oVaccineGroup} != null
+[condition][]- [Mm]ake [Nn]ote of the [Mm]aximum [Dd]ate [Ff]or [Uu]se of the [Aa]dministered [Vv]accine as {assign_maximumDateForUse}={assign_maximumDateForUse} : getAdministeredVaccine().getMaximumDateForUse()
 [condition][]- [Mm]ake [Nn]ote of [Aa]ll [Ee]valuation [Rr]easons for this [Ss]hot as {assign_oCollectionOfReasons}={assign_oCollectionOfReasons} : allEvaluationReasonsFromAllReasonSets
 [condition][]- [Mm]ake [Nn]ote of [Aa]ccepted [Ee]valuation [Rr]easons for this [Ss]hot as {assign_oCollectionOfReasons}={assign_oCollectionOfReasons} : acceptedReasons
 [condition][]- [Mm]ake [Nn]ote of [Ii]nvalid [Ee]valuation [Rr]easons for this [Ss]hot as {assign_oCollectionOfReasons}={assign_oCollectionOfReasons} : invalidReasons
@@ -133,6 +135,7 @@
 [condition][]- [Tt]he [Ss]eries belongs to the [Vv]accine [Gg]roup {dd_oVaccineGroupCdsListItem}=seriesRules.vaccineGroup == {dd_oVaccineGroupCdsListItem}
 [condition][]- [Tt]he [Ss]eries is [Cc]omplete=isSeriesComplete() == true
 [condition][]- [Tt]he [Ss]eries is [Nn]ot [Cc]omplete=isSeriesComplete() == false
+[condition][]- [Tt]he [Ss]eries has [Bb]egun [Hh]istory [Ee]valuation [Rr]outing=historyEvaluationRoutingInitiated == true
 [condition][]- [Tt]he [Ss]eries is a [Ss]easonal [Ss]eries=targetSeasonExists() == true
 [condition][]- [Tt]he [Ss]eries is a [Nn]ot a [Ss]easonal [Ss]eries=targetSeasonExists() == false
 [condition][]- [Tt]he [Ss]eries belongs to the same [Ss]eason as the [Ss]eries {refer_oTargetSeries}=targetSeason != null, targetSeason == {refer_oTargetSeries}.targetSeason
@@ -242,6 +245,8 @@
 [condition][]- [Tt]he [Rr]ecommendation is [Aa]ssociated with [Ss]hot {refer_oTargetDose}={refer_oTargetDose} != null && targetDoseIdentifier != null && targetDoseIdentifier == {refer_oTargetDose}.uniqueId
 [condition][]- [Tt]he [Rr]ecommendation [Rr]eason is not {strRecommendationReason}=recommendationReason != {strRecommendationReason}
 [condition][]- [Tt]he [Rr]ecommendation [Rr]eason is {strRecommendationReason}=recommendationReason == {strRecommendationReason}
+[condition][]- [Tt]he [Rr]ecommendation [Ss]tatus is not {enum_RecommendationStatus}=recommendationStatus != {enum_RecommendationStatus}
+[condition][]- [Tt]he [Rr]ecommendation [Ss]tatus is {enum_RecommendationStatus}=recommendationStatus == {enum_RecommendationStatus}
 
 // TargetDose accumulates
 [condition][][Vv]erify that the [Cc]ount of [Dd]oses [Aa]dministered in [Ss]eries {refer_oTargetSeries} with [Vv]accine a member of {dd_oVaccineCdsList:[(][\"][A-Z0-9._]+[\"](?:,\s*[\"][A-Z0-9._]+[\"])*[)]} is {aOp_num}  {nNumberOfDoses}=accumulate($td : TargetDose(status == DoseStatus.VALID, vaccineComponent.cdsConceptName in {dd_oVaccineCdsList} || $td.administeredVaccine.cdsConceptName in {dd_oVaccineCdsList}) from {refer_oTargetSeries}.targetDoses; $countNum: count($td); $countNum {aOp_num}  {nNumberOfDoses})
@@ -363,6 +368,7 @@
 [consequence][][Cc]reate a [Rr]ecommendation as {assign_oRecommendation} with [Ss]tatus {enum_RecommendationStatus} for the [Ss]eries {refer_oTargetSeries}=Recommendation {assign_oRecommendation} = new Recommendation({refer_oTargetSeries}); {assign_oRecommendation}.setRecommendationStatus({enum_RecommendationStatus});
 [consequence][][Cc]reate a [Rr]ecommendation as {assign_oRecommendation} for the [Ss]eries {refer_oTargetSeries}=Recommendation {assign_oRecommendation} = new Recommendation({refer_oTargetSeries});
 [consequence][][Ss]et the [Rr]ecommendation [Ss]tatus for {refer_oRecommendation} to {enum_RecommendationStatus}={refer_oRecommendation}.setRecommendationStatus({enum_RecommendationStatus});
+[consequence][][Cc]hange the [Ss]tatus of [Rr]ecommendation {refer_oRecommendation} to {enum_RecommendationStatus}=modify ({refer_oRecommendation}) \{ setRecommendationStatus({enum_RecommendationStatus}) \};
 [consequence][][Ss]et the [Rr]ecommendation [Ee]arliest [Ff]orecast [Dd]ate for {refer_oRecommendation} to the latter of {dtForecastDate} and {strDate:[\"][0-9]{1,2}[-][a-zA-Z]{3}[-][0-9]{4}[\"]}=if ({dtForecastDate} != null) \{ LocalDate latterDate = {dtForecastDate}; LocalDate strDate = TimePeriod.generateDateFromStringInDroolsDateFormat({strDate}); if (strDate != null && latterDate != null && strDate.isAfter(latterDate)) \{ latterDate = strDate; \} {refer_oRecommendation}.setEarliestDate(latterDate); \}
 [consequence][][Ss]et the [Rr]ecommendation [Ee]arliest [Ff]orecast [Dd]ate for {refer_oRecommendation} to the latter of {dtForecastDate} and {dtDate}=if ({dtForecastDate} != null) \{ LocalDate latterDate = {dtForecastDate}; if ({dtDate} != null && latterDate != null && {dtDate}.isAfter(latterDate)) \{ latterDate = {dtDate}; \} {refer_oRecommendation}.setEarliestDate(latterDate); \}
 [consequence][][Ss]et the [Rr]ecommendation [Ee]arliest [Ff]orecast [Dd]ate for {refer_oRecommendation} to {strDate:[\"][0-9]{1,2}[-][a-zA-Z]{3}[-][0-9]{4}[\"]}={refer_oRecommendation}.setEarliestDate(TimePeriod.generateDateFromStringInDroolsDateFormat({strDate}));

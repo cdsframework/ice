@@ -20,7 +20,7 @@ expander ../../knowledgeCommon/org.cdsframework.ice/org.cdsframework^ICE^1.0.0.d
 
 global java.time.LocalDate evalTime;
 
-rule "Meningococcal: Mark the Series Complete if Dose 1 is Administered >= 16yrs and < 19yrs of Age"
+rule "Meningococcal: Mark the Series Complete if Dose 1 is Administered >= 16yrs-4d and < 19yrs of Age"
 	dialect "mvel"
 	ruleflow-group "RecommendationForecast^customRecommendationRule"
 	salience 100
@@ -36,10 +36,10 @@ rule "Meningococcal: Mark the Series Complete if Dose 1 is Administered >= 16yrs
 			- make note of the date this shot was administered as $dtAdministrationDate
 		The patient information $assign_oEvaluatedPerson must be known to complete writing this rule
 			- make note of the patient's birthdate as $dtBirthDate
-			- make note of the date as $dtDateAtAge when the patient is "16y" of age
+			- make note of the date as $dtDateAtAge when the patient is "16y-4d" of age
 		There is a Series $sameTargetSeries identified by $targetSeries
 			- the number of Doses Administered before $dtDateAtAge is == 0
-		Confirm elapsed time between $dtBirthDate and $dtAdministrationDate >= "16y" && elapsed time between $dtBirthDate and $dtAdministrationDate < "19y"
+		Confirm elapsed time between $dtBirthDate and $dtAdministrationDate >= "16y-4d" && elapsed time between $dtBirthDate and $dtAdministrationDate < "19y"
 	then
 		Mark the Series $targetSeries Complete
 		Refresh all Facts in the Series $targetSeries for Forecasting

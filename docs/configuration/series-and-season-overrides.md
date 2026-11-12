@@ -12,8 +12,10 @@ when constructing the effective schedule. Because schedules are preloaded and
 cached, changing configured override maps normally requires schedule
 reconstruction or a service restart.
 
-Overrides can be supplied through any Spring Boot configuration mechanism,
-including `application.yml`, environment variables, or command-line arguments.
+Overrides can be supplied through `application.yml`, command-line arguments, or
+the environment-based mechanisms described in
+[Environment-based configuration](#environment-based-configuration). Ordinary
+per-property environment variables cannot express these overrides.
 
 ## Structure and formats
 
@@ -122,6 +124,31 @@ request-supplied administered-dose validity override controlled by
 `enable-dose-override-feature`. That request behavior is described in
 [Runtime Configuration](runtime-configuration.md).
 
+### Example: Recommend HPV beginning at age 9
+
+To configure the first HPV dose to be recommended beginning at age 9, set the
+earliest recommended age for dose 1 in both HPV series:
+
+```yaml
+ice:
+  series-overrides:
+    HPV_2_DOSE_SERIES:
+      dose-overrides:
+        1:
+          earliest-recommended-age: 9y
+    HPV_3_DOSE_SERIES:
+      dose-overrides:
+        1:
+          earliest-recommended-age: 9y
+```
+
+This changes the recommended age without changing the minimum age or other
+series properties. These overrides apply service-wide. Restart ICE after
+changing the configuration so the schedules are reconstructed.
+
+Preserve the override in your deployment configuration when upgrading ICE, and
+verify it against the new release's guidance and expected forecasts.
+
 ## Vaccine-specific dose overrides
 
 Vaccine-level overrides apply to a specific vaccine, identified by CVX code,
@@ -196,33 +223,55 @@ Command-line examples:
 --ice.season-overrides.RSV_DEFAULT_SEASON.default-stop-month-and-day=03-31
 ```
 
-## Environment variable examples
+## Environment-based configuration
 
-Spring Boot removes hyphens and uses underscores for property hierarchy
-separators when binding environment variables. Series and season identifiers
-are included directly in each variable name.
+Ordinary per-property environment variables, such as
+`ICE_SERIESOVERRIDES_HPV_2_DOSE_SERIES_DOSEOVERRIDES_1_EARLIESTRECOMMENDEDAGE`,
+do not bind to these overrides. Spring Boot lowercases environment variable
+names and treats every underscore as a property separator, so series and season
+identifiers such as `HPV_2_DOSE_SERIES` cannot be preserved as map keys.
+
+To supply overrides from the environment, use one of the standard Spring Boot
+mechanisms below. Both preserve identifiers exactly as written.
+
+### `SPRING_APPLICATION_JSON`
+
+Set `SPRING_APPLICATION_JSON` to a JSON document with the same structure as the
+YAML configuration. This example changes the first-dose recommended age in both
+HPV series:
 
 ```bash
-# Change a series-wide property.
-ICE_SERIESOVERRIDES_HPV_2_DOSE_SERIES_NUMBEROFDOSESINSERIES=3
-
-# Change one dose property in a series.
-ICE_SERIESOVERRIDES_HPV_2_DOSE_SERIES_DOSEOVERRIDES_1_EARLIESTRECOMMENDEDAGE=9y
-
-# Change an interval between two doses.
-ICE_SERIESOVERRIDES_HPV_2_DOSE_SERIES_DOSEINTERVALOVERRIDES_1_2_MINIMUMINTERVAL=12w
-
-# Change a product-specific property for a dose.
-ICE_SERIESOVERRIDES_HPV_2_DOSE_SERIES_DOSEOVERRIDES_1_SERIESVACCINEOVERRIDES_62_PREFERRED=true
-
-# Set fixed dates for a season.
-ICE_SEASONOVERRIDES_RSV_20242025_SEASON_STARTDATE=2024-08-01
-ICE_SEASONOVERRIDES_RSV_20242025_SEASON_ENDDATE=2025-03-31
-
-# Set recurring month/day boundaries for a season.
-ICE_SEASONOVERRIDES_RSV_DEFAULT_SEASON_DEFAULTSTARTMONTHANDDAY=08-01
-ICE_SEASONOVERRIDES_RSV_DEFAULT_SEASON_DEFAULTSTOPMONTHANDDAY=03-31
+SPRING_APPLICATION_JSON='{
+  "ice": {
+    "series-overrides": {
+      "HPV_2_DOSE_SERIES": {"dose-overrides": {"1": {"earliest-recommended-age": "9y"}}},
+      "HPV_3_DOSE_SERIES": {"dose-overrides": {"1": {"earliest-recommended-age": "9y"}}}
+    },
+    "season-overrides": {
+      "RSV_DEFAULT_SEASON": {
+        "default-start-month-and-day": "08-01",
+        "default-stop-month-and-day": "03-31"
+      }
+    }
+  }
+}'
 ```
+
+The whole document is one value, so all environment-supplied overrides must be
+combined into a single `SPRING_APPLICATION_JSON` variable.
+
+### Additional configuration file
+
+Mount a YAML file containing the overrides, such as a Kubernetes ConfigMap, and
+point `SPRING_CONFIG_ADDITIONAL_LOCATION` at it:
+
+```bash
+SPRING_CONFIG_ADDITIONAL_LOCATION=optional:file:/config/ice-overrides.yml
+```
+
+The file uses the same structure as the
+[Complete YAML example](#complete-yaml-example), and its values take precedence
+over the packaged `application.yml`.
 
 ## Season determination logic
 

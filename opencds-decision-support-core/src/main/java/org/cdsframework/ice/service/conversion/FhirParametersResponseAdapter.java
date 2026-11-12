@@ -34,7 +34,7 @@ public class FhirParametersResponseAdapter
     private static final String STATUS_SUCCESS = "success";
     private static final String STATUS_GENERATED = "generated";
     private static final String OUTCOME_CODE_INFORMATIONAL = "informational";
-    private static final String OUTCOME_CODE_WARNING = "warning";
+    private static final String OUTCOME_CODE_PROCESSING = "processing";
     private static final String OUTCOME_SEVERITY_INFORMATION = "information";
     private static final String OUTCOME_SEVERITY_WARNING = "warning";
     private static final String OUTCOME_SEVERITY_ERROR = "error";
@@ -48,7 +48,7 @@ public class FhirParametersResponseAdapter
         final List<OperationOutcome.Issue> issues = new ArrayList<>();
         Optional.ofNullable(validationIssues).stream().flatMap(Collection::stream).forEach(issues::add);
         if (immunizationEvaluations.isEmpty() && immunizationRecommendations.isEmpty())
-            issues.add(createOperationOutcomeIssue(OUTCOME_CODE_WARNING,
+            issues.add(createOperationOutcomeIssue(OUTCOME_CODE_PROCESSING,
                     "No evaluation or recommendation resources were produced. Ensure the request includes a patient birthDate and relevant immunization/observation input data.",
                     OUTCOME_SEVERITY_WARNING));
 
@@ -105,8 +105,7 @@ public class FhirParametersResponseAdapter
         final boolean hasWarnings = Optional.ofNullable(issues)
                 .stream()
                 .flatMap(Collection::stream)
-                .anyMatch(issue -> OUTCOME_SEVERITY_WARNING.equalsIgnoreCase(issue.severity())
-                        || OUTCOME_CODE_WARNING.equalsIgnoreCase(issue.code()));
+                .anyMatch(issue -> OUTCOME_SEVERITY_WARNING.equalsIgnoreCase(issue.severity()));
 
         if (hasErrors && hasWarnings)
             return " with errors and warnings";

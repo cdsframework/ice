@@ -4,12 +4,15 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -34,6 +37,7 @@ import org.cdsframework.fhir.ParametersParameter;
 import org.cdsframework.fhir.Patient;
 import org.cdsframework.fhir.PlanDefinition;
 import org.cdsframework.fhir.PublicationStatusEnum;
+import org.cdsframework.fhir.Reference;
 import org.cdsframework.ice.config.CdsEngineProperties;
 import org.cdsframework.ice.config.IceProperties;
 import org.cdsframework.ice.service.conversion.FhirToVmrInputAdapter;
@@ -42,10 +46,13 @@ import org.cdsframework.ice.service.conversion.SelectionContextExtensionBuilder;
 import org.cdsframework.ice.service.conversion.VaccineGroupRulesArtifactExtensionBuilder;
 import org.cdsframework.ice.service.conversion.VmrConversionComponent;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.omg.dss.EvaluationResponse;
 import org.omg.dss.FinalKMEvaluationResponse;
 import org.omg.dss.KMEvaluationResultData;
 import org.omg.dss.SemanticPayload;
+import org.opencds.vmr.v1_0.schema.AdministrableSubstance;
 import org.opencds.vmr.v1_0.schema.CD;
 import org.opencds.vmr.v1_0.schema.CDSOutput;
 import org.opencds.vmr.v1_0.schema.EvaluatedPerson;
@@ -59,6 +66,7 @@ import org.opencds.vmr.v1_0.schema.VMR;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.util.ObjectUtils;
 
+import tools.jackson.databind.json.JsonMapper;
 import tools.jackson.dataformat.xml.XmlMapper;
 
 class VmrConversionComponentIntegrationTest
@@ -84,22 +92,23 @@ class VmrConversionComponentIntegrationTest
         return properties;
     }
 
-    private static IceProperties createIceProperties(final boolean outputSeriesInformation,
+    private static IceProperties createIceProperties(final boolean outputSeriesInformationForBothOutputs,
             final boolean outputNumberOfDosesRemaining, final boolean outputScheduleAuthorities)
     {
         final IceProperties properties = new IceProperties();
         properties.setIceBaseKnowledgeBase(KNOWLEDGE_BASE);
         properties.setKnowledgeBases(Map.of(KNOWLEDGE_BASE,
-                new IceProperties.KnowledgeBaseProperties(true, false, true, outputNumberOfDosesRemaining, outputSeriesInformation,
-                        outputScheduleAuthorities, false, false, List.of(), List.of(), false,
-                        IceProperties.SupplementalTextMode.LEGACY, new ByteArrayResource(new byte[0]))));
+                new IceProperties.KnowledgeBaseProperties(true, false, true, outputNumberOfDosesRemaining,
+                        outputSeriesInformationForBothOutputs, outputSeriesInformationForBothOutputs, outputScheduleAuthorities,
+                        false, false, List.of(), List.of(), false, IceProperties.SupplementalTextMode.LEGACY,
+                        new ByteArrayResource(new byte[0]))));
         return properties;
     }
 
-    private static IceProperties createIceProperties(final boolean outputSeriesInformation,
-            @SuppressWarnings("SameParameterValue") final boolean outputNumberOfDosesRemaining)
+    private static IceProperties createIceProperties(final boolean outputSeriesInformationForBothOutputs,
+            final boolean outputNumberOfDosesRemaining)
     {
-        return createIceProperties(outputSeriesInformation, outputNumberOfDosesRemaining, false);
+        return createIceProperties(outputSeriesInformationForBothOutputs, outputNumberOfDosesRemaining, false);
     }
 
     private static CodeSystem simpleCodeSystem(final String name, final String oid, final String url,
@@ -145,12 +154,32 @@ class VmrConversionComponentIntegrationTest
                         CodeSystemConcept.builder().code("DUE_NOW").display("Due Now").build()),
                 "SUPPORTED_CONTEXTUAL_CONDITION_CODES",
                 simpleCodeSystem("SUPPORTED_CONTEXTUAL_CONDITION_CODES", "2.16.840.1.113883.3.795.12.100.52",
-                        "http://ivci.org/CodeSystem/contextual-condition"), "SUPPORTED_VACCINES",
+                        "https://ivci.org/contextual-conditions/usa/cdc-cdsi"), "SUPPORTED_VACCINES",
                 simpleCodeSystem("SUPPORTED_VACCINES", "2.16.840.1.113883.12.292", "http://hl7.org/fhir/sid/cvx",
-                        CodeSystemConcept.builder().code("10").display("IPV").build(), CodeSystemConcept.builder()
+                        CodeSystemConcept.builder()
+                                .code("10")
+                                .display("IPV")
+                                .property(CodeSystemConceptProperty.builder()
+                                        .code("diseaseImmunity")
+                                        .valueCoding(Coding.builder().code("Polio").build())
+                                        .build())
+                                .build(), CodeSystemConcept.builder()
                                 .code("24")
                                 .display("Anthrax, pre-exposure prophylaxis, post-exposure prophylaxis")
                                 .property(CodeSystemConceptProperty.builder().code("supported").valueBoolean(false).build())
+                                .build()), "SUPPORTED_DISEASE_CONCEPT",
+                simpleCodeSystem("SUPPORTED_DISEASE_CONCEPT", "2.16.840.1.113883.3.795.12.100.2",
+                        "https://terminology.cdsframework.org/ice/disease", CodeSystemConcept.builder()
+                                .code("Polio")
+                                .display("Polio")
+                                .property(CodeSystemConceptProperty.builder()
+                                        .code("outboundCode")
+                                        .valueCoding(Coding.builder()
+                                                .system("2.16.840.1.113883.6.96")
+                                                .code("398102009")
+                                                .display("Polio")
+                                                .build())
+                                        .build())
                                 .build()), "SUPPORTED_SCHEDULE_FLAGS",
                 simpleCodeSystem("SUPPORTED_SCHEDULE_FLAGS", SCHEDULE_FLAGS_OID,
                         "https://terminology.cdsframework.org/ice/schedule-flags", CodeSystemConcept.builder()
@@ -319,7 +348,7 @@ class VmrConversionComponentIntegrationTest
                                 .status("final")
                                 .code(CodeableConcept.builder()
                                         .coding(Coding.builder()
-                                                .system("http://ivci.org/CodeSystem/contextual-condition")
+                                                .system("https://ivci.org/contextual-conditions/usa/cdc-cdsi")
                                                 .code("999")
                                                 .display("Unsupported contextual condition")
                                                 .build())
@@ -476,10 +505,18 @@ class VmrConversionComponentIntegrationTest
 
     private static SubstanceAdministrationEvent createEventWithSeriesContext(final String dosesRemainingValue)
     {
+        return createEventWithSeriesContext(dosesRemainingValue, "10");
+    }
+
+    private static SubstanceAdministrationEvent createEventWithSeriesContext(final String dosesRemainingValue, final String cvx)
+    {
         final SubstanceAdministrationEvent event = new SubstanceAdministrationEvent();
         final II id = new II();
         id.setExtension("imm-1");
         event.setId(id);
+        final AdministrableSubstance substance = new AdministrableSubstance();
+        substance.setSubstanceCode(createCd(cvx, "2.16.840.1.113883.12.292", "Evaluated vaccine component"));
+        event.setSubstance(substance);
         event.getRelatedClinicalStatement().add(asRelatedObservation(createPrimaryRecommendationObservation()));
         event.getRelatedClinicalStatement().add(asRelatedObservation(createSeriesDisplayOptionsObservation(dosesRemainingValue)));
         return event;
@@ -492,6 +529,11 @@ class VmrConversionComponentIntegrationTest
 
     private static EvaluationResponse createEvaluationResponseWithSeriesContext(final String dosesRemainingValue)
     {
+        return createEvaluationResponseWithSeriesContext(dosesRemainingValue, "10");
+    }
+
+    private static EvaluationResponse createEvaluationResponseWithSeriesContext(final String dosesRemainingValue, final String cvx)
+    {
         final CDSOutput cdsOutput = new CDSOutput();
         final VMR vmrOutput = new VMR();
         final EvaluatedPerson person = new EvaluatedPerson();
@@ -502,7 +544,7 @@ class VmrConversionComponentIntegrationTest
         clinicalStatements.setSubstanceAdministrationProposals(proposals);
         final EvaluatedPerson.ClinicalStatements.SubstanceAdministrationEvents events =
                 new EvaluatedPerson.ClinicalStatements.SubstanceAdministrationEvents();
-        events.getSubstanceAdministrationEvent().add(createEventWithSeriesContext(dosesRemainingValue));
+        events.getSubstanceAdministrationEvent().add(createEventWithSeriesContext(dosesRemainingValue, cvx));
         clinicalStatements.setSubstanceAdministrationEvents(events);
         person.setClinicalStatements(clinicalStatements);
         vmrOutput.setPatient(person);
@@ -543,8 +585,22 @@ class VmrConversionComponentIntegrationTest
 
     private static EvaluationResponse createEvaluationResponseWithScheduleAuthorities()
     {
+        return createEvaluationResponseWithScheduleAuthorities("ACIP", "CDC");
+    }
+
+    private static EvaluationResponse createEvaluationResponseWithScheduleAuthorities(final String... authorityCodes)
+    {
         final SubstanceAdministrationProposal proposal = createProposalWithSeriesContext();
-        proposal.getRelatedClinicalStatement().add(asRelatedObservation(createScheduleAuthoritiesObservation()));
+        final ObservationResult authorityObservation = createScheduleAuthoritiesObservation();
+        final List<CD> availableAuthorities = List.copyOf(authorityObservation.getInterpretation());
+        authorityObservation.getInterpretation().clear();
+        for (final String code : authorityCodes)
+            authorityObservation.getInterpretation()
+                    .add(availableAuthorities.stream()
+                            .filter(authority -> code.equals(authority.getCode()))
+                            .findFirst()
+                            .orElseThrow());
+        proposal.getRelatedClinicalStatement().add(asRelatedObservation(authorityObservation));
         final CDSOutput cdsOutput = new CDSOutput();
         final VMR vmrOutput = new VMR();
         final EvaluatedPerson person = new EvaluatedPerson();
@@ -552,6 +608,12 @@ class VmrConversionComponentIntegrationTest
         final EvaluatedPerson.ClinicalStatements.SubstanceAdministrationProposals proposals =
                 new EvaluatedPerson.ClinicalStatements.SubstanceAdministrationProposals();
         proposals.getSubstanceAdministrationProposal().add(proposal);
+        final SubstanceAdministrationEvent event = createEventWithSeriesContext("2");
+        event.getRelatedClinicalStatement().add(asRelatedObservation(authorityObservation));
+        final EvaluatedPerson.ClinicalStatements.SubstanceAdministrationEvents events =
+                new EvaluatedPerson.ClinicalStatements.SubstanceAdministrationEvents();
+        events.getSubstanceAdministrationEvent().add(event);
+        clinicalStatements.setSubstanceAdministrationEvents(events);
         clinicalStatements.setSubstanceAdministrationProposals(proposals);
         person.setClinicalStatements(clinicalStatements);
         vmrOutput.setPatient(person);
@@ -678,6 +740,123 @@ class VmrConversionComponentIntegrationTest
                 .orElseThrow();
     }
 
+    /** A converter whose vaccine group 100 has the group diseases and whose one vaccine, the CVX, has the vaccine diseases. */
+    private static VmrConversionComponent createDiseaseMappingConverter(final String vaccineGroup, final String cvx,
+            final List<String> groupDiseaseNames, final List<String> groupDiseaseCodes, final List<String> diseaseNames)
+    {
+        final CdsEngineProperties.KnowledgeBaseDefinition base = createKnowledgeBaseDefinition();
+        final Map<String, CodeSystem> codeSystems = new HashMap<>(base.codeSystems());
+        final CodeSystemConcept.CodeSystemConceptBuilder group = CodeSystemConcept.builder().code("100").display(vaccineGroup);
+        final List<CodeSystemConcept> diseases = new ArrayList<>();
+        for (int i = 0; i < groupDiseaseNames.size(); i++)
+        {
+            final String disease = groupDiseaseNames.get(i);
+            group.property(CodeSystemConceptProperty.builder()
+                    .code("diseaseImmunity")
+                    .valueCoding(Coding.builder().code(disease).build())
+                    .build());
+            diseases.add(CodeSystemConcept.builder()
+                    .code(disease)
+                    .display(disease)
+                    .property(CodeSystemConceptProperty.builder()
+                            .code("outboundCode")
+                            .valueCoding(Coding.builder()
+                                    .system("2.16.840.1.113883.6.96")
+                                    .code(groupDiseaseCodes.get(i))
+                                    .display(disease)
+                                    .build())
+                            .build())
+                    .build());
+        }
+        codeSystems.put("VACCINE_GROUP_CONCEPT", simpleCodeSystem("VACCINE_GROUP_CONCEPT", VACCINE_GROUP_OID,
+                "https://terminology.cdsframework.org/ice/vaccine-group", group.build()));
+        codeSystems.put("SUPPORTED_DISEASE_CONCEPT",
+                simpleCodeSystem("SUPPORTED_DISEASE_CONCEPT", "2.16.840.1.113883.3.795.12.100.2",
+                        "https://terminology.cdsframework.org/ice/disease", diseases.toArray(CodeSystemConcept[]::new)));
+        final CodeSystemConcept.CodeSystemConceptBuilder vaccine = CodeSystemConcept.builder().code(cvx).display(vaccineGroup);
+        for (final String disease : diseaseNames)
+            vaccine.property(CodeSystemConceptProperty.builder()
+                    .code("diseaseImmunity")
+                    .valueCoding(Coding.builder().code(disease).build())
+                    .build());
+        codeSystems.put("SUPPORTED_VACCINES",
+                simpleCodeSystem("SUPPORTED_VACCINES", "2.16.840.1.113883.12.292", "http://hl7.org/fhir/sid/cvx", vaccine.build()));
+        final CdsEngineProperties properties = new CdsEngineProperties();
+        properties.setKnowledgeBaseDefinitionMap(Map.of(KNOWLEDGE_BASE,
+                new CdsEngineProperties.KnowledgeBaseDefinition(base.knowledgeBasePlanDefinition(), base.planDefinitions(),
+                        base.series(), codeSystems, base.outboundCodeSystemMap())));
+        final IceProperties iceProperties = createIceProperties(false, false);
+        return createVmrConversionComponent(new SupportingDataService(properties, iceProperties), iceProperties);
+    }
+
+    // Each disease list is separated by |: the vaccine group's diseases and codes, then the evaluated vaccine's.
+    @ParameterizedTest(name = "{0} preserves one concept per disease")
+    @CsvSource({ "MMR, 03, Measles|Mumps|Rubella, 14189004|36989005|36653000, Measles|Mumps|Rubella, 14189004|36989005|36653000",
+            "DTP, 01, Diphtheria|Pertussis|Tetanus, 397428000|27836007|76902006, Diphtheria|Pertussis|Tetanus, 397428000|27836007|76902006",
+            "MR, 04, Measles|Mumps|Rubella, 14189004|36989005|36653000, Measles|Rubella, 14189004|36653000",
+            "DT, 28, Diphtheria|Pertussis|Tetanus, 397428000|27836007|76902006, Diphtheria|Tetanus, 397428000|76902006",
+            "Polio, 10, Polio, 398102009, Polio, 398102009" })
+    void preservesDistinctTargetDiseasesInEvaluationAndRecommendation(final String vaccineGroup, final String cvx,
+            final String groupDiseaseNameList, final String groupDiseaseCodeList, final String diseaseNameList,
+            final String diseaseCodeList)
+    {
+        final List<String> groupDiseaseNames = List.of(groupDiseaseNameList.split("\\|"));
+        final List<String> groupDiseaseCodes = List.of(groupDiseaseCodeList.split("\\|"));
+        final List<String> diseaseNames = List.of(diseaseNameList.split("\\|"));
+        final List<String> diseaseCodes = List.of(diseaseCodeList.split("\\|"));
+        final VmrConversionComponent converter =
+                createDiseaseMappingConverter(vaccineGroup, cvx, groupDiseaseNames, groupDiseaseCodes, diseaseNames);
+
+        final Parameters response = converter.convertToParametersResponse(createEvaluationResponseWithSeriesContext("2", cvx),
+                createRequestParameters(), LocalDateTime.now());
+        final ImmunizationEvaluation evaluation = firstEvaluation(response);
+        final List<CodeableConcept> targetDiseases = evaluation.targetDisease();
+        assertEquals(diseaseNames, targetDiseases.stream().map(CodeableConcept::text).toList());
+        assertEquals(diseaseCodes, targetDiseases.stream().map(concept -> concept.coding().getFirst().code()).toList());
+        assertTrue(targetDiseases.stream()
+                .allMatch(concept -> concept.coding().size() == 1 && "http://snomed.info/sct".equals(
+                        concept.coding().getFirst().system())));
+        assertEquals(groupDiseaseNames, firstRecommendation(response).recommendation()
+                .getFirst()
+                .targetDisease()
+                .stream()
+                .map(CodeableConcept::text)
+                .toList());
+        assertTrue(evaluation.text().div().contains(String.join(", ", diseaseNames)));
+        assertEquals(1, streamParameters(response).filter(param -> param.resource() instanceof ImmunizationEvaluation).count());
+
+        final JsonMapper mapper = JsonMapper.builder().findAndAddModules().build();
+        final var json = mapper.readTree(mapper.writeValueAsString(evaluation));
+        assertTrue(json.get("targetDisease").isArray());
+        assertEquals(diseaseNames.size(), json.get("targetDisease").size());
+        for (int i = 0; i < diseaseNames.size(); i++)
+        {
+            assertEquals(1, json.get("targetDisease").get(i).get("coding").size());
+            assertEquals(diseaseCodes.get(i), json.get("targetDisease").get(i).get("coding").get(0).get("code").asString());
+        }
+    }
+
+    @Test
+    void usesTheVaccineGroupsDiseasesWhenTheEvaluatedCvxHasNoDiseaseMapping()
+    {
+        // A supporting-data gap for one vaccine must not fail the whole forecast.
+        final VmrConversionComponent converter = createDiseaseMappingConverter("MMR", "03", List.of("Measles", "Mumps", "Rubella"),
+                List.of("14189004", "36989005", "36653000"), List.of());
+
+        final Parameters response = converter.convertToParametersResponse(createEvaluationResponseWithSeriesContext("2", "03"),
+                createRequestParameters(), LocalDateTime.now());
+
+        assertEquals(List.of("Measles", "Mumps", "Rubella"),
+                firstEvaluation(response).targetDisease().stream().map(CodeableConcept::text).toList());
+        assertEquals(1, firstRecommendation(response).recommendation().size());
+    }
+
+    @Test
+    void rejectsEvaluationWithoutATargetDisease()
+    {
+        assertThrows(IllegalArgumentException.class, () -> ImmunizationEvaluation.builder().build());
+    }
+
     @Test
     void doesNotEmitSeriesSeasonOrDosesWhenOutputFlagsAreDisabled()
     {
@@ -694,6 +873,10 @@ class VmrConversionComponentIntegrationTest
         assertTrue(response.parameter().stream().noneMatch(param -> "assessmentDate".equals(param.name())));
         assertEquals(LocalDate.parse("2026-04-09"), recommendation.date());
         assertNull(rec.series());
+        assertNull(evaluation.series());
+        assertNull(evaluation.season());
+        assertNull(rec.season());
+        assertNull(rec.seriesDosesRemaining());
         assertNull(rec.seriesDoses());
         assertTrue(ObjectUtils.isEmpty(rec.extension()));
         assertTrue(evaluation.extension().isEmpty());
@@ -701,11 +884,50 @@ class VmrConversionComponentIntegrationTest
         assertTrue(rec.description().startsWith("Recommendation status:"));
     }
 
-    @Test
-    void emitsSeriesSeasonAndDosesWhenOutputFlagIsEnabled()
+    @ParameterizedTest
+    @CsvSource(
+            { "false,false,false", "true,false,false", "false,true,false", "false,true,true", "true,true,false", "true,true,true" })
+    void independentlyControlsEvaluationAndRecommendationSeriesContext(final boolean evaluations, final boolean recommendations,
+            final boolean doses)
     {
-        final IceProperties iceProperties = createIceProperties(true, false);
+        final IceProperties properties = createIceProperties(false, doses);
+        properties.setOutputSeriesInformationForEvaluations(Optional.of(evaluations));
+        properties.setOutputSeriesInformationForRecommendations(Optional.of(recommendations));
+        final SupportingDataService supportingData = new SupportingDataService(createCdsEngineProperties(), properties);
+        properties.setSeriesOverrides(Map.of("ZOSTER_SERIES", new IceProperties.SeriesOverride(null, null, 3, null, null)));
+        final VmrConversionComponent converter = createVmrConversionComponent(supportingData, properties);
+        final Parameters response =
+                converter.convertToParametersResponse(createEvaluationResponseWithSeriesContext(), createRequestParameters(),
+                        LocalDateTime.now());
+        final org.cdsframework.fhir.ImmunizationRecommendationRecommendation recommendation =
+                firstRecommendation(response).recommendation().getFirst();
+        final ImmunizationEvaluation evaluation = firstEvaluation(response);
+
+        assertEquals(evaluations ? "Zoster Series" : null, evaluation.series() == null ? null : evaluation.series().text());
+        assertEquals(recommendations ? "Zoster Series" : null,
+                recommendation.series() == null ? null : recommendation.series().text());
+        assertEquals(evaluations ? "2026-2027 Season" : null, evaluation.season() == null ? null : evaluation.season().text());
+        assertEquals(recommendations ? "2026-2027 Season" : null,
+                recommendation.season() == null ? null : recommendation.season().text());
+        assertEquals(evaluations,
+                evaluation.extension().stream().anyMatch(ext -> SELECTION_CONTEXT_EXTENSION_URL.equals(ext.url())));
+        assertEquals(recommendations,
+                recommendation.extension().stream().anyMatch(ext -> SELECTION_CONTEXT_EXTENSION_URL.equals(ext.url())));
+        assertEquals(evaluations ? "3" : null, evaluation.seriesDoses() == null ? null : evaluation.seriesDoses().text());
+        assertEquals(recommendations ? "3" : null,
+                recommendation.seriesDoses() == null ? null : recommendation.seriesDoses().text());
+        assertEquals(doses ? "2" : null,
+                recommendation.seriesDosesRemaining() == null ? null : recommendation.seriesDosesRemaining().text());
+        assertEquals(evaluations, evaluation.description().contains("Series: Zoster Series"));
+        assertEquals(recommendations, recommendation.description().contains("Season: 2026-2027 Season"));
+    }
+
+    @Test
+    void emitsSeriesSeasonAndDosesWhenOutputFlagsAreEnabled()
+    {
+        final IceProperties iceProperties = createIceProperties(true, true);
         final SupportingDataService supportingDataService = new SupportingDataService(createCdsEngineProperties(), iceProperties);
+        iceProperties.setSeriesOverrides(Map.of("ZOSTER_SERIES", new IceProperties.SeriesOverride(null, null, 3, null, null)));
         final VmrConversionComponent vmrConversionComponent = createVmrConversionComponent(supportingDataService, iceProperties);
 
         final Parameters response = vmrConversionComponent.convertToParametersResponse(createEvaluationResponseWithSeriesContext(),
@@ -714,42 +936,58 @@ class VmrConversionComponentIntegrationTest
         final ImmunizationEvaluation evaluation = firstEvaluation(response);
         final var rec = recommendation.recommendation().getFirst();
 
-        assertEquals("Zoster Series", rec.series());
-        assertEquals("Zoster Series", evaluation.series());
-        assertNotNull(rec.seriesDoses());
-        assertEquals("2", rec.seriesDoses().text());
+        assertEquals(evaluation.series(), rec.series());
+        assertEquals("Zoster Series", evaluation.series().text());
+        assertEquals("ZOSTER_SERIES", evaluation.series().coding().getFirst().code());
+        assertEquals("Zoster Series", evaluation.series().coding().getFirst().display());
+        assertEquals("https://terminology.cdsframework.org/ice/series", evaluation.series().coding().getFirst().system());
+        final JsonMapper mapper = JsonMapper.builder().findAndAddModules().build();
+        final var evaluationJson = mapper.readTree(mapper.writeValueAsString(evaluation));
+        assertTrue(evaluationJson.get("series").isObject());
+        assertEquals("ZOSTER_SERIES", evaluationJson.get("series").get("coding").get(0).get("code").asString());
+        assertEquals("Zoster Series", evaluationJson.get("series").get("text").asString());
+        final var recommendationJson = mapper.readTree(mapper.writeValueAsString(recommendation));
+        assertTrue(recommendationJson.get("recommendation").get(0).get("series").isObject());
+        assertEquals("Zoster Series", recommendationJson.get("recommendation").get(0).get("series").get("text").asString());
+        assertEquals("ZOSTER_SERIES",
+                recommendationJson.get("recommendation").get(0).get("series").get("coding").get(0).get("code").asString());
+        assertEquals(rec.season(), evaluation.season());
+        assertEquals("2026-2027 Season", evaluation.season().text());
+        assertEquals("SEASON_2026_2027", evaluation.season().coding().getFirst().code());
+        assertEquals("https://terminology.cdsframework.org/ice/season", evaluation.season().coding().getFirst().system());
+        assertTrue(evaluationJson.get("season").isObject());
+        assertEquals("SEASON_2026_2027", evaluationJson.get("season").get("coding").get(0).get("code").asString());
+        assertEquals(evaluationJson.get("season"), recommendationJson.get("recommendation").get(0).get("season"));
+        assertEquals("2", recommendationJson.get("recommendation").get(0).get("seriesDosesRemaining").get("text").asString());
+        assertNotNull(rec.seriesDosesRemaining());
+        assertEquals("2", rec.seriesDosesRemaining().text());
         assertEquals(1, rec.extension().size());
         final var contextExtension = rec.extension().getFirst();
         assertEquals(SELECTION_CONTEXT_EXTENSION_URL, contextExtension.url());
-        assertEquals(3, contextExtension.extension().size());
-        assertTrue(contextExtension.extension()
+        assertEquals(1, contextExtension.extension().size());
+        assertEquals("seriesSelectionType", contextExtension.extension().getFirst().url());
+        assertEquals("SERIES_DISPLAY_UNAMBIGUOUS",
+                contextExtension.extension().getFirst().valueCodeableConcept().coding().getFirst().code());
+        assertTrue(rec.extension()
                 .stream()
-                .anyMatch(ext -> "selectedSeries".equals(ext.url()) && ext.valueCodeableConcept()
-                        .coding()
-                        .stream()
-                        .anyMatch(coding -> "ZOSTER_SERIES".equals(coding.code()))));
-        assertTrue(contextExtension.extension()
-                .stream()
-                .anyMatch(ext -> "seriesSelectionType".equals(ext.url()) && ext.valueCodeableConcept()
-                        .coding()
-                        .stream()
-                        .anyMatch(coding -> "SERIES_DISPLAY_UNAMBIGUOUS".equals(coding.code()))));
-        assertTrue(contextExtension.extension()
-                .stream()
-                .anyMatch(ext -> "selectedSeason".equals(ext.url()) && ext.valueCodeableConcept()
-                        .coding()
-                        .stream()
-                        .anyMatch(coding -> "SEASON_2026_2027".equals(coding.code()))));
+                .flatMap(ext -> ext.extension().stream())
+                .noneMatch(ext -> "selectedSeries".equals(ext.url()) || "selectedSeason".equals(ext.url())));
+        assertEquals(rec.extension(), evaluation.extension());
         assertEquals(1, evaluation.extension().size());
         assertEquals(SELECTION_CONTEXT_EXTENSION_URL, evaluation.extension().getFirst().url());
         assertTrue(rec.description().contains("Series: Zoster Series"));
         assertTrue(rec.description().contains("Season: 2026-2027 Season"));
+        assertTrue(rec.description().contains("Doses remaining in series: 2"), rec.description());
+        // seriesDoses is the selected series' size; only recommendations have the engine's remaining count.
+        assertEquals("3", rec.seriesDoses().text());
+        assertEquals("3", evaluation.seriesDoses().text());
+        assertFalse(evaluation.description().contains("remaining"), evaluation.description());
     }
 
     @Test
-    void doesNotEmitSeriesDosesWhenDosesRemainingIsZero()
+    void emitsZeroDosesRemainingOnlyAsSeriesDosesRemaining()
     {
-        final IceProperties iceProperties = createIceProperties(true, false);
+        final IceProperties iceProperties = createIceProperties(true, true);
         final SupportingDataService supportingDataService = new SupportingDataService(createCdsEngineProperties(), iceProperties);
         final VmrConversionComponent vmrConversionComponent = createVmrConversionComponent(supportingDataService, iceProperties);
 
@@ -761,10 +999,11 @@ class VmrConversionComponentIntegrationTest
         final var rec = recommendation.recommendation().getFirst();
 
         assertNull(rec.seriesDoses());
+        assertEquals("0", rec.seriesDosesRemaining().text());
         assertNull(evaluation.seriesDoses());
         assertTrue(rec.description().contains("Series: Zoster Series"));
         assertTrue(rec.description().contains("Season: 2026-2027 Season"));
-        assertFalse(rec.description().contains("Recommended number of doses for immunity: 0"));
+        assertTrue(rec.description().contains("Doses remaining in series: 0"), rec.description());
     }
 
     @Test
@@ -925,28 +1164,112 @@ class VmrConversionComponentIntegrationTest
     }
 
     @Test
-    void emitsScheduleAuthorityExtensionsWhenOutputFlagIsEnabled()
+    void emitsNativeAuthorityOnEachRecommendationWhenOutputFlagIsEnabled()
     {
         final IceProperties iceProperties = createIceProperties(true, false, true);
         final SupportingDataService supportingDataService = new SupportingDataService(createCdsEngineProperties(), iceProperties);
-        final VmrConversionComponent vmrConversionComponent = createVmrConversionComponent(supportingDataService, iceProperties);
+        final VmrConversionComponent converter = createVmrConversionComponent(supportingDataService, iceProperties);
+        final Parameters response =
+                converter.convertToParametersResponse(createEvaluationResponseWithScheduleAuthorities(), createRequestParameters(),
+                        LocalDateTime.now());
+        assertEquals(1, recommendationResources(response).size());
+        final ImmunizationRecommendation recommendation = firstRecommendation(response);
+        assertEquals(1, recommendation.recommendation().size());
+        final List<Reference> authorities = recommendation.recommendation().getFirst().authority();
+        final ImmunizationEvaluation evaluation = firstEvaluation(response);
+        assertEquals(authorities, evaluation.authority());
+        assertEquals(1, streamParameters(response).filter(param -> param.resource() instanceof ImmunizationEvaluation).count());
+        assertEquals(List.of("ACIP", "CDC"), authorities.stream().map(authority -> authority.identifier().value()).toList());
+        assertEquals(List.of("Advisory Committee on Immunization Practices", "Centers for Disease Control and Prevention"),
+                authorities.stream().map(Reference::display).toList());
+        assertTrue(authorities.stream()
+                .allMatch(authority -> "Organization".equals(authority.type())
+                        && "http://terminology.cdsframework.org/ice/schedule-authority".equals(authority.identifier().system())));
+        assertTrue(recommendation.recommendation()
+                .stream()
+                .flatMap(rec -> rec.extension().stream())
+                .noneMatch(extension -> SCHEDULE_AUTHORITY_EXTENSION_URL.equals(extension.url())));
 
+        final JsonMapper mapper = JsonMapper.builder().findAndAddModules().build();
+        final String json = mapper.writeValueAsString(recommendation);
+        final var tree = mapper.readTree(json);
+        assertFalse(tree.has("authority"));
+        assertTrue(tree.get("recommendation").get(0).get("authority").isArray());
+        assertEquals(2, tree.get("recommendation").get(0).get("authority").size());
+        assertEquals("ACIP", tree.get("recommendation").get(0).get("authority").get(0).get("identifier").get("value").asString());
+        assertEquals("CDC", tree.get("recommendation").get(0).get("authority").get(1).get("identifier").get("value").asString());
+        final var evaluationJson = mapper.readTree(mapper.writeValueAsString(evaluation));
+        assertTrue(evaluationJson.get("authority").isArray());
+        assertEquals(2, evaluationJson.get("authority").size());
+        assertEquals("ACIP", evaluationJson.get("authority").get(0).get("identifier").get("value").asString());
+        assertEquals("CDC", evaluationJson.get("authority").get(1).get("identifier").get("value").asString());
+        assertFalse(json.contains(SCHEDULE_AUTHORITY_EXTENSION_URL));
+    }
+
+    @Test
+    void suppressesAuthorityWhenOutputFlagIsDisabled()
+    {
+        final IceProperties iceProperties = createIceProperties(true, false, false);
+        final VmrConversionComponent converter =
+                createVmrConversionComponent(new SupportingDataService(createCdsEngineProperties(), iceProperties), iceProperties);
         final ImmunizationRecommendation recommendation = firstRecommendation(
-                vmrConversionComponent.convertToParametersResponse(createEvaluationResponseWithScheduleAuthorities(),
-                        createRequestParameters(), LocalDateTime.now()));
-        final List<org.cdsframework.fhir.Extension> authorities = recommendation.recommendation()
+                converter.convertToParametersResponse(createEvaluationResponseWithScheduleAuthorities(), createRequestParameters(),
+                        LocalDateTime.now()));
+        assertEquals(1, recommendation.recommendation().size());
+        assertTrue(recommendation.recommendation().getFirst().authority().isEmpty());
+        assertTrue(recommendation.recommendation()
                 .getFirst()
                 .extension()
                 .stream()
-                .filter(extension -> SCHEDULE_AUTHORITY_EXTENSION_URL.equals(extension.url()))
-                .toList();
+                .noneMatch(extension -> SCHEDULE_AUTHORITY_EXTENSION_URL.equals(extension.url())));
+    }
 
-        assertEquals(2, authorities.size());
-        assertTrue(authorities.stream()
-                .anyMatch(extension -> "ACIP".equals(extension.valueReference().identifier().value())
-                        && "Advisory Committee on Immunization Practices".equals(extension.valueReference().display())));
-        assertTrue(authorities.stream()
-                .anyMatch(extension -> "CDC".equals(extension.valueReference().identifier().value())
-                        && "Centers for Disease Control and Prevention".equals(extension.valueReference().display())));
+    @Test
+    void evaluationAuthorityIsEmptyWhenDisabledOrAbsentAndAnArrayForOneAuthority()
+    {
+        final IceProperties disabled = createIceProperties(false, false, false);
+        final VmrConversionComponent disabledConverter =
+                createVmrConversionComponent(new SupportingDataService(createCdsEngineProperties(), disabled), disabled);
+        assertTrue(firstEvaluation(disabledConverter.convertToParametersResponse(createEvaluationResponseWithScheduleAuthorities(),
+                createRequestParameters(), LocalDateTime.now())).authority().isEmpty());
+        final IceProperties enabled = createIceProperties(false, false, true);
+        final VmrConversionComponent enabledConverter =
+                createVmrConversionComponent(new SupportingDataService(createCdsEngineProperties(), enabled), enabled);
+        assertTrue(firstEvaluation(
+                enabledConverter.convertToParametersResponse(createEvaluationResponseWithSeriesContext(), createRequestParameters(),
+                        LocalDateTime.now())).authority().isEmpty());
+        final ImmunizationEvaluation evaluation = firstEvaluation(
+                enabledConverter.convertToParametersResponse(createEvaluationResponseWithScheduleAuthorities("ACIP", "ACIP"),
+                        createRequestParameters(), LocalDateTime.now()));
+        assertEquals(1, evaluation.authority().size());
+        final JsonMapper mapper = JsonMapper.builder().findAndAddModules().build();
+        final var json = mapper.readTree(mapper.writeValueAsString(evaluation));
+        assertTrue(json.get("authority").isArray());
+        assertEquals(1, json.get("authority").size());
+        assertEquals("ACIP", json.get("authority").get(0).get("identifier").get("value").asString());
+    }
+
+    @Test
+    void preservesRecommendationWithoutAuthorityAndDeduplicatesRepeatedAuthority()
+    {
+        final IceProperties iceProperties = createIceProperties(false, false, true);
+        final VmrConversionComponent converter =
+                createVmrConversionComponent(new SupportingDataService(createCdsEngineProperties(), iceProperties), iceProperties);
+        final ImmunizationRecommendation withoutAuthority = firstRecommendation(
+                converter.convertToParametersResponse(createEvaluationResponseWithSeriesContext(), createRequestParameters(),
+                        LocalDateTime.now()));
+        assertEquals(1, withoutAuthority.recommendation().size());
+        assertTrue(withoutAuthority.recommendation().getFirst().authority().isEmpty());
+        final ImmunizationRecommendation withAuthority = firstRecommendation(
+                converter.convertToParametersResponse(createEvaluationResponseWithScheduleAuthorities("ACIP", "ACIP"),
+                        createRequestParameters(), LocalDateTime.now()));
+        assertEquals(1, withAuthority.recommendation().size());
+        assertEquals(1, withAuthority.recommendation().getFirst().authority().size());
+        assertEquals("ACIP", withAuthority.recommendation().getFirst().authority().getFirst().identifier().value());
+        final JsonMapper mapper = JsonMapper.builder().findAndAddModules().build();
+        final var json = mapper.readTree(mapper.writeValueAsString(withAuthority));
+        assertTrue(json.get("recommendation").get(0).get("authority").isArray());
+        assertEquals(1, json.get("recommendation").get(0).get("authority").size());
+        assertTrue(withAuthority.recommendation().getFirst().extension().isEmpty());
     }
 }

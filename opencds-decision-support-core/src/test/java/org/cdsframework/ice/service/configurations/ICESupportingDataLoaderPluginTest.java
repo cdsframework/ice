@@ -16,7 +16,6 @@ import static org.mockito.Mockito.when;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 
 import org.cdsframework.ice.config.IceProperties;
 import org.cdsframework.ice.service.Schedule;
@@ -53,18 +52,7 @@ public class ICESupportingDataLoaderPluginTest
         when(supportingData.kmId()).thenReturn("testKmId");
         when(supportingDataService.getKnowledgeBasePropertiesByKmId()).thenReturn(Collections.emptyMap());
 
-        final IceProperties iceProperties = mock(IceProperties.class);
-        when(iceProperties.getOutputEarliestAndOverdueDates()).thenReturn(Optional.empty());
-        when(iceProperties.getOutputNumberOfDosesRemaining()).thenReturn(Optional.empty());
-        when(iceProperties.getOutputSeriesInformation()).thenReturn(Optional.empty());
-        when(iceProperties.getOutputSupplementalText()).thenReturn(Optional.empty());
-        when(iceProperties.getOutputVaccineGroupRulesArtifact()).thenReturn(Optional.empty());
-        when(iceProperties.getEnableDoseOverrideFeature()).thenReturn(Optional.empty());
-        when(iceProperties.getEnableUnsupportedVaccinesGroup()).thenReturn(Optional.empty());
-        when(iceProperties.getDisableCovid19Sep2023DoseNumberReset()).thenReturn(Optional.empty());
-        when(iceProperties.getSupplementalTextMode()).thenReturn(Optional.empty());
-        when(iceProperties.getVaccineGroupExclusions()).thenReturn(null);
-        when(iceProperties.getVaccineGroupInclusions()).thenReturn(null);
+        final IceProperties iceProperties = new IceProperties();
 
         ICESupportingDataLoaderPlugin.setIceProperties(iceProperties);
         ICESupportingDataLoaderPlugin.setSupportingDataService(supportingDataService);
@@ -110,7 +98,8 @@ public class ICESupportingDataLoaderPluginTest
         assertEquals(schedule, globals.get("schedule"));
         assertEquals(true, globals.get("outputEarliestOverdueDates"));
         assertEquals(false, globals.get("outputNumberOfDosesRemaining"));
-        assertEquals(false, globals.get("outputSeriesInformation"));
+        assertEquals(false, globals.get("outputSeriesInformationForEvaluations"));
+        assertEquals(false, globals.get("outputSeriesInformationForRecommendations"));
         assertEquals(false, globals.get("doseOverrideFeatureEnabled"));
         assertEquals(true, globals.get("outputSupplementalText"));
         assertEquals(false, globals.get("outputVaccineGroupRulesArtifact"));
@@ -164,7 +153,8 @@ public class ICESupportingDataLoaderPluginTest
         when(props.enableDoseOverrideFeature()).thenReturn(false);
         when(props.outputSupplementalText()).thenReturn(true);
         when(props.outputNumberOfDosesRemaining()).thenReturn(false);
-        when(props.outputSeriesInformation()).thenReturn(false);
+        when(props.outputSeriesInformationForEvaluations()).thenReturn(false);
+        when(props.outputSeriesInformationForRecommendations()).thenReturn(false);
         when(props.outputVaccineGroupRulesArtifact()).thenReturn(false);
         when(props.enableUnsupportedVaccinesGroup()).thenReturn(false);
         when(props.vaccineGroupExclusions()).thenReturn(Collections.emptyList());

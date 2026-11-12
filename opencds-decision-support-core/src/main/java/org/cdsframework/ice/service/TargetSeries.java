@@ -41,12 +41,15 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.cdsframework.cds.CdsConcept;
 import org.cdsframework.ice.service.Recommendation.RecommendationDateType;
 import org.cdsframework.ice.supportingdata.BaseDataEvaluationReason;
 import org.cdsframework.ice.supportingdata.BaseDataRecommendationReason;
 import org.cdsframework.ice.supportingdata.ICEConceptType;
+import org.cdsframework.ice.supportingdata.LocallyCodedVaccineGroupItem;
 import org.cdsframework.ice.util.TimePeriod;
 import org.cdsframework.ice.util.TimePeriod.DurationType;
 import org.cdsframework.ice.util.TimePeriodException;
@@ -54,6 +57,7 @@ import org.kie.api.definition.type.ClassReactive;
 import org.opencds.vmr.v1_0.internal.EvaluatedPerson;
 import org.springframework.util.ObjectUtils;
 
+import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
@@ -72,15 +76,56 @@ public class TargetSeries
         MAXIMUM_AGE
     }
 
+    private record CachedVaccineGroupPriority(String vaccineGroup,
+                                              int priority)
+    {
+    }
+
     /*
-     * TargetSeriesComparator Note: this comparator imposes orderings that are inconsistent with equals.
+     * Keep same-day doses in a deterministic order so history evaluation does not depend on request ordering.
      */
     private static class TargetSeriesComparator implements Comparator<TargetDose>
     {
+        private static final Pattern DIGITS_OR_TEXT_PATTERN = Pattern.compile("\\p{Nd}+|\\P{Nd}+");
+        // Natural order, so VACCINE_CVX_74 sorts before VACCINE_CVX_119; this matches the numeric CVX order that
+        // IceExecutionEngineContext uses when inserting administration events.
+        private static final Comparator<String> CONCEPT_NAME_ORDER =
+                Comparator.nullsLast(TargetSeriesComparator::compareConceptNames);
+
+        private static int compareConceptNames(final String a, final String b)
+        {
+            final Matcher chunksA = DIGITS_OR_TEXT_PATTERN.matcher(a);
+            final Matcher chunksB = DIGITS_OR_TEXT_PATTERN.matcher(b);
+            while (true)
+            {
+                final boolean hasChunkA = chunksA.find();
+                final boolean hasChunkB = chunksB.find();
+                if (!hasChunkA || !hasChunkB)
+                    return hasChunkA == hasChunkB ? a.compareTo(b) : Boolean.compare(hasChunkA, hasChunkB);
+
+                final String chunkA = chunksA.group();
+                final String chunkB = chunksB.group();
+                final int comparison = Character.isDigit(chunkA.charAt(0)) && Character.isDigit(chunkB.charAt(0))
+                                       ? compareDigits(chunkA, chunkB)
+                                       : chunkA.compareTo(chunkB);
+                if (comparison != 0)
+                    return comparison;
+            }
+        }
+
+        private static int compareDigits(final String a, final String b)
+        {
+            final String numberA = a.replaceFirst("^0+(?=\\d)", "");
+            final String numberB = b.replaceFirst("^0+(?=\\d)", "");
+            return numberA.length() != numberB.length()
+                   ? Integer.compare(numberA.length(), numberB.length())
+                   : numberA.compareTo(numberB);
+        }
+
         @Override
         public int compare(final TargetDose a, final TargetDose b)
         {
-            if (a == null && b == null)
+            if (a == b)
                 return 0;
 
             if (a == null)
@@ -89,26 +134,29 @@ public class TargetSeries
             if (b == null)
                 return -1;
 
-            final String uniqueIdA = a.getUniqueId();
-            final String uniqueIdB = b.getUniqueId();
-
-            if (uniqueIdA != null && uniqueIdA.equals(uniqueIdB))
+            if (Objects.equals(a.getUniqueId(), b.getUniqueId()))
                 return 0;
 
-            final LocalDate aDate = a.getAdministrationDate();
-            final LocalDate bDate = b.getAdministrationDate();
+            int comparison =
+                    Comparator.nullsLast(LocalDate::compareTo).compare(a.getAdministrationDate(), b.getAdministrationDate());
+            if (comparison != 0)
+                return comparison;
 
-            if (aDate == null && bDate == null)
-                return 0;
+            comparison = CONCEPT_NAME_ORDER.compare(a.getAdministeredVaccine().getCdsConceptName(),
+                    b.getAdministeredVaccine().getCdsConceptName());
+            if (comparison != 0)
+                return comparison;
 
-            if (aDate == null)
-                return 1;
+            comparison = Comparator.nullsLast(String::compareTo).compare(a.getDoseId(), b.getDoseId());
+            if (comparison != 0)
+                return comparison;
 
-            final int comparison = aDate.compareTo(bDate);
-            if (comparison == 0)
-                return 1;
+            comparison = CONCEPT_NAME_ORDER.compare(a.getVaccineComponent().getCdsConceptName(),
+                    b.getVaccineComponent().getCdsConceptName());
+            if (comparison != 0)
+                return comparison;
 
-            return comparison;
+            return Comparator.nullsLast(String::compareTo).compare(a.getUniqueId(), b.getUniqueId());
         }
     }
 
@@ -136,6 +184,11 @@ public class TargetSeries
     private boolean selectedSeries;
     private boolean immunityToAllDiseasesRecorded;
     private boolean historyEvaluationInitiated;
+    private boolean historyEvaluationRoutingInitiated;
+    // History evaluation rule conditions read the priority repeatedly; keyed by group in case the series rules change.
+    @Getter(AccessLevel.NONE)
+    @Setter(AccessLevel.NONE)
+    private CachedVaccineGroupPriority cachedVaccineGroupPriority;
     private boolean postForecastCheckCompleted;
     private int manuallySetDoseNumberToRecommend;
     private List<Recommendation> interimRecommendationsScheduleEarliestAge;
@@ -406,26 +459,22 @@ public class TargetSeries
             final DoseRule thisSeriesLastDoseRuleFromPriorSeries = thisSeriesDoseRules.get(doseNumberFromWhichToBeginSwitch - 2);
             final DoseRule newSeriesPriorDoseRuleForIntervalOnly =
                     srOfSeriesToSwitchTo.getSeriesDoseRuleByDoseNumber(doseNumberToSwitchTo - 1);
-            thisSeriesLastDoseRuleFromPriorSeries.setAbsoluteMinimumInterval(
-                    TimePeriod.constructDeepCopyOfTimePeriodObject(
-                            newSeriesPriorDoseRuleForIntervalOnly.getAbsoluteMinimumInterval()));
+            thisSeriesLastDoseRuleFromPriorSeries.setAbsoluteMinimumInterval(TimePeriod.constructDeepCopyOfTimePeriodObject(
+                    newSeriesPriorDoseRuleForIntervalOnly.getAbsoluteMinimumInterval()));
             thisSeriesLastDoseRuleFromPriorSeries.setMinimumInterval(
                     TimePeriod.constructDeepCopyOfTimePeriodObject(newSeriesPriorDoseRuleForIntervalOnly.getMinimumInterval()));
-            thisSeriesLastDoseRuleFromPriorSeries.setEarliestRecommendedInterval(
-                    TimePeriod.constructDeepCopyOfTimePeriodObject(
-                            newSeriesPriorDoseRuleForIntervalOnly.getEarliestRecommendedInterval()));
-            thisSeriesLastDoseRuleFromPriorSeries.setLatestRecommendedInterval(
-                    TimePeriod.constructDeepCopyOfTimePeriodObject(
-                            newSeriesPriorDoseRuleForIntervalOnly.getLatestRecommendedInterval()));
+            thisSeriesLastDoseRuleFromPriorSeries.setEarliestRecommendedInterval(TimePeriod.constructDeepCopyOfTimePeriodObject(
+                    newSeriesPriorDoseRuleForIntervalOnly.getEarliestRecommendedInterval()));
+            thisSeriesLastDoseRuleFromPriorSeries.setLatestRecommendedInterval(TimePeriod.constructDeepCopyOfTimePeriodObject(
+                    newSeriesPriorDoseRuleForIntervalOnly.getLatestRecommendedInterval()));
         }
 
         // Add new DoseRules starting with the existing dose number - properly set the dose number to ensure they are sequential
-        final List<DoseRule> ssDoseRulesToAdd =
-                srOfSeriesToSwitchTo.getSeriesDoseRules()
-                        .subList(doseNumberToSwitchTo - 1, sizeOfSeriesToSwitchTo)
-                        .stream()
-                        .map(DoseRule::constructDeepCopyOfDoseRuleObject)
-                        .toList();
+        final List<DoseRule> ssDoseRulesToAdd = srOfSeriesToSwitchTo.getSeriesDoseRules()
+                .subList(doseNumberToSwitchTo - 1, sizeOfSeriesToSwitchTo)
+                .stream()
+                .map(DoseRule::constructDeepCopyOfDoseRuleObject)
+                .toList();
         if (log.isDebugEnabled())
         {
             final StringBuilder debugStr = new StringBuilder(_METHODNAME + "Switch series doses to add: ");
@@ -3549,6 +3598,22 @@ public class TargetSeries
     public String getVaccineGroup()
     {
         return seriesRules.getVaccineGroup();
+    }
+
+    public int getVaccineGroupPriority()
+    {
+        final String vaccineGroup = getVaccineGroup();
+        if (cachedVaccineGroupPriority == null || !Objects.equals(cachedVaccineGroupPriority.vaccineGroup(), vaccineGroup))
+        {
+            final LocallyCodedVaccineGroupItem group =
+                    scheduleBackingSeries.getSupportedVaccineGroups().getVaccineGroupItem(vaccineGroup);
+            if (group == null)
+                throw new IllegalArgumentException(
+                        "Specified vaccine group does not exist for this schedule: %s".formatted(vaccineGroup));
+            cachedVaccineGroupPriority = new CachedVaccineGroupPriority(vaccineGroup, group.getPriority());
+        }
+
+        return cachedVaccineGroupPriority.priority();
     }
 
     /*

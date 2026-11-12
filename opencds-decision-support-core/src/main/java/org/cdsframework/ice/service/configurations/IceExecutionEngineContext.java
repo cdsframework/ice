@@ -29,16 +29,25 @@ package org.cdsframework.ice.service.configurations;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 import org.kie.api.command.Command;
 import org.kie.api.runtime.ExecutionResults;
 import org.kie.internal.command.CommandFactory;
 import org.opencds.config.api.EvaluationContext;
 import org.opencds.config.api.ExecutionEngineContext;
+import org.opencds.vmr.v1_0.internal.AdministrableSubstance;
+import org.opencds.vmr.v1_0.internal.SubstanceAdministrationEvent;
+import org.opencds.vmr.v1_0.internal.concepts.VmrOpenCdsConcept;
+import org.opencds.vmr.v1_0.internal.datatypes.CD;
 import org.springframework.util.ObjectUtils;
 
 import lombok.Setter;
@@ -57,10 +66,99 @@ public class IceExecutionEngineContext implements ExecutionEngineContext<List<Co
     private static final Set<String> ALL_GLOBALS =
             Set.of(EVAL_TIME, CLIENT_LANG, CLIENT_TZ_OFFSET, FOCAL_PERSON_ID, ASSERTIONS, NAMED_OBJECTS);
     private static final Set<String> FILTERED_GLOBALS = Set.of(EVAL_TIME, CLIENT_LANG, CLIENT_TZ_OFFSET, FOCAL_PERSON_ID);
+    private static final Comparator<SubstanceAdministrationEvent> SUBSTANCE_ADMINISTRATION_EVENT_COMPARATOR =
+            Comparator.comparing(SubstanceAdministrationEvent::getEvaluatedPersonId, Comparator.nullsLast(String::compareTo))
+                    .thenComparing(IceExecutionEngineContext::getAdministrationDate, Comparator.nullsLast(LocalDate::compareTo))
+                    .thenComparing(IceExecutionEngineContext::getNumericVaccineCode, Comparator.nullsLast(Integer::compareTo))
+                    .thenComparing(IceExecutionEngineContext::getVaccineCode, Comparator.nullsLast(String::compareTo))
+                    .thenComparing(SubstanceAdministrationEvent::getId, Comparator.nullsLast(String::compareTo));
     @Setter
     private static String iceVersion;
+
+    private static Map<Class<?>, List<?>> orderFactListsForInsertion(final Map<Class<?>, List<?>> allFactLists)
+    {
+        final Map<Class<?>, List<?>> orderedFactLists = new LinkedHashMap<>(allFactLists);
+        final List<SubstanceAdministrationEvent> orderedEvents =
+                copyFacts(allFactLists.get(SubstanceAdministrationEvent.class), SubstanceAdministrationEvent.class).stream()
+                        .sorted(SUBSTANCE_ADMINISTRATION_EVENT_COMPARATOR)
+                        .collect(Collectors.toCollection(ArrayList::new));
+
+        if (allFactLists.containsKey(SubstanceAdministrationEvent.class))
+            orderedFactLists.put(SubstanceAdministrationEvent.class, orderedEvents);
+
+        final Map<String, Integer> eventOrderById = new HashMap<>();
+        for (int i = 0; i < orderedEvents.size(); i++)
+        {
+            final String eventId = orderedEvents.get(i).getId();
+            if (eventId != null)
+                eventOrderById.putIfAbsent(eventId, i);
+        }
+
+        for (final Map.Entry<Class<?>, List<?>> factListEntry : allFactLists.entrySet())
+        {
+            if (VmrOpenCdsConcept.class.isAssignableFrom(factListEntry.getKey()))
+                orderedFactLists.put(factListEntry.getKey(), orderEventConcepts(factListEntry.getValue(), eventOrderById));
+        }
+
+        return orderedFactLists;
+    }
+
+    private static List<VmrOpenCdsConcept> orderEventConcepts(final List<?> facts, final Map<String, Integer> eventOrderById)
+    {
+        final List<VmrOpenCdsConcept> concepts = copyFacts(facts, VmrOpenCdsConcept.class);
+        final Iterator<VmrOpenCdsConcept> orderedEventConcepts = concepts.stream()
+                .filter(concept -> eventOrderById.containsKey(concept.getConceptTargetId()))
+                .sorted(Comparator.comparingInt(concept -> eventOrderById.get(concept.getConceptTargetId())))
+                .iterator();
+
+        return concepts.stream()
+                .map(concept -> eventOrderById.containsKey(concept.getConceptTargetId()) ? orderedEventConcepts.next() : concept)
+                .collect(Collectors.toCollection(ArrayList::new));
+    }
+
+    private static <T> List<T> copyFacts(final List<?> facts, final Class<T> factType)
+    {
+        if (facts == null)
+            return List.of();
+
+        return facts.stream().map(factType::cast).toList();
+    }
+
+    private static LocalDate getAdministrationDate(final SubstanceAdministrationEvent event)
+    {
+        if (event.getAdministrationTimeInterval() == null)
+            return null;
+
+        final LocalDate low = event.getAdministrationTimeInterval().getLow();
+        return low != null ? low : event.getAdministrationTimeInterval().getHigh();
+    }
+
+    private static String getVaccineCode(final SubstanceAdministrationEvent event)
+    {
+        return Optional.ofNullable(event.getSubstance())
+                .map(AdministrableSubstance::getSubstanceCode)
+                .map(CD::getCode)
+                .orElse(null);
+    }
+
+    private static Integer getNumericVaccineCode(final SubstanceAdministrationEvent event)
+    {
+        final String vaccineCode = getVaccineCode(event);
+        if (vaccineCode == null)
+            return null;
+
+        try
+        {
+            return Integer.valueOf(vaccineCode);
+        }
+        catch (final NumberFormatException _)
+        {
+            return null;
+        }
+    }
+
     private EvaluationContext evaluationContext;
-    private Map<String, List<?>> resultFactLists = new ConcurrentHashMap<>();
+    private Map<String, List<?>> resultFactLists = new LinkedHashMap<>();
 
     @Override
     public List<Command<?>> getInput()
@@ -71,7 +169,7 @@ public class IceExecutionEngineContext implements ExecutionEngineContext<List<Co
         final String clientLanguage = evaluationContext.clientLanguage();
         final String clientTimeZoneOffset = evaluationContext.clientTimeZoneOffset();
 
-        final Map<Class<?>, List<?>> allFactLists = evaluationContext.allFactLists();
+        final Map<Class<?>, List<?>> allFactLists = orderFactListsForInsertion(evaluationContext.allFactLists());
 
         cmds.add(CommandFactory.newSetGlobal(EVAL_TIME, evalTime));
         cmds.add(CommandFactory.newSetGlobal(CLIENT_LANG, clientLanguage));
@@ -126,7 +224,8 @@ public class IceExecutionEngineContext implements ExecutionEngineContext<List<Co
     @Override
     public ExecutionEngineContext<List<Command<?>>, ExecutionResults> setResults(final ExecutionResults results)
     {
-        final Map<String, List<?>> resultFactLists = new ConcurrentHashMap<>();
+        // Callers append named objects to fact-type lists, so copy engine-owned results into mutable lists.
+        final Map<String, List<?>> resultFactLists = new LinkedHashMap<>();
 
         // update original entries from allFactLists to capture any new or updated elements
         // ** need to look for every possible fact list, because rules may have created new ones...
@@ -141,7 +240,7 @@ public class IceExecutionEngineContext implements ExecutionEngineContext<List<Co
                 // ignore these submitted globals, they should not have been
                 // changed by rules, and look at everything else
 
-                resultFactLists.put(oneName, (List<?>) results.getValue(oneName));
+                resultFactLists.put(oneName, new ArrayList<>((List<?>) results.getValue(oneName)));
             }
         }
 

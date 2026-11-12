@@ -2387,8 +2387,7 @@ rule "ABSTRACT SeriesSelection(MenB): Select MenB 4C 2-Dose Series _or_ MenB 4C 
 		        administrationDate > $latestTd.administrationDate,
 		        vaccineComponent.cdsConceptName == "VACCINE_CVX_162",
 		        invalidReasons not contains BaseDataEvaluationReason._DUPLICATE_SAME_DAY_REASON.cdsListItemName)
-		$ts2doseSeries : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.MENINGOCOCCAL_B", seriesRules.seriesName == "SUPPORTED_SERIES.MEN_B_4_C_2_DOSE_SERIES")
-		$ts3doseSeries : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.MENINGOCOCCAL_B", seriesRules.seriesName == "SUPPORTED_SERIES.MEN_B_4_C_3_DOSE_SERIES")
+		// History evaluation may already have converted the 4C 2-dose series into the 3-dose series.
 	then
 		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "ABSTRACT SeriesSelection: TargetSeries MEN_B_4_C_2_DOSE_SERIES or TargetSeries MEN_B_4_C_3_DOSE_SERIES");
 		insert(new ICEFactTypeFinding("SeriesSelection: Select MenB 4C Series"));
@@ -2400,8 +2399,8 @@ rule "SeriesSelection(MenB): Select MenB 4C 2-Dose Series if both (CVX 162, CVX 
 	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
 	salience 30
 	when
-		TargetSeries(this == $ts2doseSeries, isSeriesComplete() == true)
-		TargetSeries(this == $ts3doseSeries, isSeriesComplete() == false)
+		$ts2doseSeries : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.MENINGOCOCCAL_B", seriesRules.seriesName == "SUPPORTED_SERIES.MEN_B_4_C_2_DOSE_SERIES", isSeriesComplete() == true)
+		$ts3doseSeries : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.MENINGOCOCCAL_B", seriesRules.seriesName == "SUPPORTED_SERIES.MEN_B_4_C_3_DOSE_SERIES", isSeriesComplete() == false)
 	then
 		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "SeriesSelection: TargetSeries " + $ts2doseSeries);
 		$ts2doseSeries.setSelectedSeries(true);
@@ -2417,8 +2416,8 @@ rule "SeriesSelection(MenB): Select MenB 4C 3-Dose Series if both (CVX 162, CVX 
 	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
 	salience 30
 	when
-		TargetSeries(this == $ts2doseSeries, isSeriesComplete() == false)
-		TargetSeries(this == $ts3doseSeries, isSeriesComplete() == true)
+		$ts2doseSeries : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.MENINGOCOCCAL_B", seriesRules.seriesName == "SUPPORTED_SERIES.MEN_B_4_C_2_DOSE_SERIES", isSeriesComplete() == false)
+		$ts3doseSeries : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.MENINGOCOCCAL_B", seriesRules.seriesName == "SUPPORTED_SERIES.MEN_B_4_C_3_DOSE_SERIES", isSeriesComplete() == true)
 	then
 		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "SeriesSelection: TargetSeries " + $ts3doseSeries);
 		$ts3doseSeries.setSelectedSeries(true);

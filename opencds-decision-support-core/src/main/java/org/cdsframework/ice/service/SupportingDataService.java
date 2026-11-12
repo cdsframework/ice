@@ -572,11 +572,6 @@ public class SupportingDataService
         if (knowledgeBase.codeSystems() == null)
             return List.of();
 
-        final List<CodeSystemConcept> supportedDiseaseConcepts =
-                Optional.ofNullable(knowledgeBase.codeSystems().get("SUPPORTED_DISEASE_CONCEPT"))
-                        .map(CodeSystem::concept)
-                        .orElse(List.of());
-
         final Optional<CodeSystemConcept> vaccineGroupConcept =
                 Optional.ofNullable(knowledgeBase.codeSystems().get("VACCINE_GROUP_CONCEPT"))
                         .map(CodeSystem::concept)
@@ -600,7 +595,32 @@ public class SupportingDataService
             return List.of();
         }
 
-        return Optional.ofNullable(vaccineGroupConcept.get().property())
+        return getDiseaseConcepts(kmId, vaccineGroupConcept.get());
+    }
+
+    public List<CodeableConcept> getDiseasesForVaccine(@NotBlank final String kmId, @NotBlank final String cvxCode)
+    {
+        if (!StringUtils.hasText(cvxCode))
+            return List.of();
+
+        return Optional.ofNullable(getKnowledgeBase(kmId).codeSystems().get("SUPPORTED_VACCINES"))
+                .map(CodeSystem::concept)
+                .orElse(List.of())
+                .stream()
+                .filter(concept -> cvxCode.trim().equals(concept.code()))
+                .findFirst()
+                .map(concept -> getDiseaseConcepts(kmId, concept))
+                .orElse(List.of());
+    }
+
+    private List<CodeableConcept> getDiseaseConcepts(final String kmId, final CodeSystemConcept sourceConcept)
+    {
+        final List<CodeSystemConcept> supportedDiseaseConcepts =
+                Optional.ofNullable(getKnowledgeBase(kmId).codeSystems().get("SUPPORTED_DISEASE_CONCEPT"))
+                        .map(CodeSystem::concept)
+                        .orElse(List.of());
+
+        return Optional.ofNullable(sourceConcept.property())
                 .stream()
                 .flatMap(Collection::stream)
                 .filter(property -> "diseaseImmunity".equals(property.code()))
@@ -720,6 +740,36 @@ public class SupportingDataService
                 .filter(Objects::nonNull)
                 .filter(concept -> normalizedSeriesCode.equals(normalizeSeriesCodeForLookup(concept.code())))
                 .map(concept -> Optional.ofNullable(concept.display()).orElse(concept.code()))
+                .findFirst()
+                .orElse(null);
+    }
+
+    /** The number of doses in the series, after any configured series override, or null for an unknown series. */
+    public Integer getNumberOfDosesInSeries(final String kmId, final String seriesCode)
+    {
+        final String normalizedSeriesCode = normalizeSeriesCodeForLookup(seriesCode);
+        if (!StringUtils.hasText(normalizedSeriesCode))
+            return null;
+
+        final Integer overridden = Optional.ofNullable(getSeriesOverrides().get(normalizedSeriesCode))
+                .map(IceProperties.SeriesOverride::numberOfDosesInSeries)
+                .orElse(null);
+        if (overridden != null)
+            return overridden;
+
+        return Optional.ofNullable(getKnowledgeBase(kmId).series())
+                .orElse(Map.of())
+                .entrySet()
+                .stream()
+                .filter(entry -> normalizedSeriesCode.equals(normalizeSeriesCodeForLookup(entry.getKey()))
+                        || normalizedSeriesCode.equals(Optional.ofNullable(entry.getValue())
+                        .map(SeriesData::series)
+                        .map(Series::code)
+                        .map(this::normalizeSeriesCodeForLookup)
+                        .orElse(null)))
+                .map(Map.Entry::getValue)
+                .map(SeriesData::numberOfDosesInSeries)
+                .filter(Objects::nonNull)
                 .findFirst()
                 .orElse(null);
     }

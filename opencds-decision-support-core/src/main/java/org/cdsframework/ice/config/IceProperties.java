@@ -24,6 +24,7 @@ import lombok.ToString;
 @Getter
 @Setter
 @Validated
+@ValidSeriesOutputConfiguration
 @Component
 @ConfigurationProperties("ice")
 public class IceProperties
@@ -63,7 +64,9 @@ public class IceProperties
                                           @NotNull
                                           Boolean outputNumberOfDosesRemaining,
                                           @NotNull
-                                          Boolean outputSeriesInformation,
+                                          Boolean outputSeriesInformationForEvaluations,
+                                          @NotNull
+                                          Boolean outputSeriesInformationForRecommendations,
                                           @NotNull
                                           Boolean outputScheduleAuthorities,
                                           @NotNull
@@ -86,7 +89,6 @@ public class IceProperties
             vaccineGroupExclusions = Objects.requireNonNullElseGet(vaccineGroupExclusions, List::of);
             vaccineGroupInclusions = Objects.requireNonNullElseGet(vaccineGroupInclusions, List::of);
         }
-
     }
 
     public record SeasonOverride(LocalDate startDate,
@@ -149,7 +151,9 @@ public class IceProperties
 
     private Optional<Boolean> outputNumberOfDosesRemaining = Optional.empty();
 
-    private Optional<Boolean> outputSeriesInformation = Optional.empty();
+    private Optional<Boolean> outputSeriesInformationForEvaluations = Optional.empty();
+
+    private Optional<Boolean> outputSeriesInformationForRecommendations = Optional.empty();
 
     private Optional<Boolean> outputScheduleAuthorities = Optional.empty();
 
@@ -175,4 +179,54 @@ public class IceProperties
 
     @Valid
     private OpenApiProperties openApi;
+
+    public boolean resolveOutputEarliestAndOverdueDates(final KnowledgeBaseProperties properties)
+    {
+        return outputEarliestAndOverdueDates.orElseGet(properties::outputEarliestAndOverdueDates);
+    }
+
+    public boolean resolveEnableDoseOverrideFeature(final KnowledgeBaseProperties properties)
+    {
+        return enableDoseOverrideFeature.orElseGet(properties::enableDoseOverrideFeature);
+    }
+
+    public boolean resolveOutputSupplementalText(final KnowledgeBaseProperties properties)
+    {
+        return outputSupplementalText.orElseGet(properties::outputSupplementalText);
+    }
+
+    public boolean resolveOutputNumberOfDosesRemaining(final KnowledgeBaseProperties properties)
+    {
+        return outputNumberOfDosesRemaining.orElseGet(properties::outputNumberOfDosesRemaining);
+    }
+
+    public boolean resolveOutputSeriesInformationForEvaluations(final KnowledgeBaseProperties properties)
+    {
+        return outputSeriesInformationForEvaluations.orElseGet(properties::outputSeriesInformationForEvaluations);
+    }
+
+    public boolean resolveOutputSeriesInformationForRecommendations(final KnowledgeBaseProperties properties)
+    {
+        return outputSeriesInformationForRecommendations.orElseGet(properties::outputSeriesInformationForRecommendations);
+    }
+
+    public boolean resolveOutputScheduleAuthorities(final KnowledgeBaseProperties properties)
+    {
+        return outputScheduleAuthorities.orElseGet(properties::outputScheduleAuthorities);
+    }
+
+    public boolean resolveOutputVaccineGroupRulesArtifact(final KnowledgeBaseProperties properties)
+    {
+        return outputVaccineGroupRulesArtifact.orElseGet(properties::outputVaccineGroupRulesArtifact);
+    }
+
+    public boolean resolveEnableUnsupportedVaccinesGroup(final KnowledgeBaseProperties properties)
+    {
+        return enableUnsupportedVaccinesGroup.orElseGet(properties::enableUnsupportedVaccinesGroup);
+    }
+
+    public boolean resolveDisableCovid19Sep2023DoseNumberReset(final KnowledgeBaseProperties properties)
+    {
+        return disableCovid19Sep2023DoseNumberReset.orElseGet(properties::disableCovid19Sep2023DoseNumberReset);
+    }
 }

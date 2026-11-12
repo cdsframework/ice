@@ -46,7 +46,8 @@ ice:
   enable-dose-override-feature: false
   output-supplemental-text: true
   output-number-of-doses-remaining: false
-  output-series-information: false
+  output-series-information-for-evaluations: false
+  output-series-information-for-recommendations: false
   output-vaccine-group-rules-artifact: false
   output-schedule-authorities: false
   enable-unsupported-vaccines-group: false
@@ -65,30 +66,62 @@ cds-engine:
     enable-fhir-r6: false
 ```
 
-| Setting                                     |      Default | Effect                                                                                                                                                                                                                                                 |
-|---------------------------------------------|-------------:|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `enable-dose-override-feature`              |      `false` | Permit request-supplied administered-dose validity overrides.                                                                                                                                                                                          |
-| `enable-unsupported-vaccines-group`         |      `false` | Enable the unsupported-vaccines group.                                                                                                                                                                                                                 |
-| `output-vaccine-group-rules-artifact`       |      `false` | Include a vaccine-group Wiki URL in ICE SOAP/vMR API or ICE FHIR API (FHIR R6) output when configured. See [Output Configuration](output-configuration.md#vaccine-group-rules-artifact-and-schedule-authorities) to enable it and configure its scope. |
-| `vaccine-group-exclusions`                  | Listed above | Do not forecast the listed vaccine groups.                                                                                                                                                                                                             |
-| `vaccine-group-inclusions`                  |        Empty | When provided, restrict forecasting to these vaccine groups.                                                                                                                                                                                           |
-| `disable-covid19-sep2023-dose-number-reset` |      `false` | Disable the September 2023 COVID-19 dose-number reset behavior.                                                                                                                                                                                        |
-| `enable-fhir-r6`                            |      `false` | Enable the experimental FHIR R6 endpoint. This is a startup-only service setting under `cds-engine.experimental-features`, not a forecast request option or an `ice.*` property.                                                                       |
+| Setting                                         | Default      | Effect                                                                                                                                                                                                                                                 |
+|-------------------------------------------------|--------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `output-earliest-and-overdue-dates`             | `true`       | Includes earliest and overdue recommendation dates.                                                                                                                                                                                                    |
+| `enable-dose-override-feature`                  | `false`      | Permit request-supplied administered-dose validity overrides.                                                                                                                                                                                          |
+| `output-supplemental-text`                      | `true`       | Includes supplemental text in output.                                                                                                                                                                                                                  |
+| `output-number-of-doses-remaining`              | `false`      | Includes recommendation doses remaining; requires recommendation series information.                                                                                                                                                                   |
+| `output-series-information-for-evaluations`     | `false`      | Includes series information for substance administration evaluations.                                                                                                                                                                                  |
+| `output-series-information-for-recommendations` | `false`      | Includes series information for recommendations.                                                                                                                                                                                                       |
+| `output-vaccine-group-rules-artifact`           | `false`      | Include a vaccine-group Wiki URL in ICE SOAP/vMR API or ICE FHIR API (FHIR R6) output when configured. See [Output Configuration](output-configuration.md#vaccine-group-rules-artifact-and-schedule-authorities) to enable it and configure its scope. |
+| `output-schedule-authorities`                   | `false`      | Includes schedule authorities; see [Output Configuration](output-configuration.md).                                                                                                                                                                    |
+| `enable-unsupported-vaccines-group`             | `false`      | Enable the unsupported-vaccines group.                                                                                                                                                                                                                 |
+| `vaccine-group-exclusions`                      | Listed above | Do not forecast the listed vaccine groups.                                                                                                                                                                                                             |
+| `vaccine-group-inclusions`                      | Empty        | When provided, restrict forecasting to these vaccine groups.                                                                                                                                                                                           |
+| `disable-covid19-sep2023-dose-number-reset`     | `false`      | Disable the September 2023 COVID-19 dose-number reset behavior.                                                                                                                                                                                        |
+| `supplemental-text-mode`                        | `LEGACY`     | Selects `LEGACY`, `CODED`, or `BOTH` supplemental-text output.                                                                                                                                                                                         |
+| `enable-fhir-r6`                                | `false`      | Enable the experimental FHIR R6 endpoint. This is a startup-only service setting under `cds-engine.experimental-features`, not a forecast request option or an `ice.*` property.                                                                       |
+
+For the ICE settings, the defaults above are supplied by the bundled
+knowledge base. Omitted global ICE overrides inherit the knowledge-base
+value; an explicitly configured global value, including `false`, takes
+precedence.
+
+Enabling `output-number-of-doses-remaining` requires
+`output-series-information-for-recommendations`. Startup validation rejects
+any knowledge base whose effective configuration enables doses remaining
+while recommendation series information is disabled.
+
+The removed `output-series-information` setting is rejected at startup,
+globally or per knowledge base. Configure
+`output-series-information-for-evaluations` and
+`output-series-information-for-recommendations` instead.
 
 Do not set both `vaccine-group-exclusions` and
 `vaccine-group-inclusions` unless the resulting restriction is intentional.
 
-Equivalent environment variables for the settings on this page are:
+Equivalent environment variables for the settings in the YAML example are:
 
 ```bash
-ICE_ENABLEDOSEOVERRIDEFEATURE=true
-ICE_ENABLEUNSUPPORTEDVACCINESGROUP=true
-ICE_DISABLECOVID19SEP2023DOSENUMBERRESET=true
-CDS_ENGINE_EXPERIMENTALFEATURES_ENABLEFHIRR6=true
+ICE_OUTPUTEARLIESTANDOVERDUEDATES=true
+ICE_ENABLEDOSEOVERRIDEFEATURE=false
+ICE_OUTPUTSUPPLEMENTALTEXT=true
+ICE_OUTPUTNUMBEROFDOSESREMAINING=false
+ICE_OUTPUTSERIESINFORMATIONFOREVALUATIONS=false
+ICE_OUTPUTSERIESINFORMATIONFORRECOMMENDATIONS=false
+ICE_OUTPUTVACCINEGROUPRULESARTIFACT=false
+ICE_OUTPUTSCHEDULEAUTHORITIES=false
+ICE_ENABLEUNSUPPORTEDVACCINESGROUP=false
+ICE_VACCINEGROUPEXCLUSIONS=ANTHRAX,MOSQUITO_BORNE,CHOLERA,JAPANESE_ENCEPHALITIS,TYPHOID,YELLOW_FEVER
+ICE_DISABLECOVID19SEP2023DOSENUMBERRESET=false
+ICE_SUPPLEMENTALTEXTMODE=LEGACY
+CDS_ENGINE_EXPERIMENTALFEATURES_ENABLEFHIRR6=false
 ```
 
-See the linked configuration pages for the environment variables associated
-with output, schedule flags, and series or season overrides.
+These example values match the YAML configuration. See the linked
+configuration pages for details about output settings, schedule flags, and
+series or season overrides.
 
 ## Unsupported vaccines group
 

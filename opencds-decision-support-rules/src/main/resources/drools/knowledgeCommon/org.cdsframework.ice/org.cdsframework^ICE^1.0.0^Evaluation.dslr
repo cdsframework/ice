@@ -193,3 +193,28 @@ rule "Check if the Shot is Too Early Due to Live Virus Conflict with live virus 
 		Include the reason for shot $targetDose Invalid due to "Too Early Live Virus"
 		Log that this dose rule fired for the dose $targetDose in the Series $associatedTargetSeries
 end
+
+/**
+ * General Design rule... Do not Edit
+ * General Rule #36 (ICE3-2170): If a shot is Invalid because it was administered after the CVX end date (VACCINE_NOT_ALLOWED)
+ * and the vaccine is also not allowed for this dose (VACCINE_NOT_ALLOWED_FOR_THIS_DOSE), return only VACCINE_NOT_ALLOWED.
+ * Salience 100 runs this rule before the vaccine group rules in this ruleflow group.
+ */
+rule "HistoryEvaluation: Remove VACCINE_NOT_ALLOWED_FOR_THIS_DOSE from an Invalid shot administered after the CVX end date"
+	dialect "mvel"
+	ruleflow-group "HistoryEvaluation^postEvaluationCheck"
+	salience 100
+	when
+		There is an administered shot $notAllowedShot
+			- that has already been evaluated and whose shot validity is INVALID
+			- make note of invalid evaluation reasons for this shot as $collectionOfStrReasons
+			- the collection $collectionOfStrReasons contains "EVALUATION_REASON_CONCEPT.VACCINE_NOT_ALLOWED"
+			- the collection $collectionOfStrReasons contains "EVALUATION_REASON_CONCEPT.VACCINE_NOT_ALLOWED_FOR_THIS_DOSE"
+			- make note of the date this shot was administered as $administrationDate
+			- make note of the administered vaccine as $administeredVaccine
+		Confirm the date $administrationDate is after $administeredVaccine.maximumDateForUse
+	then
+		Remove Evaluation Reason "EVALUATION_REASON_CONCEPT.VACCINE_NOT_ALLOWED_FOR_THIS_DOSE" from Shot $notAllowedShot
+		Record that this dose rule was processed for the TargetDose $notAllowedShot
+		Log that this dose rule fired for the dose $notAllowedShot
+end
