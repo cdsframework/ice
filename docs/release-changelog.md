@@ -5,6 +5,18 @@ see the [Documentation Revision History](revision-history.md).
 
 Release notes are also available at https://cdsframework.atlassian.net/wiki/spaces/ICE/pages/78479371/Release+Notes
 
+## 2.61.2 — November 20, 2026
+
+### Vaccine Group Changes
+
+#### COVID-19
+
+If a patient's only target-dose-1 shots for a season were invalid and given before age 65, and the patient then receives a
+shot at age 65 or older in the same season, ICE now switches to the Seasonal 2-dose COVID-19 Series (>= 65 years) for that
+season, starting with target dose 1. Previously, ICE stayed in the Seasonal 1-dose COVID-19 Series (2–64 years) and
+evaluated the shot at 65 or older as invalid (`ABOVE_MAXIMUM_AGE_SERIES`). Shots given before age 65 keep their
+evaluation in the 2–64 years series. The existing switch after a valid target dose 1 before age 65 is unchanged.
+
 ## 2.61.1 — November 12, 2026
 
 ### Actions for Implementers

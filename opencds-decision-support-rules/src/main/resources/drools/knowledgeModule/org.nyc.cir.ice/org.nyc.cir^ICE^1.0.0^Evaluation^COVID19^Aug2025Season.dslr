@@ -203,6 +203,43 @@ end
  */
 
 /**
+ * ICE3-2218: If the patient has only invalid target dose 1 shot(s) administered before age 65 years for the season, followed by a
+ * shot at age >= 65 years during the same season, switch to the Seasonal 2-dose COVID-19 Series (>= 65 years) for the same season,
+ * starting with target dose 1 at >= 65 years. The conversion must happen before the shot at >= 65 years is evaluated, so this rule
+ * runs in customEvaluationRule with a salience above the target dose 1 interval rules in the same ruleflow group. A dose number of 1
+ * means no earlier shot in the series was valid; the earlier invalid shots keep their 2 - 64 years series evaluation.
+ */
+rule "COVID-19(Aug2025): Switch from 1-Dose 2-64yrs series to 2-Dose 65+ series starting with dose 1 if a shot is administered at >= 65 years after only invalid target dose 1 shots administered < 65 years"
+	dialect "mvel"
+	ruleflow-group "HistoryEvaluation^customEvaluationRule^COVID_19_AUG_2025_SEASON"
+	salience 100
+	when
+		There is an administered shot $currentShot that needs to be evaluated
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.COVID_19" and the Series with name "SUPPORTED_SERIES.COVID_19_AUG_2025_2_Y_TO_64_Y_SERIES"
+			- the dose number in the series is == 1
+		The Patient information $oEvaluatedPerson must be known to complete writing this rule
+			- make note of the date as $dtDateAtAge65y when the patient is "65y" of age
+		There is an administered shot $sameShot
+			- that is the same shot as $currentShot
+			- the administration date of the shot is >= $dtDateAtAge65y
+			- make note of the associated series as $targetSeries
+		There is an administered shot $invalidShotBefore65y
+			- the shot belongs to the series $targetSeries
+			- the administration date of the shot is < $dtDateAtAge65y
+			- that has already been evaluated and whose shot validity is INVALID
+			- the shot is not ignored
+		There is a Series $seriesToSwitchTo
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.COVID_19"
+			- the name of the Series is "SUPPORTED_SERIES.COVID_19_AUG_2025_GTE_65_SERIES"
+			- the Series belongs to the same Season as the Series $targetSeries
+	then
+		Convert from Series $targetSeries to $seriesToSwitchTo starting with Dose Number 1 and evaluate using Interval for prior dose to this dose from SwitchedTo Series
+		Refresh all facts in the Series $targetSeries for Evaluation
+		Refresh all facts for the Shot $currentShot
+		Log that this Series Rule fired for the Series $targetSeries
+end
+
+/**
  * If the patient receives dose 1 (i.e., at < 65 years) and will turn age 65 years within 12 months of the season start date,
  * switch to Seasonal 2-dose COVID-19 Series (>= 65 years) starting with target dose 2.
  */
