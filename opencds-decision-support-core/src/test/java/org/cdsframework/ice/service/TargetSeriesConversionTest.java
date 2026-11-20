@@ -3,6 +3,7 @@ package org.cdsframework.ice.service;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -88,5 +89,60 @@ class TargetSeriesConversionTest
         final TargetDose dose7 = dose(olderAdultCurrentSeason, LocalDate.of(2026, 9, 29));
         olderAdultCurrentSeason.evaluateVaccineGroupMaximumAgeandRecordReason(BIRTH_DATE, dose7);
         assertFalse(dose7.containsInvalidReason("EVALUATION_REASON_CONCEPT.ABOVE_MAXIMUM_AGE_SERIES"));
+    }
+
+    @Test
+    void conversionFromDoseOneReplacesEveryDoseRuleAndKeepsTheInvalidDoseEvaluation() throws InconsistentConfigurationException
+    {
+        final SeriesRules adultRules = new SeriesRules(ADULT_SERIES, new CdsConcept(VACCINE_GROUP));
+        final DoseRule adultDoseRule = new DoseRule(adultRules);
+        adultDoseRule.setDoseNumber(1);
+        adultDoseRule.setAbsoluteMaximumAge(new TimePeriod("65y-1d"));
+        adultRules.addSeriesDoseRule(adultDoseRule);
+
+        final SeriesRules olderAdultRules = new SeriesRules(OLDER_ADULT_SERIES, new CdsConcept(VACCINE_GROUP));
+        final DoseRule olderAdultFirstDoseRule = new DoseRule(olderAdultRules);
+        olderAdultFirstDoseRule.setDoseNumber(1);
+        olderAdultFirstDoseRule.setAbsoluteMinimumAge(new TimePeriod("65y"));
+        olderAdultFirstDoseRule.setAbsoluteMinimumInterval(new TimePeriod("2m-4d"));
+        olderAdultRules.addSeriesDoseRule(olderAdultFirstDoseRule);
+        final DoseRule olderAdultSecondDoseRule = new DoseRule(olderAdultRules);
+        olderAdultSecondDoseRule.setDoseNumber(2);
+        olderAdultRules.addSeriesDoseRule(olderAdultSecondDoseRule);
+
+        final Schedule schedule = mock(Schedule.class);
+        when(schedule.getScheduleSeriesByName(VACCINE_GROUP, OLDER_ADULT_SERIES)).thenReturn(olderAdultRules);
+        final Demographics demographics = new Demographics();
+        demographics.setBirthTime(BIRTH_DATE);
+        final EvaluatedPerson person = new EvaluatedPerson();
+        person.setDemographics(demographics);
+        final TargetSeries series = new TargetSeries(adultRules, schedule, person);
+        final TargetSeries otherSeason = new TargetSeries(adultRules, schedule, person);
+        final TargetDose invalidDoseBefore65 = dose(series, LocalDate.of(2025, 11, 1));
+        invalidDoseBefore65.setDoseNumberInSeries(1);
+        invalidDoseBefore65.setStatus(DoseStatus.INVALID);
+        invalidDoseBefore65.captureEvaluationContext(series, 1);
+
+        series.convertToSpecifiedSeries(OLDER_ADULT_SERIES, 1, true);
+
+        assertEquals(OLDER_ADULT_SERIES, series.getSeriesName());
+        assertEquals(2, series.getSeriesRules().getNumberOfDosesInSeries());
+        final DoseRule convertedFirstDoseRule = series.getSeriesRules().getSeriesDoseRuleByDoseNumber(1);
+        assertNotSame(olderAdultFirstDoseRule, convertedFirstDoseRule);
+        assertEquals("65y", convertedFirstDoseRule.getAbsoluteMinimumAge().getTimePeriodStringRepresentation());
+        assertNull(convertedFirstDoseRule.getAbsoluteMaximumAge());
+        assertEquals("2m-4d", convertedFirstDoseRule.getAbsoluteMinimumInterval().getTimePeriodStringRepresentation());
+        assertEquals(2, series.getSeriesRules().getSeriesDoseRuleByDoseNumber(2).getDoseNumber());
+
+        assertSame(adultRules, otherSeason.getSeriesRules());
+        assertEquals(1, adultRules.getNumberOfDosesInSeries());
+        assertEquals("65y-1d", adultDoseRule.getAbsoluteMaximumAge().getTimePeriodStringRepresentation());
+        assertEquals(2, olderAdultRules.getNumberOfDosesInSeries());
+        assertEquals(ADULT_SERIES, invalidDoseBefore65.getEvaluatedSeriesName());
+        assertEquals(DoseStatus.INVALID, invalidDoseBefore65.getStatus());
+
+        final TargetDose doseAt65 = dose(series, LocalDate.of(2026, 1, 15));
+        series.evaluateVaccineGroupMaximumAgeandRecordReason(BIRTH_DATE, doseAt65);
+        assertFalse(doseAt65.containsInvalidReason("EVALUATION_REASON_CONCEPT.ABOVE_MAXIMUM_AGE_SERIES"));
     }
 }

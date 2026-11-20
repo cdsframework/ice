@@ -956,6 +956,10 @@ rule "SeriesSelection(COVID-19 Aug2025+): Select the Seasonal 2-dose COVID-19 Se
 		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "SeriesSelection: TargetSeries " + $ts);
 end
 
+// Exception: if an in-season series switch occurred from the Seasonal 1-dose COVID-19 Series (2 - 64 years) to the Seasonal 2-dose
+// COVID-19 Series (>= 65 years), the converted series is renamed and the original >= 65 years candidate is retracted, so this rule no
+// longer matches and the >= 65 years selection rules select the converted series. This covers both the valid target dose 1 switch and
+// the ICE3-2218 switch after only invalid target dose 1 shots at < 65 years (see the COVID-19 Aug2025 evaluation rules).
 rule "SeriesSelection(COVID-19 Aug2025+): Select the Seasonal 1-dose COVID-19 Series (>= 2 - 64 years) if patient has in-season shots administered at >= 2 years and target dose 1 received at age < 65 years"
 	extends "SeriesSelection(COVID-19 Aug2025+ Abstract): In Aug2025+ season, determine date at which patient turns 2 and 65 years of age"
 	dialect "mvel"
